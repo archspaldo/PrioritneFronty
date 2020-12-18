@@ -8,10 +8,15 @@ class BinaryQueue : public PriorityQueue<K, T>
 public:
 	BinaryQueue();
 	~BinaryQueue();
+	PriorityQueue<K, T>& operator=(const PriorityQueue<K, T>& other) override;
+	PriorityQueue<K, T>& operator=(PriorityQueue<K, T>&& other) override;
+	BinaryQueue<K, T>& operator=(const BinaryQueue<K, T>& other) override;
+	BinaryQueue<K, T>& operator=(BinaryQueue<K, T>&& other) override;
 	void clear() override;
 	size_t size() const override;
 	void push(const K& key, const T& data) override;
 	T pop() override;
+	PriorityQueue<K, T>* merge(const PriorityQueue<K, T>& other) override;
 	T& peek() override;
 	const T peek() const override;
 	K peekPriority() override;
@@ -41,6 +46,48 @@ inline BinaryQueue<K, T>::~BinaryQueue()
 }
 
 template<typename K, typename T>
+inline PriorityQueue<K, T>& BinaryQueue<K, T>::operator=(const PriorityQueue<K, T>& other)
+{
+	if (this != &other)
+	{
+		*this = dynamic_cast<const BinaryQueue<K, T>&>(other);
+	}
+	return *this;
+}
+
+template<typename K, typename T>
+inline PriorityQueue<K, T>& BinaryQueue<K, T>::operator=(PriorityQueue<K, T>&& other)
+{
+	if (this != &other)
+	{
+		*this = std::move(dynamic_cast<BinaryQueue<K, T>&&>(other));
+	}
+	return *this;
+}
+
+template<typename K, typename T>
+inline BinaryQueue<K, T>& BinaryQueue<K, T>::operator=(const BinaryQueue<K, T>& other)
+{
+	if (this != &other)
+	{
+		this->clear();
+		*this->list_ = *other.list_;
+	}
+	return *this;
+}
+
+template<typename K, typename T>
+inline BinaryQueue<K, T>& BinaryQueue<K, T>::operator=(BinaryQueue<K, T>&& other)
+{
+	if (this != &other)
+	{
+		this->clear();
+		*this->list_ == std::move(*other.list_);
+	}
+	return *this;
+}
+
+template<typename K, typename T>
 inline void BinaryQueue<K, T>::clear()
 {
 	for (PriorityQueueItem<K, T>* item : *this->list_)
@@ -49,8 +96,8 @@ inline void BinaryQueue<K, T>::clear()
 		{
 			delete item;
 		}
-		this->list_->clear();
 	}
+	this->list_->clear();
 }
 
 template<typename K, typename T>
@@ -85,11 +132,27 @@ inline T BinaryQueue<K, T>::pop()
 }
 
 template<typename K, typename T>
+inline PriorityQueue<K, T>* BinaryQueue<K, T>::merge(const PriorityQueue<K, T>& other)
+{
+	if (this != &other) {
+		if (this->size() < other.size())
+		{
+			Routines::swap(this, &other);
+		}
+		for (int i = 0; i < other.size(); i++)
+		{
+			this->push(other.peekPriority(), other.pop());
+		}
+	}
+	return *this;
+}
+
+template<typename K, typename T>
 inline T& BinaryQueue<K, T>::peek()
 {
 	if (this->list_->empty())
 	{
-		throw new std::logic_error("BinaryQueue<K, T>::pop(): Zoznam je prazdny");
+		throw new std::logic_error("BinaryQueue<K, T>::peek(): Zoznam je prazdny");
 	}
 	return (*this->list_)[0]->data();
 }
@@ -99,7 +162,7 @@ inline const T BinaryQueue<K, T>::peek() const
 {
 	if (this->list_->empty())
 	{
-		throw new std::logic_error("BinaryQueue<K, T>::pop(): Zoznam je prazdny");
+		throw new std::logic_error("BinaryQueue<K, T>::peek(): Zoznam je prazdny");
 	}
 	return (*this->list_)[0]->data();
 }
@@ -109,7 +172,7 @@ inline K BinaryQueue<K, T>::peekPriority()
 {
 	if (this->list_->empty())
 	{
-		throw new std::logic_error("BinaryQueue<K, T>::pop(): Zoznam je prazdny");
+		throw new std::logic_error("BinaryQueue<K, T>::peekPriority(): Zoznam je prazdny");
 	}
 	return (*this->list_)[0]->priority();
 }
