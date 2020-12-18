@@ -5,9 +5,9 @@ class Iterator
 {
 public:
 	virtual ~Iterator() {};
-	virtual Iterator<T>& operator=(const Iterator<T>& diff) = 0;
-	virtual bool operator==(const Iterator<T>& diff) = 0;
-	virtual bool operator!=(const Iterator<T>& diff) = 0;
+	virtual Iterator<T>& operator=(const Iterator<T>& other) = 0;
+	virtual bool operator==(const Iterator<T>& other) = 0;
+	virtual bool operator!=(const Iterator<T>& other) = 0;
 	virtual const T operator*() = 0;
 	virtual Iterator<T>& operator++() = 0;
 };
@@ -18,9 +18,9 @@ class PriorityQueueIterator
 public:
 	PriorityQueueIterator(Iterator<T>* iterator);
 	virtual ~PriorityQueueIterator();
-	PriorityQueueIterator<T>& operator=(const PriorityQueueIterator<T>& diff);
-	bool operator==(const PriorityQueueIterator<T>& diff);
-	bool operator!=(const PriorityQueueIterator<T>& diff);
+	PriorityQueueIterator<T>& operator=(const PriorityQueueIterator<T>& other);
+	bool operator==(const PriorityQueueIterator<T>& other);
+	bool operator!=(const PriorityQueueIterator<T>& other);
 	const T operator*();
 	PriorityQueueIterator<T>& operator++();
 private:
@@ -63,25 +63,25 @@ inline PriorityQueueIterator<T>::~PriorityQueueIterator()
 }
 
 template<typename T>
-inline PriorityQueueIterator<T>& PriorityQueueIterator<T>::operator=(const PriorityQueueIterator<T>& diff)
+inline PriorityQueueIterator<T>& PriorityQueueIterator<T>::operator=(const PriorityQueueIterator<T>& other)
 {
-	if (this != &diff)
+	if (this != &other)
 	{
-		*this->iterator_ = *diff.iterator_;
+		*this->iterator_ = *other.iterator_;
 	}
 	return *this;
 }
 
 template<typename T>
-inline bool PriorityQueueIterator<T>::operator==(const PriorityQueueIterator<T>& diff)
+inline bool PriorityQueueIterator<T>::operator==(const PriorityQueueIterator<T>& other)
 {
-	return *this->iterator_ == *diff.iterator_;
+	return *this->iterator_ == *other.iterator_;
 }
 
 template<typename T>
-inline bool PriorityQueueIterator<T>::operator!=(const PriorityQueueIterator<T>& diff)
+inline bool PriorityQueueIterator<T>::operator!=(const PriorityQueueIterator<T>& other)
 {
-	return !(*this->iterator_ == *diff.iterator_);
+	return !(*this->iterator_ == *other.iterator_);
 }
 
 template<typename T>

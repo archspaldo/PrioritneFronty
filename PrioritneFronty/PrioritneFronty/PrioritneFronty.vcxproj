@@ -143,8 +143,12 @@
     <ClInclude Include="ArrayList.h" />
     <ClInclude Include="BinaryQueue.h" />
     <ClInclude Include="Iterator.h" />
+    <ClInclude Include="IteratorImplementation.h" />
     <ClInclude Include="List.h" />
     <ClInclude Include="PriorityQueue.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

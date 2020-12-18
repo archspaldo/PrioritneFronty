@@ -1,5 +1,6 @@
 #pragma once
-#include "Iterator.h"
+#include "IteratorImplementation.h"
+
 template <typename T>
 class List : public Iterable<T>
 {
@@ -15,7 +16,7 @@ public:
 	virtual void addAt(const T& data, const int index) = 0;
 	virtual void remove(const T& data) = 0;
 	virtual T removeAt(const int index) = 0;
-	virtual int indexOf(const T& data) = 0;
+	virtual int find(const T& data) = 0;
 	virtual Iterator<T>* getBeginIterator() const = 0;
 	virtual Iterator<T>* getEndIterator() const = 0;
 };

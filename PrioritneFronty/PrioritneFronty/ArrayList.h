@@ -9,14 +9,15 @@ class ArrayList : public List<T>
 public:
 	ArrayList();
 	ArrayList(size_t capacity);
-	ArrayList(const ArrayList<T>& diff);
-	ArrayList(ArrayList<T>&& diff);
+	ArrayList(const ArrayList<T>& other);
+	ArrayList(ArrayList<T>&& other);
 	~ArrayList();
-	List<T>& operator=(const List<T>& diff);
-	ArrayList<T>& operator=(const ArrayList<T>& diff);
-	ArrayList<T>& operator=(ArrayList<T>&& diff);
+	List<T>& operator=(const List<T>& other);
+	ArrayList<T>& operator=(const ArrayList<T>& other);
+	ArrayList<T>& operator=(ArrayList<T>&& other);
 	const T operator[](const int index) const;
 	T& operator[](const int index) override;
+	void clear();
 	size_t size() const override;
 	bool empty() const override;
 	bool full() const;
@@ -25,11 +26,13 @@ public:
 	void remove(const T& data) override;
 	T removeAt(const int index) override;
 	int find(const T& data) override;
-	
+	Iterator<T>* getBeginIterator() const override;
+	Iterator<T>* getEndIterator() const override;
 private:
 	void resize();
-	Array* array_;
+	Array<T>* array_;
 	size_t size_;
+
 };
 
 template<typename T>
@@ -47,18 +50,18 @@ inline ArrayList<T>::ArrayList(size_t capacity) :
 }
 
 template<typename T>
-inline ArrayList<T>::ArrayList(const ArrayList<T>& diff) :
+inline ArrayList<T>::ArrayList(const ArrayList<T>& other) :
 	List<T>(),
-	array_(new Array<T>(*diff.array_)),
-	size_(diff.size_)
+	array_(new Array<T>(*other.array_)),
+	size_(other.size_)
 {
 }
 
 template<typename T>
-inline ArrayList<T>::ArrayList(ArrayList<T>&& diff) :
+inline ArrayList<T>::ArrayList(ArrayList<T>&& other) :
 	List<T>(),
-	array_(std::move(*diff.array_)),
-	size_(diff.size_)
+	array_(std::move(*other.array_)),
+	size_(other.size_)
 {
 }
 
@@ -73,33 +76,35 @@ inline ArrayList<T>::~ArrayList()
 }
 
 template<typename T>
-inline List<T>& ArrayList<T>::operator=(const List<T>& diff)
+inline List<T>& ArrayList<T>::operator=(const List<T>& other)
 {
-	if (this != &diff)
+	if (this != &other)
 	{
-		*this = dynamic_cast<ArrayList<T>&>(diff);
+		*this = dynamic_cast<const ArrayList<T>&>(other);
 	}
 	return *this;
 }
 
 template<typename T>
-inline ArrayList<T>& ArrayList<T>::operator=(const ArrayList<T>& diff)
+inline ArrayList<T>& ArrayList<T>::operator=(const ArrayList<T>& other)
 {
 	if (this != &other)
 	{
-		*this->array_ = *diff.array_;
-		this->size_ = diff.size_;
+		*this->array_ = *other.array_;
+		this->size_ = other.size_;
 	}
+	return *this;
 }
 
 template<typename T>
-inline ArrayList<T>& ArrayList<T>::operator=(ArrayList<T>&& diff)
+inline ArrayList<T>& ArrayList<T>::operator=(ArrayList<T>&& other)
 {
 	if (this != &other)
 	{
-		*this->array_ = std::move(*diff.array_);
-		this->size_ = diff.size_;
+		*this->array_ = std::move(*other.array_);
+		this->size_ = other.size_;
 	}
+	return *this;
 }
 
 template<typename T>
@@ -112,6 +117,12 @@ template<typename T>
 inline T& ArrayList<T>::operator[](const int index)
 {
 	return this->array_->operator[](index);
+}
+
+template<typename T>
+inline void ArrayList<T>::clear()
+{
+	this->size_ = 0;
 }
 
 template<typename T>
@@ -139,7 +150,7 @@ inline void ArrayList<T>::add(const T& data)
 	{
 		this->resize();
 	}
-	this->operator[](this->size_++) = data;
+	this->operator[]((int)this->size_++) = data;
 }
 
 template<typename T>
@@ -190,6 +201,18 @@ inline int ArrayList<T>::find(const T& data)
 		}
 	}
 	return INT_MIN;
+}
+
+template<typename T>
+inline Iterator<T>* ArrayList<T>::getBeginIterator() const
+{
+	return new ArrayListIterator<T>(this, 0);
+}
+
+template<typename T>
+inline Iterator<T>* ArrayList<T>::getEndIterator() const
+{
+	return new ArrayListIterator<T>(this, (int)(this->size_));
 }
 
 template<typename T>
