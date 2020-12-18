@@ -146,6 +146,7 @@
     <ClInclude Include="IteratorImplementation.h" />
     <ClInclude Include="List.h" />
     <ClInclude Include="PriorityQueue.h" />
+    <ClInclude Include="Routines.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />

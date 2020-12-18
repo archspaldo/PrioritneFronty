@@ -107,8 +107,8 @@ inline void Array<T>::copy(const Array<T>& src, const size_t srcStartIndex, Arra
 {
 	if (&src == &dest && destStartIndex + length > srcStartIndex && destStartIndex < srcStartIndex + length)
 		memmove(reinterpret_cast<byte*>(dest.pointer_) + destStartIndex * sizeof(T),
-			reinterpret_cast<byte*>(src.pointer_) + destStartIndex * sizeof(T), length);
+			reinterpret_cast<byte*>(src.pointer_) + srcStartIndex * sizeof(T), length * sizeof(T));
 	else
 		memcpy(reinterpret_cast<byte*>(dest.pointer_) + destStartIndex * sizeof(T),
-			reinterpret_cast<byte*>(src.pointer_) + destStartIndex * sizeof(T), length);
+			reinterpret_cast<byte*>(src.pointer_) + srcStartIndex * sizeof(T), length * sizeof(T));
 }

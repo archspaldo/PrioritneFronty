@@ -1,5 +1,6 @@
 #pragma once
 #include "IteratorImplementation.h"
+#include <stdexcept>
 
 template <typename T>
 class List : public Iterable<T>

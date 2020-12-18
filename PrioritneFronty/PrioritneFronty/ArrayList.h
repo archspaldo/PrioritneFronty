@@ -220,5 +220,5 @@ inline void ArrayList<T>::resize()
 {
 	Array<T>* array = new Array<T>(this->array_->size() * 2);
 	Array<T>::copy(*this->array_, 0, *array, 0, this->array_->size());
-	*this->array_ = *std::move(array);
+	*this->array_ = std::move(*array);
 }

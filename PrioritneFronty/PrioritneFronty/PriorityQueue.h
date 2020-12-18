@@ -1,10 +1,12 @@
 #pragma once
+#include "Routines.h"
+#include <stdexcept>
 
 template <typename K, typename T>
 class PriorityQueueItem
 {
 public:
-	PriorityQueueItem(K priority, T data);
+	PriorityQueueItem(const K& priority, const T& data);
 	K& priority();
 	T& data();
 private:
@@ -18,8 +20,8 @@ class PriorityQueue
 {
 public:
 	virtual void clear() = 0;
-	virtual size_t size() = 0;
-	virtual void push(K& key, T& data) = 0;
+	virtual size_t size() const = 0;
+	virtual void push(const K& key, const T& data) = 0;
 	virtual T pop() = 0;
 	virtual T& peek() = 0;
 	virtual const T peek() const = 0;
@@ -27,7 +29,7 @@ public:
 };
 
 template<typename K, typename T>
-inline PriorityQueueItem<K, T>::PriorityQueueItem(K priority, T data) :
+inline PriorityQueueItem<K, T>::PriorityQueueItem(const K& priority, const T& data) :
 	priority_(priority), data_(data)
 {
 }
