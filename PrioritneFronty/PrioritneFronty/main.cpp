@@ -2,7 +2,7 @@
 #include <iostream> 
 
 int main() {
-	BinaryQueue<int, int>* h = new BinaryQueue<int, int>();
+	/*BinaryQueue<int, int>* h = new BinaryQueue<int, int>();
     h->push(3, 3);
     h->push(15, 15);
     h->push(10, 10);
@@ -19,6 +19,12 @@ int main() {
     }
 
     delete h;
+
+    return 0;*/
+    for (int i = 0; i < 10 || i < 11;i++)
+    {
+        std::cout << i << '\n';
+    }
 
     return 0;
 }

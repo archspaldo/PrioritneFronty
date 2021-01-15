@@ -10,13 +10,12 @@ public:
 	~BinaryQueue();
 	PriorityQueue<K, T>& operator=(const PriorityQueue<K, T>& other) override;
 	PriorityQueue<K, T>& operator=(PriorityQueue<K, T>&& other) override;
-	BinaryQueue<K, T>& operator=(const BinaryQueue<K, T>& other) override;
-	BinaryQueue<K, T>& operator=(BinaryQueue<K, T>&& other) override;
+	BinaryQueue<K, T>& operator=(const BinaryQueue<K, T>& other);
+	BinaryQueue<K, T>& operator=(BinaryQueue<K, T>&& other);
 	void clear() override;
 	size_t size() const override;
 	void push(const K& key, const T& data) override;
 	T pop() override;
-	PriorityQueue<K, T>* merge(const PriorityQueue<K, T>& other) override;
 	T& peek() override;
 	const T peek() const override;
 	K peekPriority() override;
@@ -82,7 +81,7 @@ inline BinaryQueue<K, T>& BinaryQueue<K, T>::operator=(BinaryQueue<K, T>&& other
 	if (this != &other)
 	{
 		this->clear();
-		*this->list_ == std::move(*other.list_);
+		*this->list_ = std::move(*other.list_);
 	}
 	return *this;
 }
@@ -130,7 +129,7 @@ inline T BinaryQueue<K, T>::pop()
 	delete item;
 	return data;
 }
-
+/*
 template<typename K, typename T>
 inline PriorityQueue<K, T>* BinaryQueue<K, T>::merge(const PriorityQueue<K, T>& other)
 {
@@ -144,8 +143,8 @@ inline PriorityQueue<K, T>* BinaryQueue<K, T>::merge(const PriorityQueue<K, T>& 
 			this->push(other.peekPriority(), other.pop());
 		}
 	}
-	return *this;
-}
+	return this;
+}*/
 
 template<typename K, typename T>
 inline T& BinaryQueue<K, T>::peek()
@@ -174,7 +173,7 @@ inline K BinaryQueue<K, T>::peekPriority()
 	{
 		throw new std::logic_error("BinaryQueue<K, T>::peekPriority(): Zoznam je prazdny");
 	}
-	return (*this->list_)[0]->priority();
+	return (*this->list_)[0]->key();
 }
 
 template<typename K, typename T>

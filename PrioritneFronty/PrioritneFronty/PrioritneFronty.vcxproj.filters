@@ -39,6 +39,12 @@
     <ClInclude Include="Routines.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="FibonacciHeap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LinkedList.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">

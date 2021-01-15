@@ -4,6 +4,12 @@
 template<typename T>
 class ArrayList;
 
+template<typename T>
+class LinkedList;
+
+template<typename T>
+class LinkedListItem;
+
 
 template<typename T>
 class ArrayListIterator : public Iterator<T>
@@ -41,6 +47,47 @@ public:
 	Iterator<T>& operator++()
 	{
 		this->index_++;
+		return *this;
+	}
+};
+
+template<typename T>
+class LinkedListIterator : public Iterator<T>
+{
+private:
+	const LinkedListItem<T>* node_;
+	bool flag_;
+public:
+	LinkedListIterator(const LinkedListItem<T>* node, bool flag) :
+		node_(node), flag_(flag)
+	{
+	}
+	~LinkedListIterator() {};
+	Iterator<T>& operator=(const Iterator<T>& other)
+	{
+		if (this != &other)
+		{
+			node_ = dynamic_cast<const LinkedListIterator&>(other).node_;
+			flag_ = dynamic_cast<const LinkedListIterator&>(other).flag_;
+		}
+		return *this;
+	}
+	bool operator==(const Iterator<T>& other)
+	{
+		return this->node_ == dynamic_cast<const LinkedListIterator&>(other).node_ && this->flag_ == dynamic_cast<const LinkedListIterator&>(other).flag_;
+	}
+	bool operator!=(const Iterator<T>& other)
+	{
+		return this->node_ != dynamic_cast<const LinkedListIterator&>(other).node_ || this->flag_ != dynamic_cast<const LinkedListIterator&>(other).flag_;
+	}
+	const T operator*()
+	{
+		return this->node_->data();
+	}
+	Iterator<T>& operator++()
+	{
+		this->node_ = this->node_->next();
+		this->flag_ = true;
 		return *this;
 	}
 };
