@@ -4,6 +4,8 @@
 #include "LinkedList.h"
 #include <math.h>
 
+constexpr auto RESIZE = 2.1;
+
 template <typename K, typename T>
 class FibbonaciHeapItem : public PriorityQueueItem<K, T>
 {
@@ -23,6 +25,7 @@ private:
 	FibbonaciHeapItem<K, T>* parent_;
 	LinkedList<FibbonaciHeapItem<K, T>*>* children_;
 	bool mark_;
+
 };
 
 template <typename K, typename T>
@@ -31,8 +34,6 @@ class FibbonaciHeap : public PriorityQueue<K, T>
 public:
 	FibbonaciHeap();
 	~FibbonaciHeap();
-	PriorityQueue<K, T>& operator=(const PriorityQueue<K, T>& other) override;
-	PriorityQueue<K, T>& operator=(PriorityQueue<K, T>&& other) override;
 	FibbonaciHeap<K, T>& operator=(const FibbonaciHeap<K, T>& other);
 	FibbonaciHeap<K, T>& operator=(FibbonaciHeap<K, T>&& other);
 	void clear() override;
@@ -42,6 +43,7 @@ public:
 	T& peek() override;
 	const T peek() const override;
 	K peekPriority() override;
+	void decrease_key(const K& key, const K& new_key);
 	static FibbonaciHeap<K, T>& unite(FibbonaciHeap<K, T>& other1, FibbonaciHeap<K, T>& other2);
 private:
 	void consolidate();
@@ -60,18 +62,6 @@ inline FibbonaciHeap<K, T>::FibbonaciHeap() :
 template<typename K, typename T>
 inline FibbonaciHeap<K, T>::~FibbonaciHeap()
 {
-}
-
-template<typename K, typename T>
-inline PriorityQueue<K, T>& FibbonaciHeap<K, T>::operator=(const PriorityQueue<K, T>& other)
-{
-	// TODO: insert return statement here
-}
-
-template<typename K, typename T>
-inline PriorityQueue<K, T>& FibbonaciHeap<K, T>::operator=(PriorityQueue<K, T>&& other)
-{
-	// TODO: insert return statement here
 }
 
 template<typename K, typename T>
@@ -164,6 +154,12 @@ inline K FibbonaciHeap<K, T>::peekPriority()
 }
 
 template<typename K, typename T>
+inline void FibbonaciHeap<K, T>::decrease_key(const K& key, const K& new_key)
+{
+
+}
+
+template<typename K, typename T>
 inline FibbonaciHeap<K, T>& FibbonaciHeap<K, T>::unite(FibbonaciHeap<K, T>& other1, FibbonaciHeap<K, T>& other2)
 {
 	FibbonaciHeap<K, T>* heap = new FibbonaciHeap<K, T>*();
@@ -185,7 +181,7 @@ inline void FibbonaciHeap<K, T>::consolidate()
 {
 	FibbonaciHeapItem<K, T>* node_x, node_y;
 	int node_degree;
-	int degree = (int)(log(this->size_) / log(1.61));
+	int degree = (int)(log(this->size_) * RESIZE);
 	Array<FibbonaciHeapItem<K, T>*>* node_list = new Array<FibbonaciHeapItem<K, T>*>(degree);
 	for (FibbonaciHeapItem<K, T>* node : *this->rootList_)
 	{
@@ -243,7 +239,7 @@ inline FibbonaciHeapItem<K, T>::FibbonaciHeapItem(const K& priority, const T& da
 template<typename K, typename T>
 inline FibbonaciHeapItem<K, T>::~FibbonaciHeapItem()
 {
-	delete this->parent_;
+	this->parent_ = nullptr;
 	delete this->children_;
 	this->degree_ = 0;
 	this->mark_ = false;

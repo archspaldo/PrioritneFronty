@@ -1,4 +1,5 @@
 #include "BinaryQueue.h"
+#include "LinkedList.h"
 #include <iostream> 
 
 int main() {
@@ -21,7 +22,14 @@ int main() {
     delete h;
 
     return 0;*/
+    LinkedList<int> list;
+
     for (int i = 0; i < 10 || i < 11;i++)
+    {
+        list.add(i);
+    }
+
+    for (int i : list)
     {
         std::cout << i << '\n';
     }

@@ -29,7 +29,7 @@ public:
 	List<T>& operator=(const List<T>& other);
 	LinkedList<T>& operator=(const LinkedList<T>& other);
 	LinkedList<T>& operator=(LinkedList<T>&& other);
-	const T operator[](const int index) const;
+	const T operator[](const int index) const override;
 	T& operator[](const int index) override;
 	void clear();
 	size_t size() const override;
@@ -45,7 +45,7 @@ public:
 private:
 	size_t size_;
 	LinkedListItem<T>* node_;
-	LinkedListItem<T>* itemAt(const int index);
+	LinkedListItem<T>* itemAt(const int index) const;
 };
 
 template<typename T>
@@ -115,13 +115,13 @@ inline LinkedList<T>& LinkedList<T>::operator=(LinkedList<T>&& other)
 template<typename T>
 inline const T LinkedList<T>::operator[](const int index) const
 {
-	return itemAt(index)->data();
+	return this->itemAt(index)->data();
 }
 
 template<typename T>
 inline T& LinkedList<T>::operator[](const int index)
 {
-	return itemAt(index)->data();
+	return this->itemAt(index)->data();
 }
 
 template<typename T>
@@ -131,7 +131,7 @@ inline void LinkedList<T>::clear()
 		LinkedListItem<T>* current = this->node_;
 		LinkedListItem<T>* next;
 		for (int i = 0; i < this->size_; i++) {
-			next = current->next_;
+			next = current->next();
 			delete current;
 			current = next;
 		}
@@ -297,7 +297,7 @@ inline LinkedList<T>& LinkedList<T>::concatenate(LinkedList<T>& other1, LinkedLi
 }
 
 template<typename T>
-inline LinkedListItem<T>* LinkedList<T>::itemAt(const int index)
+inline LinkedListItem<T>* LinkedList<T>::itemAt(const int index) const
 {
 	LinkedListItem<T>* node = this->node_;
 	if (index < this->size_ / 2)

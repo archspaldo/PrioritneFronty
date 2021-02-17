@@ -55,10 +55,10 @@ template<typename T>
 class LinkedListIterator : public Iterator<T>
 {
 private:
-	const LinkedListItem<T>* node_;
+	LinkedListItem<T>* node_;
 	bool flag_;
 public:
-	LinkedListIterator(const LinkedListItem<T>* node, bool flag) :
+	LinkedListIterator(LinkedListItem<T>* node, bool flag) :
 		node_(node), flag_(flag)
 	{
 	}

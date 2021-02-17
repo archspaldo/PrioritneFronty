@@ -14,7 +14,7 @@ public:
 	BinaryQueue<K, T>& operator=(BinaryQueue<K, T>&& other);
 	void clear() override;
 	size_t size() const override;
-	void push(const K& key, const T& data) override;
+	void push(const K& priority, const T& data) override;
 	T pop() override;
 	T& peek() override;
 	const T peek() const override;
@@ -106,9 +106,9 @@ inline size_t BinaryQueue<K, T>::size() const
 }
 
 template<typename K, typename T>
-inline void BinaryQueue<K, T>::push(const K& key, const T& data)
+inline void BinaryQueue<K, T>::push(const K& priority, const T& data)
 {
-	this->list_->add(new PriorityQueueItem<K, T>(key, data));
+	this->list_->add(new PriorityQueueItem<K, T>(priority, data));
 	this->heapifyUp(this->size() - 1);
 }
 
@@ -173,7 +173,7 @@ inline K BinaryQueue<K, T>::peekPriority()
 	{
 		throw new std::logic_error("BinaryQueue<K, T>::peekPriority(): Zoznam je prazdny");
 	}
-	return (*this->list_)[0]->key();
+	return (*this->list_)[0]->priority();
 }
 
 template<typename K, typename T>
