@@ -8,8 +8,6 @@ class BinaryQueue : public PriorityQueue<K, T>
 public:
 	BinaryQueue();
 	~BinaryQueue();
-	PriorityQueue<K, T>& operator=(const PriorityQueue<K, T>& other) override;
-	PriorityQueue<K, T>& operator=(PriorityQueue<K, T>&& other) override;
 	BinaryQueue<K, T>& operator=(const BinaryQueue<K, T>& other);
 	BinaryQueue<K, T>& operator=(BinaryQueue<K, T>&& other);
 	void clear() override;
@@ -20,7 +18,7 @@ public:
 	const T peek() const override;
 	K peekPriority() override;
 private:
-	List<PriorityQueueItem<K, T>*>* list_;
+	List<PriorityQueue<K, T>::PriorityQueueItem*>* list_;
 	int leftSon(const int index);
 	int righSon(const int index);
 	int parent(const int index);
@@ -34,7 +32,7 @@ private:
 template<typename K, typename T>
 inline BinaryQueue<K, T>::BinaryQueue() :
 	PriorityQueue<K, T>(),
-	list_(new ArrayList<PriorityQueueItem<K, T>*>())
+	list_(new ArrayList<typename PriorityQueue<K, T>::PriorityQueueItem*>())
 {
 }
 
@@ -42,26 +40,6 @@ template<typename K, typename T>
 inline BinaryQueue<K, T>::~BinaryQueue()
 {
 	this->clear();
-}
-
-template<typename K, typename T>
-inline PriorityQueue<K, T>& BinaryQueue<K, T>::operator=(const PriorityQueue<K, T>& other)
-{
-	if (this != &other)
-	{
-		*this = dynamic_cast<const BinaryQueue<K, T>&>(other);
-	}
-	return *this;
-}
-
-template<typename K, typename T>
-inline PriorityQueue<K, T>& BinaryQueue<K, T>::operator=(PriorityQueue<K, T>&& other)
-{
-	if (this != &other)
-	{
-		*this = std::move(dynamic_cast<BinaryQueue<K, T>&&>(other));
-	}
-	return *this;
 }
 
 template<typename K, typename T>
@@ -89,7 +67,7 @@ inline BinaryQueue<K, T>& BinaryQueue<K, T>::operator=(BinaryQueue<K, T>&& other
 template<typename K, typename T>
 inline void BinaryQueue<K, T>::clear()
 {
-	for (PriorityQueueItem<K, T>* item : *this->list_)
+	for (typename PriorityQueue<K, T>::PriorityQueueItem* item : *this->list_)
 	{
 		if (item)
 		{
@@ -108,7 +86,7 @@ inline size_t BinaryQueue<K, T>::size() const
 template<typename K, typename T>
 inline void BinaryQueue<K, T>::push(const K& priority, const T& data)
 {
-	this->list_->add(new PriorityQueueItem<K, T>(priority, data));
+	this->list_->add(new typename PriorityQueue<K, T>::PriorityQueueItem(priority, data));
 	this->heapifyUp(this->size() - 1);
 }
 
@@ -123,7 +101,7 @@ inline T BinaryQueue<K, T>::pop()
 	{
 		Routines::swap((*this->list_)[0], (*this->list_)[this->size() - 1]);
 	}
-	PriorityQueueItem<K, T>* item = this->list_->removeAt(this->size() - 1);
+	typename PriorityQueue<K, T>::PriorityQueueItem* item = this->list_->removeAt(this->size() - 1);
 	this->heapifyDown(0);
 	T data = item->data();
 	delete item;
@@ -197,8 +175,8 @@ inline int BinaryQueue<K, T>::parent(const int index)
 template<typename K, typename T>
 inline int BinaryQueue<K, T>::greaterSon(const int index)
 {
-	PriorityQueueItem<K, T>* lChild = this->leftSon(index) < this->size() ? (*this->list_)[this->leftSon(index)] : nullptr;
-	PriorityQueueItem<K, T>* rChild = this->righSon(index) < this->size() ? (*this->list_)[this->righSon(index)] : nullptr;
+	typename PriorityQueue<K, T>::PriorityQueueItem* lChild = this->leftSon(index) < this->size() ? (*this->list_)[this->leftSon(index)] : nullptr;
+	typename PriorityQueue<K, T>::PriorityQueueItem* rChild = this->righSon(index) < this->size() ? (*this->list_)[this->righSon(index)] : nullptr;
 	if (lChild && rChild)
 	{
 		return lChild->priority() < rChild->priority() ? this->leftSon(index) : this->righSon(index);

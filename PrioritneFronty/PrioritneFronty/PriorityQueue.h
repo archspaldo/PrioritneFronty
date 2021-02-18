@@ -3,20 +3,6 @@
 #include <stdexcept>
 
 template <typename K, typename T>
-class PriorityQueueItem
-{
-public:
-	PriorityQueueItem(const K& priority, const T& data);
-	virtual ~PriorityQueueItem() {};
-	K& priority();
-	T& data();
-private:
-	K priority_;
-	T data_;
-};
-
-
-template <typename K, typename T>
 class PriorityQueue
 {
 public:
@@ -28,23 +14,36 @@ public:
 	virtual const T peek() const = 0;
 	virtual K peekPriority() = 0;
 protected:
+	class PriorityQueueItem;
+};
 
+template <typename K, typename T>
+class PriorityQueue<K, T>::PriorityQueueItem
+{
+public:
+	PriorityQueueItem(const K& priority, const T& data);
+	virtual ~PriorityQueueItem() {};
+	K& priority();
+	T& data();
+private:
+	K priority_;
+	T data_;
 };
 
 template<typename K, typename T>
-inline PriorityQueueItem<K, T>::PriorityQueueItem(const K& priority, const T& data) :
+inline PriorityQueue<K, T>::PriorityQueueItem::PriorityQueueItem(const K& priority, const T& data) :
 	priority_(priority), data_(data)
 {
 }
 
 template<typename K, typename T>
-inline K& PriorityQueueItem<K, T>::priority()
+inline K& PriorityQueue<K, T>::PriorityQueueItem::priority()
 {
 	return priority_;
 }
 
 template<typename K, typename T>
-inline T& PriorityQueueItem<K, T>::data()
+inline T& PriorityQueue<K, T>::PriorityQueueItem::data()
 {
 	return data_;
 }

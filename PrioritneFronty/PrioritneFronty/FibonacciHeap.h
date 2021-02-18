@@ -7,28 +7,6 @@
 constexpr auto RESIZE = 2.1;
 
 template <typename K, typename T>
-class FibbonaciHeapItem : public PriorityQueueItem<K, T>
-{
-public:
-	FibbonaciHeapItem(const K& priority, const T& data);
-	~FibbonaciHeapItem();
-	const int degree();
-	void degree(const int degree);
-	FibbonaciHeapItem<K, T>* parent();
-	void parent(FibbonaciHeapItem<K, T>* parent);
-	LinkedList<FibbonaciHeapItem<K, T>*>* children();
-	void children(LinkedList<FibbonaciHeapItem<K, T>*>* children);
-	const bool mark();
-	void mark(const bool mark);
-private:
-	int degree_;
-	FibbonaciHeapItem<K, T>* parent_;
-	LinkedList<FibbonaciHeapItem<K, T>*>* children_;
-	bool mark_;
-
-};
-
-template <typename K, typename T>
 class FibbonaciHeap : public PriorityQueue<K, T>
 {
 public:
@@ -46,11 +24,34 @@ public:
 	void decrease_key(const K& key, const K& new_key);
 	static FibbonaciHeap<K, T>& unite(FibbonaciHeap<K, T>& other1, FibbonaciHeap<K, T>& other2);
 private:
+	class FibbonaciHeapItem;
 	void consolidate();
-	void link(FibbonaciHeapItem<K, T>* node1, FibbonaciHeapItem<K, T>* node2);
-	LinkedList<FibbonaciHeapItem<K, T>*>* rootList_;
+	void link(FibbonaciHeapItem* node1, FibbonaciHeapItem* node2);
+	LinkedList<FibbonaciHeapItem*>* rootList_;
 	size_t size_;
 	FibbonaciHeapItem* root_
+};
+
+template <typename K, typename T>
+class FibbonaciHeap<K, T>::FibbonaciHeapItem : public PriorityQueue<K, T>::PriorityQueueItem
+{
+public:
+	FibbonaciHeapItem(const K& priority, const T& data);
+	~FibbonaciHeapItem();
+	const int degree();
+	void degree(const int degree);
+	FibbonaciHeapItem* parent();
+	void parent(FibbonaciHeapItem* parent);
+	LinkedList<FibbonaciHeapItem*>* children();
+	void children(LinkedList<FibbonaciHeapItem*>* children);
+	const bool mark();
+	void mark(const bool mark);
+private:
+	int degree_;
+	FibbonaciHeapItem* parent_;
+	LinkedList<FibbonaciHeapItem*>* children_;
+	bool mark_;
+
 };
 
 template<typename K, typename T>
@@ -90,10 +91,10 @@ inline size_t FibbonaciHeap<K, T>::size() const
 template<typename K, typename T>
 inline void FibbonaciHeap<K, T>::push(const K& priority, const T& data)
 {
-	FibbonaciHeapItem<K, T>* node = new FibbonaciHeapItem<K, T>(priority, data);
+	FibbonaciHeap<K, T>::FibbonaciHeapItem* node = new FibbonaciHeap<K, T>::FibbonaciHeapItem(priority, data);
 	if (!this->root_)
 	{
-		this->rootList_ = new LinkedList<FibbonaciHeapItem<K, T>*>();
+		this->rootList_ = new LinkedList<FibbonaciHeap<K, T>::FibbonaciHeapItem*>();
 		this->root_ = node;
 	}
 	else
@@ -110,10 +111,10 @@ inline void FibbonaciHeap<K, T>::push(const K& priority, const T& data)
 template<typename K, typename T>
 inline T FibbonaciHeap<K, T>::pop()
 {
-	FibbonaciHeapItem<K, T>* node = this->root_;
+	FibbonaciHeap<K, T>::FibbonaciHeapItem* node = this->root_;
 	if (node)
 	{
-		for (FibbonaciHeapItem<K, T>* child : *node->children())
+		for (FibbonaciHeap<K, T>::FibbonaciHeapItem* child : *node->children())
 		{
 			this->rootList_->add(child);
 			child->degree(0);
@@ -182,8 +183,8 @@ inline void FibbonaciHeap<K, T>::consolidate()
 	FibbonaciHeapItem<K, T>* node_x, node_y;
 	int node_degree;
 	int degree = (int)(log(this->size_) * RESIZE);
-	Array<FibbonaciHeapItem<K, T>*>* node_list = new Array<FibbonaciHeapItem<K, T>*>(degree);
-	for (FibbonaciHeapItem<K, T>* node : *this->rootList_)
+	Array<FibbonaciHeap<K, T>::FibbonaciHeapItem*>* node_list = new Array<FibbonaciHeap<K, T>::FibbonaciHeapItem*>(degree);
+	for (FibbonaciHeap<K, T>::FibbonaciHeapItem* node : *this->rootList_)
 	{
 		node_x = node;
 		node_degree = node_x.degree();
@@ -221,7 +222,7 @@ inline void FibbonaciHeap<K, T>::consolidate()
 }
 
 template<typename K, typename T>
-inline void FibbonaciHeap<K, T>::link(FibbonaciHeapItem<K, T>* node1, FibbonaciHeapItem<K, T>* node2)
+inline void FibbonaciHeap<K, T>::FibbonaciHeap::link(FibbonaciHeap<K, T>::FibbonaciHeapItem* node1, FibbonaciHeap<K, T>::FibbonaciHeapItem* node2)
 {
 	this->rootList_->remove(node2);
 	node1->children()->add(node2);
@@ -230,14 +231,14 @@ inline void FibbonaciHeap<K, T>::link(FibbonaciHeapItem<K, T>* node1, FibbonaciH
 }
 
 template<typename K, typename T>
-inline FibbonaciHeapItem<K, T>::FibbonaciHeapItem(const K& priority, const T& data) :
+inline FibbonaciHeap<K, T>::FibbonaciHeapItem::FibbonaciHeapItem(const K& priority, const T& data) :
 	PriorityQueueItem<K, T>(priority, data),
 	degree_(0), parent_(nullptr), children_(nullptr), mark_(false)
 {
 }
 
 template<typename K, typename T>
-inline FibbonaciHeapItem<K, T>::~FibbonaciHeapItem()
+inline FibbonaciHeap<K, T>::FibbonaciHeapItem::~FibbonaciHeapItem()
 {
 	this->parent_ = nullptr;
 	delete this->children_;
@@ -246,49 +247,49 @@ inline FibbonaciHeapItem<K, T>::~FibbonaciHeapItem()
 }
 
 template<typename K, typename T>
-inline const int FibbonaciHeapItem<K, T>::degree()
+inline const int FibbonaciHeap<K, T>::FibbonaciHeapItem::degree()
 {
 	return this->degree_;
 }
 
 template<typename K, typename T>
-inline void FibbonaciHeapItem<K, T>::degree(const int degree)
+inline void FibbonaciHeap<K, T>::FibbonaciHeapItem::degree(const int degree)
 {
 	this->degree_ = degree;
 }
 
 template<typename K, typename T>
-inline FibbonaciHeapItem<K, T>* FibbonaciHeapItem<K, T>::parent()
+inline typename FibbonaciHeap<K, T>::FibbonaciHeapItem* FibbonaciHeap<K, T>::FibbonaciHeapItem::parent()
 {
 	return this->parent_;
 }
 
 template<typename K, typename T>
-inline void FibbonaciHeapItem<K, T>::parent(FibbonaciHeapItem<K, T>* parent)
+inline void FibbonaciHeap<K, T>::FibbonaciHeapItem::parent(FibbonaciHeapItem* parent)
 {
 	this->parent_ = parent;
 }
 
 template<typename K, typename T>
-inline LinkedList<FibbonaciHeapItem<K, T>*>* FibbonaciHeapItem<K, T>::children()
+inline LinkedList<typename FibbonaciHeap<K, T>::FibbonaciHeapItem*>* FibbonaciHeap<K, T>::FibbonaciHeapItem::children()
 {
 	return this->children_;
 }
 
 template<typename K, typename T>
-inline void FibbonaciHeapItem<K, T>::children(LinkedList<FibbonaciHeapItem<K, T>*>* children)
+inline void FibbonaciHeap<K, T>::FibbonaciHeapItem::children(LinkedList<FibbonaciHeapItem*>* children)
 {
 	this->children_ = children;
 }
 
 template<typename K, typename T>
-inline const bool FibbonaciHeapItem<K, T>::mark()
+inline const bool FibbonaciHeap<K, T>::FibbonaciHeapItem::mark()
 {
 	return this->mark_;
 }
 
 template<typename K, typename T>
-inline void FibbonaciHeapItem<K, T>::mark(const bool mark)
+inline void FibbonaciHeap<K, T>::FibbonaciHeapItem::mark(const bool mark)
 {
 	this->mark_ = mark;
 }
