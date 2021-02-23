@@ -2,10 +2,12 @@
 #include "PairingHeap.h"
 #include "BinomialHeap.h"
 #include "FibonacciHeap.h"
+#include "heap_monitor.h"
 #include <iostream> 
 
 int main() {
-    BinaryQueue<int, int>* h = new BinaryQueue<int, int>();
+    initHeapMonitor();
+    PriorityQueue<int, int>* h = new FibonacciHeap<int, int>();
     h->push(3, 3);
     h->push(15, 15);
     h->push(10, 10);
@@ -18,7 +20,7 @@ int main() {
     
     std::cout << h->pop() << "\n";
 
-    for (int i = 0; i < 9; i++)
+    for (int i = 0; i < 8; i++)
     {
         std::cout << h->pop() << "\n";
     }
@@ -26,16 +28,4 @@ int main() {
     delete h;
 
     return 0;
-    /*LinkedList<int> list;
-
-    for (int i = 0; i < 10 || i < 11;i++)
-    {
-        list.add(i);
-    }
-
-    for (int i : list)
-    {
-        std::cout << i << '\n';
-    }
-    */
 }

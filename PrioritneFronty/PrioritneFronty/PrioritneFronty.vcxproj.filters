@@ -21,9 +21,6 @@
     <ClInclude Include="BinaryQueue.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Routines.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="FibonacciHeap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -31,6 +28,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="BinomialHeap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="heap_monitor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

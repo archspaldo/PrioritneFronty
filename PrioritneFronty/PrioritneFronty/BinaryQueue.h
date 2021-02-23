@@ -8,8 +8,6 @@ class BinaryQueue : public PriorityQueue<K, T>
 public:
 	BinaryQueue();
 	~BinaryQueue();
-	BinaryQueue<K, T>& operator=(const BinaryQueue<K, T>& other);
-	BinaryQueue<K, T>& operator=(BinaryQueue<K, T>&& other);
 	void clear() override;
 	size_t size() const override;
 	void push(const K& priority, const T& data) override;
@@ -78,7 +76,7 @@ inline T BinaryQueue<K, T>::pop()
 	}
 	if (this->size() > 1)
 	{
-		Routines::swap((*this->list_)[0], (*this->list_)[this->size() - 1]);
+		std::swap((*this->list_)[0], (*this->list_)[this->size() - 1]);
 	}
 	typename PriorityQueue<K, T>::PriorityQueueItem* item = this->list_->back();
 	this->list_->pop_back();
@@ -153,7 +151,7 @@ inline void BinaryQueue<K, T>::heapifyUp(const int index)
 {
 	for (int i = index, parent = this->parent(i); i > 0 && (*this->list_)[parent]->priority() > (*this->list_)[i]->priority(); i = parent, parent = this->parent(i))
 	{
-		Routines::swap((*this->list_)[parent], (*this->list_)[i]);
+		std::swap((*this->list_)[parent], (*this->list_)[i]);
 	}
 }
 
@@ -162,7 +160,7 @@ inline void BinaryQueue<K, T>::heapifyDown(const int index)
 {
 	for (int i = index, child = this->greaterSon(i); child < this->size() && (*this->list_)[child]->priority() < (*this->list_)[i]->priority(); i = child, child = this->greaterSon(i))
 	{
-		Routines::swap((*this->list_)[child], (*this->list_)[i]);
+		std::swap((*this->list_)[child], (*this->list_)[i]);
 	}
 }
 
