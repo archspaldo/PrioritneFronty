@@ -1,11 +1,11 @@
 #include "BinaryQueue.h"
-#include "LinkedList.h"
 #include "PairingHeap.h"
 #include "BinomialHeap.h"
+#include "FibonacciHeap.h"
 #include <iostream> 
 
 int main() {
-    BinomialHeap<int, int>* h = new BinomialHeap<int, int>();
+    BinaryQueue<int, int>* h = new BinaryQueue<int, int>();
     h->push(3, 3);
     h->push(15, 15);
     h->push(10, 10);

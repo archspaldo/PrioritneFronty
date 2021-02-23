@@ -1,6 +1,6 @@
 #pragma once
 #include "PriorityQueue.h"
-#include "ArrayList.h"
+#include <vector>
 
 template <typename K, typename T>
 class BinaryQueue : public PriorityQueue<K, T>
@@ -18,7 +18,7 @@ public:
 	const T peek() const override;
 	K peekPriority() override;
 private:
-	List<PriorityQueue<K, T>::PriorityQueueItem*>* list_;
+	std::vector<typename PriorityQueue<K, T>::PriorityQueueItem*>* list_;
 	int leftSon(const int index);
 	int righSon(const int index);
 	int parent(const int index);
@@ -32,7 +32,7 @@ private:
 template<typename K, typename T>
 inline BinaryQueue<K, T>::BinaryQueue() :
 	PriorityQueue<K, T>(),
-	list_(new ArrayList<typename PriorityQueue<K, T>::PriorityQueueItem*>())
+	list_(new std::vector<typename PriorityQueue<K, T>::PriorityQueueItem*>())
 {
 }
 
@@ -40,28 +40,7 @@ template<typename K, typename T>
 inline BinaryQueue<K, T>::~BinaryQueue()
 {
 	this->clear();
-}
-
-template<typename K, typename T>
-inline BinaryQueue<K, T>& BinaryQueue<K, T>::operator=(const BinaryQueue<K, T>& other)
-{
-	if (this != &other)
-	{
-		this->clear();
-		*this->list_ = *other.list_;
-	}
-	return *this;
-}
-
-template<typename K, typename T>
-inline BinaryQueue<K, T>& BinaryQueue<K, T>::operator=(BinaryQueue<K, T>&& other)
-{
-	if (this != &other)
-	{
-		this->clear();
-		*this->list_ = std::move(*other.list_);
-	}
-	return *this;
+	delete this->list_;
 }
 
 template<typename K, typename T>
@@ -86,7 +65,7 @@ inline size_t BinaryQueue<K, T>::size() const
 template<typename K, typename T>
 inline void BinaryQueue<K, T>::push(const K& priority, const T& data)
 {
-	this->list_->add(new typename PriorityQueue<K, T>::PriorityQueueItem(priority, data));
+	this->list_->push_back(new typename PriorityQueue<K, T>::PriorityQueueItem(priority, data));
 	this->heapifyUp(this->size() - 1);
 }
 
@@ -101,28 +80,13 @@ inline T BinaryQueue<K, T>::pop()
 	{
 		Routines::swap((*this->list_)[0], (*this->list_)[this->size() - 1]);
 	}
-	typename PriorityQueue<K, T>::PriorityQueueItem* item = this->list_->removeAt(this->size() - 1);
+	typename PriorityQueue<K, T>::PriorityQueueItem* item = this->list_->back();
+	this->list_->pop_back();
 	this->heapifyDown(0);
 	T data = item->data();
 	delete item;
 	return data;
 }
-/*
-template<typename K, typename T>
-inline PriorityQueue<K, T>* BinaryQueue<K, T>::merge(const PriorityQueue<K, T>& other)
-{
-	if (this != &other) {
-		if (this->size() < other.size())
-		{
-			Routines::swap(this, &other);
-		}
-		for (int i = 0; i < other.size(); i++)
-		{
-			this->push(other.peekPriority(), other.pop());
-		}
-	}
-	return this;
-}*/
 
 template<typename K, typename T>
 inline T& BinaryQueue<K, T>::peek()

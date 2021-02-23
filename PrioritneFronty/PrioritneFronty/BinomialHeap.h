@@ -1,6 +1,5 @@
 #pragma once
 #include "PriorityQueue.h"
-#include "LinkedList.h"
 
 template <typename K, typename T>
 class BinomialHeap : public PriorityQueue<K, T>
