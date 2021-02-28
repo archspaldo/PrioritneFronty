@@ -22,7 +22,7 @@ private:
 };
 
 template<typename K, typename T>
-class PairingHeap<K, T>::PairingHeapItem : public PriorityQueue<K, T>::PriorityQueueItem
+class PairingHeap<K, T>::PairingHeapItem : public PriorityQueueItem<K, T>
 {
 public:
 	PairingHeapItem(const K& priority, const T& data);

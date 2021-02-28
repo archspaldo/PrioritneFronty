@@ -7,94 +7,127 @@ class BinomialHeap : public PriorityQueue<K, T>
 public:
 	BinomialHeap();
 	~BinomialHeap();
-	BinomialHeap<K, T>& operator=(BinomialHeap<K, T>&& other);
 	void clear() override;
 	size_t size() const override;
-	void push(const K& key, const T& data) override;
+	PriorityQueueItem<K, T>* push(const K& key, const T& data) override;
 	T pop() override;
 	T& peek() override;
 	const T peek() const override;
 	K peekPriority() override;
 	void merge(BinomialHeap<K, T>* other_heap);
+	void decrease_key(PriorityQueueItem<K, T>* node, const K& key);
 private:
 	class BinomialHeapItem;
-
 	void find_minimum();
-
 	BinomialHeapItem* head_;
 	BinomialHeapItem* root_;
 	size_t size_;
 };
 
 template <typename K, typename T>
-class BinomialHeap<K, T>::BinomialHeapItem : public PriorityQueue<K, T>::PriorityQueueItem
+class BinomialHeap<K, T>::BinomialHeapItem : public PriorityQueueItem<K, T>
 {
 public:
 	BinomialHeapItem(const K& priority, const T& data);
 	~BinomialHeapItem();
+	bool heapify();
 	BinomialHeapItem* link(BinomialHeapItem* node);
 	BinomialHeapItem* add_sub_tree(BinomialHeapItem* node);
 	BinomialHeapItem* merge_tree(BinomialHeapItem* node);
-	BinomialHeapItem* sibling();
-	void sibling(BinomialHeapItem* node);
-	BinomialHeapItem* left_son();
-	void left_son(BinomialHeapItem* node);
-
+	BinomialHeapItem* parent();
+	void parent(BinomialHeapItem* node);
+	BinomialHeapItem* right_sibling();
+	void right_sibling(BinomialHeapItem* node);
+	BinomialHeapItem* left_sibling();
+	void left_sibling(BinomialHeapItem* node);
+	BinomialHeapItem* first_child();
+	void first_child(BinomialHeapItem* node);
 	size_t order();
 private:
-	BinomialHeapItem* sibling_;
-	BinomialHeapItem* left_son_;
+	BinomialHeapItem* parent_;
+	BinomialHeapItem* right_sibling_;
+	BinomialHeapItem* left_sibling_;
+	BinomialHeapItem* first_child_;
 	size_t order_;
 };
 
 
 template<typename K, typename T>
 inline BinomialHeap<K, T>::BinomialHeapItem::BinomialHeapItem(const K& priority, const T& data):
-	PriorityQueueItem(priority, data), sibling_(nullptr), left_son_(nullptr), order_(1)
+	PriorityQueueItem<K, T>(priority, data), parent_(nullptr), right_sibling_(nullptr), left_sibling_(nullptr), first_child_(nullptr), order_(0)
 {
 }
 
 template<typename K, typename T>
 inline BinomialHeap<K, T>::BinomialHeapItem::~BinomialHeapItem()
 {
-	if (this->sibling_)
+	if (this->right_sibling_)
 	{
-		delete this->sibling_;
-		this->sibling_ = nullptr;
+		delete this->right_sibling_;
+		this->right_sibling_ = nullptr;
 	}
-	if (this->left_son_)
+	if (this->first_child_)
 	{
-		delete this->left_son_;
-		this->left_son_ = nullptr;
+		delete this->first_child_;
+		this->first_child_ = nullptr;
 	}
+	this->parent_ = this->left_sibling_ = nullptr;
 	this->order_ = 0;
+}
+
+template<typename K, typename T>
+inline bool BinomialHeap<K, T>::BinomialHeapItem::heapify()
+{
+	if (this->parent_)
+	{
+		if (this->priority() < this->parent_->priority())
+		{
+			std::swap(this->right_sibling_, this->parent_->right_sibling_);
+			std::swap(this->first_child_, this->parent_->first_child_);
+
+		}
+	}
 }
 
 template<typename K, typename T>
 inline typename BinomialHeap<K, T>::BinomialHeapItem* BinomialHeap<K, T>::BinomialHeapItem::link(BinomialHeapItem* node)
 {
-	if (node)
+	if (this->priority() < node->priority())
 	{
-		if (this->priority() < node->priority())
+		this->right_sibling_ = node->right_sibling_;
+		if (this->right_sibling_)
 		{
-			this->sibling_ = node->sibling_;
-			return this->add_sub_tree(node);
+			this->right_sibling_->left_sibling_ = this;
 		}
-		else
-		{
-			return node->add_sub_tree(this);
-		}
+		return this->add_sub_tree(node);
 	}
-	return this;
+	else
+	{
+		node->left_sibling_ = this->left_sibling_;
+		if (node->left_sibling_)
+		{
+			node->left_sibling_->right_sibling_ = node;
+		}
+		return node->add_sub_tree(this);
+	}
 }
 
 template<typename K, typename T>
 inline typename BinomialHeap<K, T>::BinomialHeapItem* BinomialHeap<K, T>::BinomialHeapItem::add_sub_tree(BinomialHeapItem* node)
 {
-	if (node && this->order_ == node->order_)
+	if (node)
 	{
-		node->sibling_ = this->left_son_;
-		this->left_son_ = node;
+		if (this->first_child_)
+		{
+			this->first_child_->left_sibling_ = node;
+		}
+		else
+		{
+			this->first_child_ = node;
+		}
+		node->right_sibling_ = this->first_child_;
+		node->left_sibling_ = nullptr;
+		this->first_child_ = node;
 		this->order_++;
 	}
 	return this;
@@ -117,27 +150,51 @@ inline typename BinomialHeap<K, T>::BinomialHeapItem* BinomialHeap<K, T>::Binomi
 }
 
 template<typename K, typename T>
-inline typename BinomialHeap<K, T>::BinomialHeapItem* BinomialHeap<K, T>::BinomialHeapItem::sibling()
+inline typename BinomialHeap<K, T>::BinomialHeapItem* BinomialHeap<K, T>::BinomialHeapItem::parent()
 {
-	return this->sibling_;
+	return this->parent_;
 }
 
 template<typename K, typename T>
-inline void BinomialHeap<K, T>::BinomialHeapItem::sibling(BinomialHeapItem* node)
+inline void BinomialHeap<K, T>::BinomialHeapItem::parent(BinomialHeapItem* node)
 {
-	this->sibling_ = node;
+	this->parent_ = node;
 }
 
 template<typename K, typename T>
-inline typename BinomialHeap<K, T>::BinomialHeapItem* BinomialHeap<K, T>::BinomialHeapItem::left_son()
+inline typename BinomialHeap<K, T>::BinomialHeapItem* BinomialHeap<K, T>::BinomialHeapItem::right_sibling()
 {
-	return this->left_son_;
+	return this->right_sibling_;
 }
 
 template<typename K, typename T>
-inline void BinomialHeap<K, T>::BinomialHeapItem::left_son(BinomialHeapItem* node)
+inline void BinomialHeap<K, T>::BinomialHeapItem::right_sibling(BinomialHeapItem* node)
 {
-	this->left_son_ = node;
+	this->right_sibling_ = node;
+}
+
+template<typename K, typename T>
+inline typename BinomialHeap<K, T>::BinomialHeapItem* BinomialHeap<K, T>::BinomialHeapItem::left_sibling()
+{
+	return this->left_sibling_;
+}
+
+template<typename K, typename T>
+inline void BinomialHeap<K, T>::BinomialHeapItem::left_sibling(BinomialHeapItem* node)
+{
+	this->left_sibling_ = node;
+}
+
+template<typename K, typename T>
+inline typename BinomialHeap<K, T>::BinomialHeapItem* BinomialHeap<K, T>::BinomialHeapItem::first_child()
+{
+	return this->first_child_;
+}
+
+template<typename K, typename T>
+inline void BinomialHeap<K, T>::BinomialHeapItem::first_child(BinomialHeapItem* node)
+{
+	this->first_child_ = node;
 }
 
 template<typename K, typename T>
@@ -155,33 +212,15 @@ inline BinomialHeap<K, T>::BinomialHeap() :
 template<typename K, typename T>
 inline BinomialHeap<K, T>::~BinomialHeap()
 {
-	this->size_ = 0;
-	this->root_ = nullptr;
-	delete this->head_;
-	this->head_ = nullptr;
-}
-
-
-template<typename K, typename T>
-inline BinomialHeap<K, T>& BinomialHeap<K, T>::operator=(BinomialHeap<K, T>&& other)
-{
-	if (this != &other)
-	{
-		this->head_ = other.head_;
-		this->root_ = other.root_;
-		this->size_ = other.size_;
-		other.head_ = other.root_ = nullptr;
-		other.size_ = 0;
-	}
-	return *this;
+	this->clear();
 }
 
 template<typename K, typename T>
 inline void BinomialHeap<K, T>::clear()
 {
-	this->root_ = nullptr;
-	this->size_ = 0;
 	delete this->head_;
+	this->root_ = this->head_ = nullptr;
+	this->size_ = 0;
 }
 
 template<typename K, typename T>
@@ -191,12 +230,14 @@ inline size_t BinomialHeap<K, T>::size() const
 }
 
 template<typename K, typename T>
-inline void BinomialHeap<K, T>::push(const K& key, const T& data)
+inline PriorityQueueItem<K, T>* BinomialHeap<K, T>::push(const K& key, const T& data)
 {
-	BinomialHeap<K, T> new_heap;
-	new_heap.head_ = new BinomialHeapItem(key, data);
-	new_heap.size_++;
-	this->merge(&new_heap);
+	BinomialHeap<K, T>* temporary_heap = new BinomialHeap<K, T>();
+	BinomialHeapItem* new_item = new BinomialHeapItem(key, data);
+	temporary_heap->head_ = new_item;
+	temporary_heap->size_++;
+	this->merge(temporary_heap);
+	return (PriorityQueueItem<K, T>*)new_item;
 }
 
 template<typename K, typename T>
@@ -204,39 +245,30 @@ inline T BinomialHeap<K, T>::pop()
 {
 	if (this->head_)
 	{
-		BinomialHeap<K, T> temporary_heap;
-		BinomialHeapItem* min = this->head_, * prev = nullptr, * next;
-		if (min)
+		if (this->root_->left_sibling())
 		{
-			for (BinomialHeapItem* tmp = this->head_; tmp; tmp = tmp->sibling())
-			{
-				if (tmp->sibling() && tmp->sibling()->priority() < min->priority())
-				{
-					min = tmp->sibling();
-					prev = tmp;
-				}
-			}
-		}
-		if (prev)
-		{
-			prev->sibling(min->sibling());
+			this->root_->left_sibling()->right_sibling(this->root_->right_sibling());
 		}
 		else
 		{
-			this->head_ = this->head_->sibling();
+			this->head_ = this->head_->right_sibling();
 		}
 
-		prev = min->left_son();
-		min->left_son(nullptr);
-		min->sibling(nullptr);
-		while (prev)
+		BinomialHeap<K, T>* temporary_heap = new BinomialHeap<K, T>();
+		BinomialHeapItem* min = this->root_, * child_list_ptr = this->root_->first_child(), * child_list_next_ptr;
+
+		this->root_->first_child(nullptr);
+		this->root_->right_sibling(nullptr);
+
+		while (child_list_ptr)
 		{
-			next = prev->sibling();
-			prev->sibling(temporary_heap.head_);
-			temporary_heap.head_ = prev;
-			prev = next;
+			child_list_next_ptr = child_list_ptr->right_sibling();
+			child_list_ptr->parent(nullptr);
+			child_list_ptr->right_sibling(temporary_heap->head_);
+			temporary_heap->head_ = child_list_ptr;
+			child_list_ptr = child_list_next_ptr;
 		}
-		this->merge(&temporary_heap);
+		this->merge(temporary_heap);
 		this->size_--;
 		T data = min->data();
 		delete min;
@@ -264,110 +296,112 @@ inline K BinomialHeap<K, T>::peekPriority()
 }
 
 template<typename K, typename T>
-inline void BinomialHeap<K, T>::merge(BinomialHeap<K, T>* other_tree)
+inline void BinomialHeap<K, T>::merge(BinomialHeap<K, T>* other_heap)
 {
 	if (this->head_)
 	{
-		if (other_tree->head_)
+		if (other_heap->head_)
 		{
-			BinomialHeap<K, T>* result_heap = new BinomialHeap<K, T>();
-			BinomialHeapItem* current_1 = this->head_, * current_2 = other_tree->head_, * current_3 = nullptr;
-			if (current_1)
+			BinomialHeap<K, T>* temporary_heap = new BinomialHeap<K, T>();
+			BinomialHeapItem* heap_1_root_list_ptr = this->head_, * heap_2_root_list_ptr = other_heap->head_;
+			if (this->head_)
 			{
-				if (current_1->order() < current_2->order())
+				if (this->head_->order() < other_heap->head_->order())
 				{
-					current_3 = current_1;
-					current_1 = current_1->sibling();
+					temporary_heap->head_ = this->head_;
+					heap_1_root_list_ptr = this->head_->right_sibling();
 				}
 				else
 				{
-					current_3 = current_2;
-					current_2 = current_2->sibling();
+					temporary_heap->head_ = other_heap->head_;
+					heap_2_root_list_ptr = other_heap->head_->right_sibling();
 				}
 			}
 			else
 			{
-				current_3 = current_2;
+				temporary_heap->head_ = other_heap->head_;
 			}
-			result_heap->head_ = current_3;
-			while (current_1 && current_2)
+			BinomialHeapItem* heap_3_root_list_ptr = temporary_heap->head_;
+			while (heap_1_root_list_ptr && heap_2_root_list_ptr)
 			{
-				if (current_1->order() < current_2->order())
+				if (heap_1_root_list_ptr->order() < heap_2_root_list_ptr->order())
 				{
-					current_3->sibling(current_1);
-					current_1 = current_1->sibling();
+					heap_3_root_list_ptr->right_sibling(heap_1_root_list_ptr);
+					heap_1_root_list_ptr = heap_1_root_list_ptr->right_sibling();
 				}
 				else
 				{
-					current_3->sibling(current_2);
-					current_2 = current_2->sibling();
+					heap_3_root_list_ptr->right_sibling(heap_2_root_list_ptr);
+					heap_2_root_list_ptr = heap_2_root_list_ptr->right_sibling();
 				}
-				current_3 = current_3->sibling();
+				heap_3_root_list_ptr = heap_3_root_list_ptr->right_sibling();
 			}
-			while (current_1)
+			while (heap_1_root_list_ptr)
 			{
-				current_3->sibling(current_1);
-				current_1 = current_1->sibling();
-				current_3 = current_3->sibling();
+				heap_3_root_list_ptr->right_sibling(heap_1_root_list_ptr);
+				heap_1_root_list_ptr = heap_1_root_list_ptr->right_sibling();
+				heap_3_root_list_ptr = heap_3_root_list_ptr->right_sibling();
 			}
-			while (current_2)
+			while (heap_2_root_list_ptr)
 			{
-				current_3->sibling(current_2);
-				current_2 = current_2->sibling();
-				current_3 = current_3->sibling();
+				heap_3_root_list_ptr->right_sibling(heap_2_root_list_ptr);
+				heap_2_root_list_ptr = heap_2_root_list_ptr->right_sibling();
+				heap_3_root_list_ptr = heap_3_root_list_ptr->right_sibling();
 			}
 
-			result_heap->size_ = this->size_ + other_tree->size_;
+			temporary_heap->size_ = this->size_ + other_heap->size_;
 
-			this->head_ = other_tree->head_ = nullptr;
-			this->root_ = other_tree->root_ = nullptr;
-			this->size_ = other_tree->size_ = 0;
+			this->head_ = temporary_heap->head_;
+			this->size_ = temporary_heap->size_;
 
-			if (result_heap->head_)
+			temporary_heap->head_ = other_heap->head_ = nullptr;
+			delete temporary_heap;
+
+			if (this->head_)
 			{
-				current_3 = result_heap->head_;
-				current_1 = current_3->sibling();
-				current_2 = nullptr;
-				while (current_1)
+				heap_1_root_list_ptr = this->head_;
+				heap_2_root_list_ptr = this->head_->right_sibling();
+				heap_3_root_list_ptr = nullptr;
+				while (heap_2_root_list_ptr)
 				{
-					if (current_3->order() != current_1->order() || (current_1->sibling() && current_1->order() == current_1->sibling()->order()))
+					if (heap_1_root_list_ptr->order() != heap_2_root_list_ptr->order() ||
+						(heap_2_root_list_ptr->right_sibling() && heap_2_root_list_ptr->order() == heap_2_root_list_ptr->right_sibling()->order()))
 					{
-						current_2 = current_3;
-						current_3 = current_3->sibling();
+						heap_3_root_list_ptr = heap_1_root_list_ptr;
+						heap_1_root_list_ptr = heap_1_root_list_ptr->right_sibling();
 					}
 					else
 					{
-						current_3 = current_3->link(current_1);
-						if (current_2)
+						heap_1_root_list_ptr = heap_1_root_list_ptr->link(heap_2_root_list_ptr);
+						if (heap_3_root_list_ptr)
 						{
-							current_2->sibling(current_3);
+							heap_3_root_list_ptr->right_sibling(heap_1_root_list_ptr);
 						}
 						else
 						{
-							result_heap->head_ = current_3;
+							this->head_ = heap_1_root_list_ptr;
 						}
 					}
-					current_1 = current_3->sibling();
+					heap_2_root_list_ptr = heap_1_root_list_ptr->right_sibling();
 				}
 			}
-			result_heap->find_minimum();
-			this->head_ = result_heap->head_;
-			this->root_ = result_heap->root_;
-			this->size_ = result_heap->size_;
-			result_heap->head_ = result_heap->root_ = nullptr;
-			result_heap->size_ = 0;
-			delete result_heap;
 		}
-
 	}
 	else
 	{
-		this->head_ = other_tree->head_;
-		this->root_ = other_tree->root_;
-		this->size_ = other_tree->size_;
-		other_tree->head_ = other_tree->root_ = nullptr;
-		other_tree->size_ = 0;
+		this->head_ = other_heap->head_;
+		other_heap->head_ = nullptr;	
 	}
+	delete other_heap;
+	this->find_minimum();
+}
+
+template<typename K, typename T>
+inline void BinomialHeap<K, T>::decrease_key(PriorityQueueItem<K, T>* node, const K& key)
+{
+	node->priority(key);
+	BinomialHeapItem* decreased_node = (BinomialHeapItem*)node;
+
 }
 
 template<typename K, typename T>
@@ -376,7 +410,7 @@ inline void BinomialHeap<K, T>::find_minimum()
 	BinomialHeapItem* min = this->head_;
 	if (min)
 	{
-		for (BinomialHeapItem* node = this->head_->sibling(); node; node = node->sibling())
+		for (BinomialHeapItem* node = this->head_->right_sibling(); node; node = node->right_sibling())
 		{
 			if (node->priority() < min->priority())
 			{

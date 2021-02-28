@@ -27,7 +27,7 @@ private:
 };
 
 template <typename K, typename T>
-class FibonacciHeap<K, T>::FibonacciHeapItem : public PriorityQueue<K, T>::PriorityQueueItem
+class FibonacciHeap<K, T>::FibonacciHeapItem : public PriorityQueueItem<K, T>
 {
 public:
 	FibonacciHeapItem(const K& priority, const T& data);
@@ -226,7 +226,7 @@ inline void FibonacciHeap<K, T>::consolidate()
 
 template<typename K, typename T>
 inline FibonacciHeap<K, T>::FibonacciHeapItem::FibonacciHeapItem(const K& priority, const T& data) :
-	PriorityQueueItem(priority, data),
+	PriorityQueueItem<K, T>(priority, data),
 	degree_(0), left_son_(nullptr), right_son_(nullptr), right_sibling_(nullptr), left_sibling_(nullptr), mark_(false)
 {
 }

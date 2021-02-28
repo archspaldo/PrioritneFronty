@@ -1,6 +1,7 @@
 #pragma once
 #include "PriorityQueue.h"
 #include <vector>
+#include <iostream>
 
 template <typename K, typename T>
 class BinaryQueue : public PriorityQueue<K, T>
@@ -16,7 +17,7 @@ public:
 	const T peek() const override;
 	K peekPriority() override;
 private:
-	std::vector<typename PriorityQueue<K, T>::PriorityQueueItem*>* list_;
+	std::vector<PriorityQueueItem<K, T>*>* list_;
 	int leftSon(const int index);
 	int righSon(const int index);
 	int parent(const int index);
@@ -30,7 +31,7 @@ private:
 template<typename K, typename T>
 inline BinaryQueue<K, T>::BinaryQueue() :
 	PriorityQueue<K, T>(),
-	list_(new std::vector<typename PriorityQueue<K, T>::PriorityQueueItem*>())
+	list_(new std::vector<PriorityQueueItem<K, T>*>())
 {
 }
 
@@ -44,12 +45,10 @@ inline BinaryQueue<K, T>::~BinaryQueue()
 template<typename K, typename T>
 inline void BinaryQueue<K, T>::clear()
 {
-	for (typename PriorityQueue<K, T>::PriorityQueueItem* item : *this->list_)
+	for (PriorityQueueItem<K, T>* item : *this->list_)
 	{
-		if (item)
-		{
-			delete item;
-		}
+		
+		delete item;
 	}
 	this->list_->clear();
 }
@@ -63,7 +62,7 @@ inline size_t BinaryQueue<K, T>::size() const
 template<typename K, typename T>
 inline void BinaryQueue<K, T>::push(const K& priority, const T& data)
 {
-	this->list_->push_back(new typename PriorityQueue<K, T>::PriorityQueueItem(priority, data));
+	this->list_->push_back(new PriorityQueueItem<K, T>(priority, data));
 	this->heapifyUp(this->size() - 1);
 }
 
@@ -78,7 +77,7 @@ inline T BinaryQueue<K, T>::pop()
 	{
 		std::swap((*this->list_)[0], (*this->list_)[this->size() - 1]);
 	}
-	typename PriorityQueue<K, T>::PriorityQueueItem* item = this->list_->back();
+	PriorityQueueItem<K, T>* item = this->list_->back();
 	this->list_->pop_back();
 	this->heapifyDown(0);
 	T data = item->data();
@@ -137,8 +136,8 @@ inline int BinaryQueue<K, T>::parent(const int index)
 template<typename K, typename T>
 inline int BinaryQueue<K, T>::greaterSon(const int index)
 {
-	typename PriorityQueue<K, T>::PriorityQueueItem* lChild = this->leftSon(index) < this->size() ? (*this->list_)[this->leftSon(index)] : nullptr;
-	typename PriorityQueue<K, T>::PriorityQueueItem* rChild = this->righSon(index) < this->size() ? (*this->list_)[this->righSon(index)] : nullptr;
+	PriorityQueueItem<K, T>* lChild = this->leftSon(index) < this->size() ? (*this->list_)[this->leftSon(index)] : nullptr;
+	PriorityQueueItem<K, T>* rChild = this->righSon(index) < this->size() ? (*this->list_)[this->righSon(index)] : nullptr;
 	if (lChild && rChild)
 	{
 		return lChild->priority() < rChild->priority() ? this->leftSon(index) : this->righSon(index);
