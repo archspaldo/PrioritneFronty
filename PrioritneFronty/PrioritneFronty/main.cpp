@@ -50,7 +50,7 @@ int main() {
 
     delete h;*/
 
-    PriorityQueueLinkedItem<int, int>* i0 = new PriorityQueueLinkedItem<int, int>(0, 0);
+   /* PriorityQueueLinkedItem<int, int>* i0 = new PriorityQueueLinkedItem<int, int>(0, 0);
     PriorityQueueLinkedItem<int, int>* i1 = new PriorityQueueLinkedItem<int, int>(1, 1);
     PriorityQueueLinkedItem<int, int>* i2 = new PriorityQueueLinkedItem<int, int>(2, 2);
     PriorityQueueLinkedItem<int, int>* i3 = new PriorityQueueLinkedItem<int, int>(3, 3);
@@ -60,18 +60,16 @@ int main() {
     PriorityQueueLinkedItem<int, int>* i7 = new PriorityQueueLinkedItem<int, int>(7, 7);
     PriorityQueueLinkedItem<int, int>* i8 = new PriorityQueueLinkedItem<int, int>(8, 8);
 
-    i0->merge(i1);
+    i6->link_on_right(i1);
     i1->link_on_right(i2);
-    i1->link_on_right(i3);
-    i4->link_on_right(i5);
-    i4->link_on_right(i6);
-    i1->link_on_right(i4);
-    i7->merge(i8);
-    i0->merge(i7);
-    i0->priority(9);
-    i7->heapify();
+    i2->link_on_right(i3);
+    i6->merge_with_right_sibling();
+    i6->link_on_right(i0);
+    i0->heapify();
 
-    delete i0;
+
+
+    delete i0;*/
 
     /*a* a1 = new b(1, 1);
     a* a2 = new b(2, 2);
