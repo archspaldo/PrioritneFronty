@@ -2,6 +2,7 @@
 #include "PairingHeap.h"
 #include "BinomialHeap.h"
 #include "FibonacciHeap.h"
+#include "PairingHeapBinaryTree.h"
 #include "heap_monitor.h"
 #include <iostream> 
 
@@ -30,7 +31,7 @@ public:
 
 int main() {
     initHeapMonitor();
-    /*PriorityQueue<int, int>* h = new BinomialHeap<int, int>();
+    PriorityQueue<int, int>* h = new PairingHeapBTMultiPass<int, int>();
     h->push(3, 3);
     h->push(15, 15);
     h->push(10, 10);
@@ -48,7 +49,7 @@ int main() {
         std::cout << h->pop() << "\n";
     }
 
-    delete h;*/
+    delete h;
 
    /* PriorityQueueLinkedItem<int, int>* i0 = new PriorityQueueLinkedItem<int, int>(0, 0);
     PriorityQueueLinkedItem<int, int>* i1 = new PriorityQueueLinkedItem<int, int>(1, 1);

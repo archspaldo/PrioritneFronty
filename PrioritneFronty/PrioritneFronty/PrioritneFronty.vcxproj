@@ -144,6 +144,7 @@
     <ClInclude Include="FibonacciHeap.h" />
     <ClInclude Include="heap_monitor.h" />
     <ClInclude Include="PairingHeap.h" />
+    <ClInclude Include="PairingHeapBinaryTree.h" />
     <ClInclude Include="PriorityQueue.h" />
   </ItemGroup>
   <ItemGroup>
