@@ -3,6 +3,8 @@
 #include <vector>
 #include <math.h>
 
+
+
 template <typename K, typename T>
 class FibonacciHeap : public PriorityQueue<K, T>
 {
@@ -15,15 +17,14 @@ public:
 	T& peek() override;
 	const T peek() const override;
 	K peekPriority() override;
-	void merge(FibonacciHeap<K, T>* other_heap);
-	void decrease_key(PriorityQueueItem<K, T>* node, const K& key);
-	
+	void merge(PriorityQueue<K, T>* other_heap);
+	void change_priority(PriorityQueueItem<K, T>* node, const K& key);
 private:
-	class FibonacciHeapItem : public PriorityQueueLinkedItem<K, T>
+	class FibonacciHeapItem : public PQDoubleLinkedItem<K, T>
 	{
 	public:
 		FibonacciHeapItem(const K& priority, const T& data) :
-			PriorityQueueLinkedItem<K, T>(priority, data), flag_(false) {};
+			PQDoubleLinkedItem<K, T>(priority, data), flag_(false) {};
 		~FibonacciHeapItem() {};
 		bool flag()
 		{
@@ -36,6 +37,9 @@ private:
 	private:
 		bool flag_;
 	};
+
+	void decrease_key(PriorityQueueItem<K, T>* node, const K& key);
+	void increase_key(PriorityQueueItem<K, T>* node, const K& key);
 	
 	void cut(FibonacciHeapItem* node);
 	void cascading_cut(FibonacciHeapItem* node);
@@ -132,26 +136,43 @@ inline K FibonacciHeap<K, T>::peekPriority()
 }
 
 template<typename K, typename T>
-inline void FibonacciHeap<K, T>::merge(FibonacciHeap<K, T>* other_heap)
+inline void FibonacciHeap<K, T>::merge(PriorityQueue<K, T>* other_heap)
 {
-	if (other_heap)
+	FibonacciHeap<K, T>* heap = (FibonacciHeap<K, T>*)other_heap;
+	if (heap)
 	{
 		if (this->head_)
 		{
-			this->head_->link_on_left(other_heap->head);
-			this->size_ += other_heap->size_;
-			if (other_heap->root_ && other_heap->root_->priority() < this->root_->priority())
+			this->head_->link_on_left(heap->head);
+			this->size_ += heap->size_;
+			if (heap->root_ && heap->root_->priority() < this->root_->priority())
 			{
-				this->root_ = other_heap->root_;
+				this->root_ = heap->root_;
 			}
 		}
 		else
 		{
-			this->head_ = other_heap->head_;
-			this->size_ = other_heap->size_;
-			this->root_ = other_heap->root_;
+			this->head_ = heap->head_;
+			this->size_ = heap->size_;
+			this->root_ = heap->root_;
 		}
-		other_heap->head_ = nullptr;
+		heap->head_ = nullptr;
+	}
+}
+
+template<typename K, typename T>
+inline void FibonacciHeap<K, T>::change_priority(PriorityQueueItem<K, T>* node, const K& key)
+{
+	if (key < node->priority())
+	{
+		this->decrease_key(node, key);
+	}
+	else
+	{
+		if (key > node->priority())
+		{
+			this->increase_key(node, key);
+		}
 	}
 }
 
@@ -171,6 +192,25 @@ inline void FibonacciHeap<K, T>::decrease_key(PriorityQueueItem<K, T>* node, con
 	}
 }
 
+template<typename K, typename T>
+inline void FibonacciHeap<K, T>::increase_key(PriorityQueueItem<K, T>* node, const K& key)
+{
+	node->priority(key);
+	FibonacciHeapItem* decreased_node = (FibonacciHeapItem*)node;
+	for (FibonacciHeapItem* node_ptr = decreased_node->first_son(),* node_next_ptr = node_ptr ? node_ptr->right_sibling() : nullptr; node_ptr; node_ptr = node_next_ptr, node_next_ptr = node_ptr->is_isolated() ? node_ptr->right_sibling() : nullptr)
+	{
+		if (node_ptr->priority() < decreased_node->priority())
+		{
+			if (decreased_node->first_son() == node_ptr)
+			{
+				decreased_node->first_son(node_next_ptr);
+			}
+			this->cut(node_ptr);
+			this->cascading_cut(decreased_node);
+		}
+	}
+}
+
 
 
 template<typename K, typename T>
@@ -179,9 +219,9 @@ inline void FibonacciHeap<K, T>::consolidate()
 	constexpr auto RESIZE = 2.1;
 	int node_degree;
 	const int degree = (int)(log(this->size_) * RESIZE);
-	std::vector<PriorityQueueLinkedItem<K, T>*> node_list(degree);
+	std::vector<PQDoubleLinkedItem<K, T>*> node_list(degree);
 
-	for (PriorityQueueLinkedItem<K, T>* node = this->head_, * right_sibling = node && !node->is_isolated() ? node->right_sibling() : nullptr; node;
+	for (PQDoubleLinkedItem<K, T>* node = this->head_, * right_sibling = node && !node->is_isolated() ? node->right_sibling() : nullptr; node;
 		node = right_sibling, right_sibling = (node && !node->is_isolated()) ? node->right_sibling() : nullptr)
 	{
 		node_degree = node->degree();

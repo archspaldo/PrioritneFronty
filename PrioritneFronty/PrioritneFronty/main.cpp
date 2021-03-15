@@ -4,7 +4,7 @@
 #include "FibonacciHeap.h"
 #include "PairingHeapBinaryTree.h"
 #include "heap_monitor.h"
-#include <iostream> 
+#include <iostream>
 
 class a
 {
@@ -31,7 +31,7 @@ public:
 
 int main() {
     initHeapMonitor();
-    PriorityQueue<int, int>* h = new PairingHeapBTMultiPass<int, int>();
+    PriorityQueue<int, int>* h = new BinomialHeap<int, int>();
     h->push(3, 3);
     h->push(15, 15);
     h->push(10, 10);
@@ -51,15 +51,15 @@ int main() {
 
     delete h;
 
-   /* PriorityQueueLinkedItem<int, int>* i0 = new PriorityQueueLinkedItem<int, int>(0, 0);
-    PriorityQueueLinkedItem<int, int>* i1 = new PriorityQueueLinkedItem<int, int>(1, 1);
-    PriorityQueueLinkedItem<int, int>* i2 = new PriorityQueueLinkedItem<int, int>(2, 2);
-    PriorityQueueLinkedItem<int, int>* i3 = new PriorityQueueLinkedItem<int, int>(3, 3);
-    PriorityQueueLinkedItem<int, int>* i4 = new PriorityQueueLinkedItem<int, int>(4, 4);
-    PriorityQueueLinkedItem<int, int>* i5 = new PriorityQueueLinkedItem<int, int>(5, 5);
-    PriorityQueueLinkedItem<int, int>* i6 = new PriorityQueueLinkedItem<int, int>(6, 6);
-    PriorityQueueLinkedItem<int, int>* i7 = new PriorityQueueLinkedItem<int, int>(7, 7);
-    PriorityQueueLinkedItem<int, int>* i8 = new PriorityQueueLinkedItem<int, int>(8, 8);
+   /* PQDoubleLinkedItem<int, int>* i0 = new PQDoubleLinkedItem<int, int>(0, 0);
+    PQDoubleLinkedItem<int, int>* i1 = new PQDoubleLinkedItem<int, int>(1, 1);
+    PQDoubleLinkedItem<int, int>* i2 = new PQDoubleLinkedItem<int, int>(2, 2);
+    PQDoubleLinkedItem<int, int>* i3 = new PQDoubleLinkedItem<int, int>(3, 3);
+    PQDoubleLinkedItem<int, int>* i4 = new PQDoubleLinkedItem<int, int>(4, 4);
+    PQDoubleLinkedItem<int, int>* i5 = new PQDoubleLinkedItem<int, int>(5, 5);
+    PQDoubleLinkedItem<int, int>* i6 = new PQDoubleLinkedItem<int, int>(6, 6);
+    PQDoubleLinkedItem<int, int>* i7 = new PQDoubleLinkedItem<int, int>(7, 7);
+    PQDoubleLinkedItem<int, int>* i8 = new PQDoubleLinkedItem<int, int>(8, 8);
 
     i6->link_on_right(i1);
     i1->link_on_right(i2);

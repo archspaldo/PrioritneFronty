@@ -1,11 +1,13 @@
 #pragma once
 #include "PriorityQueue.h"
+#include <vector>
 
 template <typename K, typename T>
 class BinomialHeap : public PriorityQueue<K, T>
 {
 public:
 	BinomialHeap();
+	BinomialHeap(PQDoubleLinkedItem<K, T>* head, size_t size = 0);
 	~BinomialHeap();
 	size_t size() const override;
 	PriorityQueueItem<K, T>* push(const K& key, const T& data) override;
@@ -13,12 +15,12 @@ public:
 	T& peek() override;
 	const T peek() const override;
 	K peekPriority() override;
-	void merge(BinomialHeap<K, T>* other_heap);
-	void decrease_key(PriorityQueueItem<K, T>* node, const K& key);
+	void merge(PriorityQueue<K, T>* other_heap);
+	void change_priority(PriorityQueueItem<K, T>* node, const K& key);
 private:
 	void find_minimum();
-	PriorityQueueLinkedItem<K, T>* head_;
-	PriorityQueueLinkedItem<K, T>* root_;
+	PQDoubleLinkedItem<K, T>* head_;
+	PQDoubleLinkedItem<K, T>* root_;
 	size_t size_;
 };
 
@@ -26,6 +28,13 @@ template<typename K, typename T>
 inline BinomialHeap<K, T>::BinomialHeap() :
 	PriorityQueue<K, T>(), size_(0), head_(nullptr), root_(nullptr)
 {
+}
+
+template<typename K, typename T>
+inline BinomialHeap<K, T>::BinomialHeap(PQDoubleLinkedItem<K, T>* head, size_t size) :
+	PriorityQueue<K, T>(), head_(head), root_(head), size_(size)
+{
+	this->find_minimum();
 }
 
 template<typename K, typename T>
@@ -45,12 +54,10 @@ inline size_t BinomialHeap<K, T>::size() const
 template<typename K, typename T>
 inline PriorityQueueItem<K, T>* BinomialHeap<K, T>::push(const K& key, const T& data)
 {
-	BinomialHeap<K, T>* temporary_heap = new BinomialHeap<K, T>();
-	PriorityQueueLinkedItem<K, T>* new_item = new PriorityQueueLinkedItem<K, T>(key, data);
-	temporary_heap->head_ = new_item;
-	temporary_heap->size_++;
-	this->merge(temporary_heap);
-	return (PriorityQueueItem<K, T>*)new_item;
+	PQDoubleLinkedItem<K, T>* new_item = new PQDoubleLinkedItem<K, T>(key, data);
+	BinomialHeap<K, T>* new_heap = new BinomialHeap<K, T>(new_item, 1);
+	this->merge(new_heap);
+	return new_item;
 }
 
 template<typename K, typename T>
@@ -58,6 +65,8 @@ inline T BinomialHeap<K, T>::pop()
 {
 	if (this->head_)
 	{
+		PQDoubleLinkedItem<K, T>* root = this->root_;
+
 		if (this->head_->is_isolated())
 		{
 			this->head_ = nullptr;
@@ -71,34 +80,19 @@ inline T BinomialHeap<K, T>::pop()
 			this->root_->isolate();
 		}
 
-		PriorityQueueLinkedItem<K, T>* min = this->root_, * child_list_ptr = this->root_->first_son(),
-			* child_list_next_ptr = child_list_ptr && !child_list_ptr->is_isolated() ? child_list_ptr->right_sibling() : nullptr;
-		BinomialHeap<K, T>* temporary_heap = new BinomialHeap<K, T>();
-
-		this->root_->first_son(nullptr);
-		this->root_->right_sibling(nullptr);
-		
-		if (child_list_ptr)
-		{
-			temporary_heap->head_ = child_list_ptr->isolate();
-			temporary_heap->head_->parent(nullptr);
-		}
-		
-
-		while (child_list_next_ptr)
-		{
-			child_list_ptr = child_list_next_ptr;
-			child_list_next_ptr = child_list_ptr->is_isolated() ? nullptr : child_list_ptr->right_sibling();
-			temporary_heap->head_->link_on_left(child_list_ptr->isolate());
-			temporary_heap->head_ = child_list_ptr;
-		}
-		this->merge(temporary_heap);
+		this->find_minimum();
 		this->size_--;
-		T data = min->data();
-		delete min;
+		
+		BinomialHeap<K, T>* new_heap = new BinomialHeap<K, T>(root->first_son());
+
+		root->first_son(nullptr);
+
+		this->merge(new_heap);
+		T data = root->data();
+		delete root;
 		return data;
 	}
-	return 0;
+	throw new std::range_error("BinomialHeap<K, T>::pop(): PriorityQueue is empty!");
 }
 
 template<typename K, typename T>
@@ -120,119 +114,95 @@ inline K BinomialHeap<K, T>::peekPriority()
 }
 
 template<typename K, typename T>
-inline void BinomialHeap<K, T>::merge(BinomialHeap<K, T>* other_heap)
+inline void BinomialHeap<K, T>::merge(PriorityQueue<K, T>* other_heap)
 {
-	if (this->head_)
+	BinomialHeap<K, T>* heap = (BinomialHeap<K, T>*)other_heap;
+	if (heap)
 	{
-		if (other_heap->head_)
+		if (this->head_)
 		{
-			BinomialHeap<K, T>* temporary_heap = new BinomialHeap<K, T>();
-			PriorityQueueLinkedItem<K, T>* heap_1_root_list_ptr = this->head_, * heap_2_root_list_ptr = other_heap->head_;
-			if (this->head_->degree() < other_heap->head_->degree())
+			if (heap->head_)
 			{
-				heap_1_root_list_ptr = heap_1_root_list_ptr->is_isolated() ? nullptr : heap_1_root_list_ptr->right_sibling();
-				temporary_heap->head_ = this->head_->isolate();
-			}
-			else
-			{
-				heap_2_root_list_ptr = heap_2_root_list_ptr->is_isolated() ? nullptr : heap_2_root_list_ptr->right_sibling();
-				temporary_heap->head_ = other_heap->head_->isolate();
-			}
-			PriorityQueueLinkedItem<K, T>* heap_3_root_list_ptr = temporary_heap->head_;
-			while (heap_1_root_list_ptr && heap_2_root_list_ptr)
-			{
-				if (heap_1_root_list_ptr->degree() < heap_2_root_list_ptr->degree())
+				if (heap->root_->priority() < this->root_->priority())
 				{
-					heap_3_root_list_ptr = heap_1_root_list_ptr->is_isolated() ? nullptr : heap_1_root_list_ptr->right_sibling();
-					temporary_heap->head_->link_on_left(heap_1_root_list_ptr->isolate());
-					heap_1_root_list_ptr = heap_3_root_list_ptr;
+					this->root_ = heap->root_;
 				}
-				else
+				int size = (int)(std::max(log2(this->size_) + 1, log2(heap->size_) + 1));
+				std::vector<PQDoubleLinkedItem<K, T>*> node_list(size + 1);
+				PQDoubleLinkedItem<K, T>* node_ptr = heap->head_, * node_next_ptr;
+				size_t degree;
+				while (node_ptr)
 				{
-					heap_3_root_list_ptr = heap_2_root_list_ptr->is_isolated() ? nullptr : heap_2_root_list_ptr->right_sibling();
-					temporary_heap->head_->link_on_left(heap_2_root_list_ptr->isolate());
-					heap_2_root_list_ptr = heap_3_root_list_ptr;
+					node_next_ptr = node_ptr->is_isolated() ? nullptr : node_ptr->right_sibling();
+					node_list[node_ptr->degree()] = node_ptr->isolate();
+					node_ptr = node_next_ptr;
 				}
-			}
-			while (heap_1_root_list_ptr)
-			{
-				heap_3_root_list_ptr = heap_1_root_list_ptr->is_isolated() ? nullptr : heap_1_root_list_ptr->right_sibling();
-				temporary_heap->head_->link_on_left(heap_1_root_list_ptr->isolate());
-				heap_1_root_list_ptr = heap_3_root_list_ptr;
-			}
-			while (heap_2_root_list_ptr)
-			{
-				heap_3_root_list_ptr = heap_2_root_list_ptr->is_isolated() ? nullptr : heap_2_root_list_ptr->right_sibling();
-				temporary_heap->head_->link_on_left(heap_2_root_list_ptr->isolate());
-				heap_2_root_list_ptr = heap_3_root_list_ptr;
-			}
-			this->head_ = temporary_heap->head_;
-			this->size_ += other_heap->size_;
-
-			temporary_heap->head_ = other_heap->head_ = nullptr;
-			delete temporary_heap;
-
-			heap_1_root_list_ptr = this->head_;
-			heap_2_root_list_ptr = heap_1_root_list_ptr->right_sibling();
-			heap_3_root_list_ptr = nullptr;
-
-			while (heap_2_root_list_ptr != this->head_)
-			{
-				if (heap_1_root_list_ptr->degree() != heap_2_root_list_ptr->degree() ||
-					(heap_2_root_list_ptr->right_sibling()
-						!= this->head_ && heap_2_root_list_ptr->degree() == heap_2_root_list_ptr->right_sibling()->degree()))
+				node_ptr = this->head_;
+				this->head_ = nullptr;
+				while (node_ptr)
 				{
-					heap_3_root_list_ptr = heap_1_root_list_ptr;
-					heap_1_root_list_ptr = heap_1_root_list_ptr->right_sibling();
-				}
-				else
-				{
-					heap_1_root_list_ptr = heap_1_root_list_ptr->merge_with_right_sibling();
-					if (heap_3_root_list_ptr)
+					node_next_ptr = node_ptr->is_isolated() ? nullptr : node_ptr->right_sibling();
+					node_ptr->isolate();
+					degree = node_ptr->degree();
+					while (node_list[degree])
 					{
-						heap_3_root_list_ptr->link_on_right(heap_1_root_list_ptr);
-						heap_3_root_list_ptr = heap_3_root_list_ptr->right_sibling();
+						node_ptr = node_ptr->merge(node_list[degree]);
+						node_list[degree++] = nullptr;
 					}
-					else
+					node_list[degree] = node_ptr;
+					node_ptr = node_next_ptr;
+
+				} 
+
+				for (int i = 0; i < size + 1; i++)
+				{
+					if (node_list[i])
 					{
-						this->head_ = heap_1_root_list_ptr;
+						if (this->head_)
+						{
+							node_ptr->link_on_right(node_list[i]);
+							node_ptr = node_ptr->right_sibling();
+						}
+						else
+						{
+							this->head_ = node_ptr = node_list[i];
+						}
 					}
 				}
-				heap_2_root_list_ptr = heap_1_root_list_ptr->right_sibling();
+
 			}
 		}
+		else
+		{
+			this->head_ = heap->head_;
+			this->root_ = heap->root_;
+		}
+		this->size_ += heap->size_;
+		heap->head_ = nullptr;
+		delete heap;
 	}
-	else
-	{
-		this->head_ = other_heap->head_;
-		this->size_ = other_heap->size_;
-		other_heap->head_ = nullptr;
-	}
-	delete other_heap;
-	this->find_minimum();
 }
 
 template<typename K, typename T>
-inline void BinomialHeap<K, T>::decrease_key(PriorityQueueItem<K, T>* node, const K& key)
+inline void BinomialHeap<K, T>::change_priority(PriorityQueueItem<K, T>* node, const K& key)
 {
-	node->priority(key);
-	PriorityQueueLinkedItem<K, T>* decreased_node = (PriorityQueueLinkedItem<K, T>*)node;
-	decreased_node->heapify();
+	node->priority() = key;
+	PQDoubleLinkedItem<K, T>* changed_node = (PQDoubleLinkedItem<K, T>*)node;
+	changed_node->heapify();
 }
 
 template<typename K, typename T>
 inline void BinomialHeap<K, T>::find_minimum()
 {
-	PriorityQueueLinkedItem<K, T>* min = this->head_;
-	if (min)
+	this->root_ = this->head_;
+	if (this->head_)
 	{
-		for (PriorityQueueLinkedItem<K, T>* node = this->head_->right_sibling(); node != this->head_; node = node->right_sibling())
+		for (PQDoubleLinkedItem<K, T>* node = this->head_->right_sibling(); node != this->head_; node = node->right_sibling())
 		{
-			if (node->priority() < min->priority())
+			if (node->priority() < this->root_->priority())
 			{
-				min = node;
+				this->root_ = node;
 			}
 		}
 	}
-	this->root_ = min;
 }

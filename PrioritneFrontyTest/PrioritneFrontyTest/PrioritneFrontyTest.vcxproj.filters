@@ -15,34 +15,16 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="PriorityQueue.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="BinaryQueue.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="FibonacciHeap.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PairingHeap.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="BinomialHeap.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="heap_monitor.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PairingHeapBinaryTree.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="PriorityQueueItems.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="RankPairingHeap.h">
+    <ClInclude Include="PriorityQueue.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GeneralBinomialQueue.h">
+    <ClInclude Include="BinomialHeap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

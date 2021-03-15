@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -21,8 +21,8 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{a15733f9-36a5-4bb1-adb3-9424b3ab5595}</ProjectGuid>
-    <RootNamespace>PrioritneFronty</RootNamespace>
+    <ProjectGuid>{75dcce5c-e39b-4996-81f3-4bf7234797f9}</ProjectGuid>
+    <RootNamespace>PrioritneFrontyTest</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -139,16 +139,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="BinaryQueue.h" />
     <ClInclude Include="BinomialHeap.h" />
     <ClInclude Include="FibonacciHeap.h" />
-    <ClInclude Include="GeneralBinomialQueue.h" />
-    <ClInclude Include="heap_monitor.h" />
     <ClInclude Include="PairingHeap.h" />
-    <ClInclude Include="PairingHeapBinaryTree.h" />
     <ClInclude Include="PriorityQueue.h" />
     <ClInclude Include="PriorityQueueItems.h" />
-    <ClInclude Include="RankPairingHeap.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />

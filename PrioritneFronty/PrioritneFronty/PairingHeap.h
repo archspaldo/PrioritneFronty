@@ -15,11 +15,11 @@ public:
 	K peekPriority() override;
 	void merge(PairingHeap<K, T>* other_heap);
 private:
-	class PairingHeapItem : public PriorityQueueLinkedItem<K, T>
+	class PairingHeapItem : public PQDoubleLinkedItem<K, T>
 	{
 	public:
 		PairingHeapItem(const K& priority, const T& data) :
-			PriorityQueueLinkedItem<K, T>(priority, data) {};
+			PQDoubleLinkedItem<K, T>(priority, data) {};
 		~PairingHeapItem() {};
 		PairingHeapItem* two_pass();
 	};
@@ -124,7 +124,7 @@ inline typename PairingHeap<K, T>::PairingHeapItem* PairingHeap<K, T>::PairingHe
 	}
 	else
 	{
-		PriorityQueueLinkedItem<K, T>* paired_nodes = nullptr, * paired_nodes_ptr = nullptr;
+		PQDoubleLinkedItem<K, T>* paired_nodes = nullptr, * paired_nodes_ptr = nullptr;
 		paired_nodes = this->merge_with_right_sibling();
 		paired_nodes_ptr = paired_nodes->right_sibling();
 		while (paired_nodes_ptr != paired_nodes && paired_nodes_ptr->right_sibling() != paired_nodes)
