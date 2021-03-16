@@ -6,6 +6,8 @@ class FibonacciHeap : public LazyBinomialHeap<K, T>
 {
 protected:
 	void consolidate_with(BinaryTreeItem<K, T>* node, bool skip_root = true) override;
+	void priority_was_increased(BinaryTreeItem<K, T>* node);
+	void priority_was_decreased(BinaryTreeItem<K, T>* node);
 public:
 	FibonacciHeap();
 	~FibonacciHeap();
@@ -101,4 +103,14 @@ inline void FibonacciHeap<K, T>::consolidate_with(BinaryTreeItem<K, T>* node, bo
 			}
 		}
 	}
+}
+
+template<typename K, typename T>
+inline void FibonacciHeap<K, T>::priority_was_increased(BinaryTreeItem<K, T>* node)
+{
+}
+
+template<typename K, typename T>
+inline void FibonacciHeap<K, T>::priority_was_decreased(BinaryTreeItem<K, T>* node)
+{
 }

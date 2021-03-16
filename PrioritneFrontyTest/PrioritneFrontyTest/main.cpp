@@ -2,6 +2,7 @@
 #include "BinomialHeap.h"
 #include "PairingHeap.h"
 #include "heap_monitor.h"
+#include "RankPairingHeap.h"
 #include <iostream>
 
 
@@ -9,7 +10,7 @@ int main()
 {
    
     initHeapMonitor();
-    PriorityQueue<int, int>* h = new PairingHeapBTTwoPass<int, int>();
+    PriorityQueue<int, int>* h = new RankPairingHeap<int, int>();
     h->push(3, 3);
     h->push(15, 15);
     h->push(10, 10);
