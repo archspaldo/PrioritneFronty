@@ -6,15 +6,17 @@
 template <typename K, typename T>
 class PairingHeapBT : public LazyBinomialHeap<K, T>
 {
+protected:
+	PairingHeapBT();
+	virtual BinaryTreeItem<K, T>* consolidate(BinaryTreeItem<K, T>* node) = 0;
+	void priority_was_increased(BinaryTreeItem<K, T>* node) override;
+	void priority_was_decreased(BinaryTreeItem<K, T>* node) override;
 public:
 	~PairingHeapBT();
 	PriorityQueueItem<K, T>* push(const K& key, const T& data) override;
 	void merge(PriorityQueue<K, T>* other_heap) override;
-	void change_priority(PriorityQueueItem<K, T>* node, const K& new_priority) override;
 	void consolidate_with(BinaryTreeItem<K, T>* node, bool skip_root = true) override;
-protected:
-	PairingHeapBT();
-	virtual BinaryTreeItem<K, T>* consolidate(BinaryTreeItem<K, T>* node) = 0;
+
 };
 
 template <typename K, typename T>
@@ -39,6 +41,46 @@ template<typename K, typename T>
 inline PairingHeapBT<K, T>::PairingHeapBT() :
 	LazyBinomialHeap<K, T>()
 {
+}
+
+template<typename K, typename T>
+inline void PairingHeapBT<K, T>::priority_was_increased(BinaryTreeItem<K, T>* node)
+{
+	if (node->parent())
+	{
+		node->cut();
+		this->root_ = this->root_->merge(casted_node);
+	}
+}
+
+template<typename K, typename T>
+inline void PairingHeapBT<K, T>::priority_was_decreased(BinaryTreeItem<K, T>* node)
+{
+	BinaryTreeItem<K, T>* parent = node->parent(), * node_ptr = node;
+	bool is_left_son = parent ? parent->left_son() == node_ptr : false;
+
+	node_ptr->cut();
+	node_ptr->degree() = 0;
+	node_ptr->right_son(node_ptr->left_son());
+	node_ptr->left_son(nullptr);
+
+	node_ptr = this->consolidate(node);
+
+	if (parent)
+	{
+		if (is_left_son)
+		{
+			parent->add_left_son(node_ptr);
+		}
+		else
+		{
+			parent->add_right_son(node_ptr);
+		}
+	}
+	else
+	{
+		this->root_ = node_ptr;
+	}
 }
 
 template<typename K, typename T>
@@ -78,48 +120,6 @@ inline void PairingHeapBT<K, T>::merge(PriorityQueue<K, T>* other_heap)
 	}
 	heap->root_ = nullptr;
 	delete heap;
-}
-
-template<typename K, typename T>
-inline void PairingHeapBT<K, T>::change_priority(PriorityQueueItem<K, T>* node, const K& new_priority)
-{
-	node->priority() = new_priority;
-	BinaryTreeItem<K, T>* casted_node = (BinaryTreeItem<K, T>*)node;
-	if (casted_node->parent() && new_priority < casted_node->parent()->priority())
-	{
-		casted_node->cut();
-		this->root_ = this->root_->merge(casted_node);
-		return;
-	}
-	if (casted_node->left_son() && new_priority > casted_node->left_son()->priority())
-	{
-		BinaryTreeItem<K, T>* parent = casted_node->parent();
-		bool is_left_son = parent ? parent->left_son() == casted_node : false;
-
-		casted_node->cut();
-		casted_node->degree() = 0;
-		casted_node->right_son(casted_node->left_son());
-		casted_node->left_son(nullptr);
-
-		casted_node = this->consolidate(casted_node);
-
-		if (parent)
-		{
-			if (is_left_son)
-			{
-				parent->add_left_son(casted_node);
-			}
-			else
-			{
-				parent->add_right_son(casted_node);
-			}
-		}
-		else
-		{
-			this->root_ = casted_node;
-		}
-	}
-	return;
 }
 
 template<typename K, typename T>

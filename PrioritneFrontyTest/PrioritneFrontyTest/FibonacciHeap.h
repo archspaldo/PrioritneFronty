@@ -4,15 +4,17 @@
 template <typename K, typename T>
 class FibonacciHeap : public LazyBinomialHeap<K, T>
 {
+private:
+	void cut(FibonacciHeapItem<K, T>* node);
+	void cascading_cut(FibonacciHeapItem<K, T>* node);
 protected:
 	void consolidate_with(BinaryTreeItem<K, T>* node, bool skip_root = true) override;
-	void priority_was_increased(BinaryTreeItem<K, T>* node);
-	void priority_was_decreased(BinaryTreeItem<K, T>* node);
+	void priority_was_increased(BinaryTreeItem<K, T>* node) override;
+	void priority_was_decreased(BinaryTreeItem<K, T>* node) override;
 public:
 	FibonacciHeap();
 	~FibonacciHeap();
 	PriorityQueueItem<K, T>* push(const K& priority, const T& data);
-	void change_priority(PriorityQueueItem<K, T>* node, const K& priority);
 };
 
 template<typename K, typename T>
@@ -32,8 +34,29 @@ inline PriorityQueueItem<K, T>* FibonacciHeap<K, T>::push(const K& priority, con
 }
 
 template<typename K, typename T>
-inline void FibonacciHeap<K, T>::change_priority(PriorityQueueItem<K, T>* node, const K& priority)
+inline void FibonacciHeap<K, T>::cut(FibonacciHeapItem<K, T>* node)
 {
+	node->cut();
+	node->parent()->degree()--;
+	this->root_->add_root_item(node);
+	node->flag() = false;
+}
+
+template<typename K, typename T>
+inline void FibonacciHeap<K, T>::cascading_cut(FibonacciHeapItem<K, T>* node)
+{
+	if (node->parent())
+	{
+		if (node->flag())
+		{
+			this->cut(node);
+			this->cascading_cut(node->ordered_ancestor());
+		}
+		else
+		{
+			node->flag() = true;
+		}
+	}
 }
 
 template<typename K, typename T>
@@ -108,9 +131,30 @@ inline void FibonacciHeap<K, T>::consolidate_with(BinaryTreeItem<K, T>* node, bo
 template<typename K, typename T>
 inline void FibonacciHeap<K, T>::priority_was_increased(BinaryTreeItem<K, T>* node)
 {
+	FibonacciHeapItem<K, T>* casted_node = (FibonacciHeapItem<K, T>*)node;
+	if (casted_node->ordered_ancestor() && casted_node->priority() < casted_node->parent()->priority())
+	{
+		this->cut(casted_node);
+		this->cascading_cut(casted_node->ordered_ancestor());
+	}
+	if (casted_node->priority() < this->root_->priority())
+	{
+		this->root_ = casted_node;
+	}
 }
 
 template<typename K, typename T>
 inline void FibonacciHeap<K, T>::priority_was_decreased(BinaryTreeItem<K, T>* node)
 {
+	FibonacciHeapItem<K, T>* casted_node = (FibonacciHeapItem<K, T>*)node;
+	for (FibonacciHeapItem<K, T>* node_ptr = node->left_son(), * node_next_ptr = node_ptr ? node_ptr->right_son() : nullptr; node_ptr;
+		node_ptr = node_next_ptr, node_next_ptr = node_ptr ? node_ptr->right_son() : nullptr)
+	{
+		if (node_ptr->priority() < casted_node->priority())
+		{
+			node_ptr->cut();
+			this->cut(node_ptr);
+			this->cascading_cut(node_ptr->ordered_ancestor());
+		}
+	}
 }

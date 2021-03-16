@@ -26,6 +26,8 @@ protected:
 	size_t size_;
 	template <class I> PriorityQueueItem<K, T>* push(const K& priority, const T& data);
 	virtual void consolidate_with(BinaryTreeItem<K, T>* node, bool skip_root = true) = 0;
+	virtual void priority_was_increased(BinaryTreeItem<K, T>* node) = 0;
+	virtual void priority_was_decreased(BinaryTreeItem<K, T>* node) = 0;
 	LazyBinomialHeap();
 public:
 	virtual ~LazyBinomialHeap();
@@ -34,7 +36,7 @@ public:
 	T pop();
 	T& find_min();
 	virtual void merge(PriorityQueue<K, T>* other_heap);
-	void change_priority(PriorityQueueItem<K, T>* node, const K& priority) = 0;
+	void change_priority(PriorityQueueItem<K, T>* node, const K& priority);
 };
 
 template<typename K, typename T>
@@ -121,6 +123,20 @@ inline void LazyBinomialHeap<K, T>::merge(PriorityQueue<K, T>* other_heap)
 		this->size_ += heap->size_;
 		heap->root_ = nullptr;
 		delete heap;
+	}
+}
+
+template<typename K, typename T>
+inline void LazyBinomialHeap<K, T>::change_priority(PriorityQueueItem<K, T>* node, const K& priority)
+{
+	size_t old_priority = node->priority();
+	if (priority < old_priority)
+	{
+		this->priority_was_increased((BinaryTreeItem<K, T>*)node);
+	}
+	if (priority > old_priority)
+	{
+		this->priority_was_decreased((BinaryTreeItem<K, T>*)node);
 	}
 }
 
