@@ -24,13 +24,13 @@ class LazyBinomialHeap : public PriorityQueue<K, T>
 protected:
 	BinaryTreeItem<K, T>* root_;
 	size_t size_;
-	virtual void consolidate_with(BinaryTreeItem<K, T>* node) = 0;
+	template <class I> PriorityQueueItem<K, T>* push(const K& priority, const T& data);
+	virtual void consolidate_with(BinaryTreeItem<K, T>* node, bool skip_root = true) = 0;
 	LazyBinomialHeap();
 public:
 	virtual ~LazyBinomialHeap();
 	size_t size() const;
 	virtual PriorityQueueItem<K, T>* push(const K& priority, const T& data) = 0;
-	template <class I> PriorityQueueItem<K, T>* push(const K& priority, const T& data);
 	T pop();
 	T& find_min();
 	virtual void merge(PriorityQueue<K, T>* other_heap);
@@ -64,7 +64,7 @@ inline PriorityQueueItem<K, T>* LazyBinomialHeap<K, T>::push(const K& priority, 
 	BinaryTreeItem<K, T>* new_node = new I(priority, data);
 	if (this->root_)
 	{
-		this->root_->add_root_item(node);
+		this->root_->add_root_item(new_node);
 		if (priority < this->root_->priority())
 		{
 			this->root_ = new_node;
@@ -76,7 +76,6 @@ inline PriorityQueueItem<K, T>* LazyBinomialHeap<K, T>::push(const K& priority, 
 	}
 	this->size_++;
 	return new_node;
-
 }
 
 template<typename K, typename T>

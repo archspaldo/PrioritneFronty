@@ -5,12 +5,12 @@ template <typename K, typename T>
 class FibonacciHeap : public LazyBinomialHeap<K, T>
 {
 protected:
-	void consolidate_with(BinaryTreeItem<K, T>* node) override;
+	void consolidate_with(BinaryTreeItem<K, T>* node, bool skip_root = true) override;
 public:
 	FibonacciHeap();
 	~FibonacciHeap();
 	PriorityQueueItem<K, T>* push(const K& priority, const T& data);
-	void change_priority(PriorityQueueItem<K, T>* node, const K& priority) {};
+	void change_priority(PriorityQueueItem<K, T>* node, const K& priority);
 };
 
 template<typename K, typename T>
@@ -26,11 +26,16 @@ inline FibonacciHeap<K, T>::~FibonacciHeap()
 template<typename K, typename T>
 inline PriorityQueueItem<K, T>* FibonacciHeap<K, T>::push(const K& priority, const T& data)
 {
-	return ((LazyBinomialHeap<K, T>*)this)->push<BinaryTreeItemWithAncestor<K, T>>(priority, data);
+	return this->LazyBinomialHeap<K, T>::push<FibonacciHeapItem<K, T>>(priority, data);
 }
 
 template<typename K, typename T>
-inline void FibonacciHeap<K, T>::consolidate_with(BinaryTreeItem<K, T>* node)
+inline void FibonacciHeap<K, T>::change_priority(PriorityQueueItem<K, T>* node, const K& priority)
+{
+}
+
+template<typename K, typename T>
+inline void FibonacciHeap<K, T>::consolidate_with(BinaryTreeItem<K, T>* node, bool skip_root)
 {
 	const int degree = (int)(log(this->size_) * 2.1) + 2;
 	size_t node_degree;
@@ -50,29 +55,41 @@ inline void FibonacciHeap<K, T>::consolidate_with(BinaryTreeItem<K, T>* node)
 			node_list[node_degree] = node_ptr;
 		}
 	}
-	if (this->head_)
+
+	node_ptr = this->root_->right_son();
+	this->root_->right_son(nullptr);
+	for (node_next_ptr = node_ptr ? node_ptr->right_son() : nullptr; node_ptr && node_ptr != this->root_; node_ptr = node_next_ptr, node_next_ptr = node_ptr->right_son())
 	{
-		for (node_ptr = this->head_, node_next_ptr = node_ptr->right_son(); node_ptr; node_ptr = node_next_ptr, node_next_ptr = node_ptr ? node_ptr->right_son() : nullptr)
+		node_degree = node_ptr->degree();
+		node_ptr->right_son(nullptr);
+		while (node_list[node_degree])
 		{
-			node_degree = node_ptr->degree();
-			node_ptr->cut();
-			while (node_list[node_degree])
-			{
-				node_ptr = node_ptr->merge(node_list[node_degree]);
-				node_list[node_degree++] = nullptr;
-			}
-			node_list[node_degree] = node_ptr;
+			node_ptr = node_ptr->merge(node_list[node_degree]);
+			node_list[node_degree++] = nullptr;
 		}
+		node_list[node_degree] = node_ptr;
 	}
-	this->head_ = this->root_ = node_ptr = nullptr;
+
+	if (!skip_root)
+	{
+		node_ptr = this->root_;
+		node_degree = node_ptr->degree();
+		while (node_list[node_degree])
+		{
+			node_ptr = node_ptr->merge(node_list[node_degree]);
+			node_list[node_degree++] = nullptr;
+		}
+		node_list[node_degree] = node_ptr;
+	}
+
+	this->root_ = nullptr;
 	for (BinaryTreeItem<K, T>* node : node_list)
 	{
 		if (node)
 		{
-			if (this->head_)
+			if (this->root_)
 			{
-				node_ptr->right_son(node);
-				node_ptr = node_ptr->right_son();
+				this->root_->add_root_item(node);
 				if (node->priority() < this->root_->priority())
 				{
 					this->root_ = node;
@@ -80,9 +97,8 @@ inline void FibonacciHeap<K, T>::consolidate_with(BinaryTreeItem<K, T>* node)
 			}
 			else
 			{
-				this->head_ = this->root_ = node_ptr = node;
+				this->root_ = node;
 			}
 		}
 	}
-	this->foot_ = node_ptr;
 }

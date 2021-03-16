@@ -27,6 +27,12 @@
     <ClInclude Include="BinomialHeap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="PairingHeap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RankPairingHeap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">

@@ -142,7 +142,6 @@
     <ClInclude Include="BinaryQueue.h" />
     <ClInclude Include="BinomialHeap.h" />
     <ClInclude Include="FibonacciHeap.h" />
-    <ClInclude Include="GeneralBinomialQueue.h" />
     <ClInclude Include="heap_monitor.h" />
     <ClInclude Include="PairingHeap.h" />
     <ClInclude Include="PairingHeapBinaryTree.h" />
