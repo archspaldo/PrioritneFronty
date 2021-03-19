@@ -9,9 +9,8 @@ class BinaryQueue : public PriorityQueue<K, T>
 public:
 	BinaryQueue();
 	~BinaryQueue();
-	void clear() override;
 	size_t size() const override;
-	void push(const K& priority, const T& data) override;
+	PriorityQueueItem<K, T>* push(const K& priority, const T& data) override;
 	T pop() override;
 	T& peek() override;
 	const T peek() const override;
@@ -38,20 +37,14 @@ inline BinaryQueue<K, T>::BinaryQueue() :
 template<typename K, typename T>
 inline BinaryQueue<K, T>::~BinaryQueue()
 {
-	this->clear();
-	delete this->list_;
-}
-
-template<typename K, typename T>
-inline void BinaryQueue<K, T>::clear()
-{
 	for (PriorityQueueItem<K, T>* item : *this->list_)
 	{
-		
 		delete item;
 	}
 	this->list_->clear();
+	delete this->list_;
 }
+
 
 template<typename K, typename T>
 inline size_t BinaryQueue<K, T>::size() const
@@ -60,10 +53,12 @@ inline size_t BinaryQueue<K, T>::size() const
 }
 
 template<typename K, typename T>
-inline void BinaryQueue<K, T>::push(const K& priority, const T& data)
+inline PriorityQueueItem<K, T>* BinaryQueue<K, T>::push(const K& priority, const T& data)
 {
-	this->list_->push_back(new PriorityQueueItem<K, T>(priority, data));
+	PriorityQueueItem<K, T>* node = new PriorityQueueItem<K, T>(priority, data);
+	this->list_->push_back(node);
 	this->heapifyUp(this->size() - 1);
+	return node;
 }
 
 template<typename K, typename T>
@@ -162,4 +157,3 @@ inline void BinaryQueue<K, T>::heapifyDown(const int index)
 		std::swap((*this->list_)[child], (*this->list_)[i]);
 	}
 }
-
