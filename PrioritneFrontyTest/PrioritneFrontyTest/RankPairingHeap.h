@@ -14,7 +14,6 @@ public:
 	RankPairingHeap();
 	~RankPairingHeap();
 	PriorityQueueItem<K, T>* push(const K& priority, const T& data);
-	void change_priority(PriorityQueueItem<K, T>* node, const K& priority);
 };
 
 template<typename K, typename T>
@@ -32,21 +31,6 @@ template<typename K, typename T>
 inline PriorityQueueItem<K, T>* RankPairingHeap<K, T>::push(const K& priority, const T& data)
 {
 	return this->LazyBinomialHeap<K, T>::push<BinaryTreeItem<K, T>>(priority, data);;
-}
-
-template<typename K, typename T>
-inline void RankPairingHeap<K, T>::change_priority(PriorityQueueItem<K, T>* node, const K& priority)
-{
-	size_t old_priority = node->priority();
-	node->priority() = priority;
-	if (priority < old_priority)
-	{
-		this->priority_was_increased((BinaryTreeItem<K, T>*)node);
-	}
-	if (priority > old_priority)
-	{
-		this->priority_was_decreased((BinaryTreeItem<K, T>*)node);
-	}
 }
 
 template<typename K, typename T>

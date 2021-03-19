@@ -15,6 +15,7 @@ public:
 	PriorityQueueItem<K, T>* push(const K& priority, const T& data) override;
 	void merge(PriorityQueue<K, T>* other_heap) override;
 	void change_priority(PriorityQueueItem<K, T>* node, const K& priority) {};
+
 };
 
 template<typename K, typename T>
@@ -116,11 +117,20 @@ inline void BinomialHeap<K, T>::consolidate_with(BinaryTreeItem<K, T>* node, boo
 template<typename K, typename T>
 inline void BinomialHeap<K, T>::priority_was_increased(BinaryTreeItem<K, T>* node)
 {
-
+	BinaryTreeItemWithAncestor<K, T>* casted_node = (BinaryTreeItemWithAncestor<K, T>*)node;
+	while (casted_node->ordered_ancestor() && casted_node->priority() < casted_node->ordered_ancestor()->priority())
+	{
+		casted_node->swap_with_ordered_ancestor();
+	}
 }
 
 template<typename K, typename T>
 inline void BinomialHeap<K, T>::priority_was_decreased(BinaryTreeItem<K, T>* node)
 {
-
+	BinaryTreeItemWithAncestor<K, T>* casted_node = (BinaryTreeItemWithAncestor<K, T>*)node, * minimal_son = casted_node->find_minimal_left_son();
+	while (minimal_son && minimal_son->priority() < casted_node->priority())
+	{
+		minimal_son->swap_with_ordered_ancestor();
+		minimal_son = casted_node->find_minimal_left_son();
+	}
 }

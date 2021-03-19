@@ -53,9 +53,10 @@ public:
 	~BinaryTreeItemWithAncestor();
 
 	BinaryTreeItem<K, T>* cut() override;
-
 	BinaryTreeItem<K, T>* add_left_son(BinaryTreeItem<K, T>* node) override;
 	BinaryTreeItem<K, T>* add_right_son(BinaryTreeItem<K, T>* node) override;
+
+	BinaryTreeItemWithAncestor* find_minimal_left_son();
 	void swap_with_ordered_ancestor();
 
 	BinaryTreeItemWithAncestor<K, T>* ordered_ancestor();
@@ -314,39 +315,55 @@ inline BinaryTreeItem<K, T>* BinaryTreeItemWithAncestor<K, T>::add_right_son(Bin
 }
 
 template<typename K, typename T>
+inline BinaryTreeItemWithAncestor<K, T>* BinaryTreeItemWithAncestor<K, T>::find_minimal_left_son()
+{
+	BinaryTreeItem<K, T>* node = this->BinaryTreeItem<K, T>::left_son();
+	for (BinaryTreeItem<K, T>* node_ptr = this->BinaryTreeItem<K, T>::left_son(); node_ptr; node_ptr = node_ptr->right_son())
+	{
+		if (node_ptr->priority() < node->priority())
+		{
+			node = node_ptr;
+		}
+	}
+	return (BinaryTreeItemWithAncestor*)node;
+}
+
+template<typename K, typename T>
 inline void BinaryTreeItemWithAncestor<K, T>::swap_with_ordered_ancestor()
 {
 	if (this->ordered_ancestor_)
 	{
-		if (this->parent_ == this->ordered_ancestor_)
+		BinaryTreeItemWithAncestor<K, T>* son = (BinaryTreeItemWithAncestor<K, T>*)this->right_son_, * ordered_ancestor = this->ordered_ancestor_,
+			* parent = (BinaryTreeItemWithAncestor<K, T>*)this->parent_;;
+		if (ordered_ancestor->parent_)
 		{
-			BinaryTreeItemWithAncestor<K, T>* node = this->right_son_, * ordered_ancestor = (BinaryTreeItemWithAncestor<K, T>*)(this->ordered_ancestor_);
-			if (ordered_ancestor->parent_)
+			if (ordered_ancestor->parent_ == ordered_ancestor->ordered_ancestor_)
 			{
-				if (ordered_ancestor_->parent_ == ordered_ancestor_->ordered_ancestor_)
-				{
-					ordered_ancestor_->parent_->left_son_ = this;
-				}
-				else
-				{
-					ordered_ancestor_->parent_->right_son = this;
-				}
+				ordered_ancestor->parent_->BinaryTreeItem<K, T>::left_son(this);
 			}
-
-			this->parent_ = ordered_ancestor_->parent_;
-			this->ordered_ancestor_ = ordered_ancestor_->ordered_ancestor_;
-
-			ordered_ancestor->parent_ = this;
-			this->BinaryTreeItem<K, T>::right_son(ordered_ancestor->right_son_);
-			ordered_ancestor->BinaryTreeItem<K, T>::right_son(node);
-
-
-			this->parent_->left_son(this->left_son_);
-			this->left_son(this->parent_);
-			this->right_son(this->parent_->right_son_);
-			this->parent_->right_son(node);
-			std::swap(this->degree_, this->parent_->degree_);
+			else
+			{
+				ordered_ancestor->parent_->BinaryTreeItem<K, T>::right_son(this);
+			}
 		}
+		this->ordered_ancestor_ = ordered_ancestor->ordered_ancestor_;
+
+		this->BinaryTreeItem<K, T>::right_son(ordered_ancestor->right_son_);
+		ordered_ancestor->BinaryTreeItem<K, T>::right_son(son);
+
+		son = (BinaryTreeItemWithAncestor<K, T>*)this->left_son_;
+
+		if (parent == ordered_ancestor)
+		{
+			this->left_son(ordered_ancestor);
+		}
+		else
+		{
+			parent->BinaryTreeItem<K, T>::right_son(ordered_ancestor);
+			this->left_son(ordered_ancestor->left_son_);
+		}
+		ordered_ancestor->left_son(son);
+		std::swap(this->degree_, parent->degree_);
 	}
 }
 
