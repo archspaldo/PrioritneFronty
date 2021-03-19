@@ -295,7 +295,7 @@ inline BinaryTreeItem<K, T>* BinaryTreeItemWithAncestor<K, T>::add_left_son(Bina
 	{
 		BinaryTreeItemWithAncestor* casted_node = (BinaryTreeItemWithAncestor*)node;
 		casted_node->ordered_ancestor_ = this;
-		this->left_son(casted_node->right_son(this->left_son_));
+		this->BinaryTreeItem<K, T>::left_son(casted_node->BinaryTreeItem<K, T>::right_son(this->left_son_));
 		this->degree_++;
 	}
 	return this;
@@ -308,7 +308,7 @@ inline BinaryTreeItem<K, T>* BinaryTreeItemWithAncestor<K, T>::add_right_son(Bin
 	{
 		BinaryTreeItemWithAncestor* casted_node = (BinaryTreeItemWithAncestor*)node;
 		casted_node->ordered_ancestor_ = this->ordered_ancestor_;
-		this->right_son(casted_node->right_son(this->right_son_));
+		this->BinaryTreeItem<K, T>::right_son(casted_node->BinaryTreeItem<K, T>::right_son(this->right_son_));
 	}
 	return this;
 }
@@ -323,8 +323,24 @@ inline void BinaryTreeItemWithAncestor<K, T>::swap_with_ordered_ancestor()
 			BinaryTreeItemWithAncestor<K, T>* node = this->right_son_, * ordered_ancestor = (BinaryTreeItemWithAncestor<K, T>*)(this->ordered_ancestor_);
 			if (ordered_ancestor->parent_)
 			{
-
+				if (ordered_ancestor_->parent_ == ordered_ancestor_->ordered_ancestor_)
+				{
+					ordered_ancestor_->parent_->left_son_ = this;
+				}
+				else
+				{
+					ordered_ancestor_->parent_->right_son = this;
+				}
 			}
+
+			this->parent_ = ordered_ancestor_->parent_;
+			this->ordered_ancestor_ = ordered_ancestor_->ordered_ancestor_;
+
+			ordered_ancestor->parent_ = this;
+			this->BinaryTreeItem<K, T>::right_son(ordered_ancestor->right_son_);
+			ordered_ancestor->BinaryTreeItem<K, T>::right_son(node);
+
+
 			this->parent_->left_son(this->left_son_);
 			this->left_son(this->parent_);
 			this->right_son(this->parent_->right_son_);
