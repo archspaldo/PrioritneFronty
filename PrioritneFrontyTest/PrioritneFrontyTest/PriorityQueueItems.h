@@ -56,6 +56,7 @@ public:
 
 	BinaryTreeItem<K, T>* add_left_son(BinaryTreeItem<K, T>* node) override;
 	BinaryTreeItem<K, T>* add_right_son(BinaryTreeItem<K, T>* node) override;
+	void swap_with_ordered_ancestor();
 
 	BinaryTreeItemWithAncestor<K, T>* ordered_ancestor();
 
@@ -95,7 +96,7 @@ inline T& PriorityQueueItem<K, T>::data()
 
 template<typename K, typename T>
 inline BinaryTreeItem<K, T>::BinaryTreeItem(const K& priority, const T& data) :
-	PriorityQueueItem<K, T>(priority, data), left_son_(nullptr), right_son_(nullptr), parent_(nullptr)
+	PriorityQueueItem<K, T>(priority, data), left_son_(nullptr), right_son_(nullptr), parent_(nullptr), degree_(0)
 {
 }
 
@@ -310,6 +311,27 @@ inline BinaryTreeItem<K, T>* BinaryTreeItemWithAncestor<K, T>::add_right_son(Bin
 		this->right_son(casted_node->right_son(this->right_son_));
 	}
 	return this;
+}
+
+template<typename K, typename T>
+inline void BinaryTreeItemWithAncestor<K, T>::swap_with_ordered_ancestor()
+{
+	if (this->ordered_ancestor_)
+	{
+		if (this->parent_ == this->ordered_ancestor_)
+		{
+			BinaryTreeItemWithAncestor<K, T>* node = this->right_son_, * ordered_ancestor = (BinaryTreeItemWithAncestor<K, T>*)(this->ordered_ancestor_);
+			if (ordered_ancestor->parent_)
+			{
+
+			}
+			this->parent_->left_son(this->left_son_);
+			this->left_son(this->parent_);
+			this->right_son(this->parent_->right_son_);
+			this->parent_->right_son(node);
+			std::swap(this->degree_, this->parent_->degree_);
+		}
+	}
 }
 
 template<typename K, typename T>

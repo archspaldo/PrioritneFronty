@@ -157,4 +157,3 @@ inline void BinaryQueue<K, T>::heapifyDown(const int index)
 		std::swap((*this->list_)[child], (*this->list_)[i]);
 	}
 }
-

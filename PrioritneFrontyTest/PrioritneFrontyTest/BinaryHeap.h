@@ -3,11 +3,11 @@
 #include <vector>
 
 template <typename K, typename T>
-class BinaryQueue : public PriorityQueue<K, T>
+class BinaryHeap : public PriorityQueue<K, T>
 {
 public:
-	BinaryQueue();
-	~BinaryQueue();
+	BinaryHeap();
+	~BinaryHeap();
 	size_t size() const override;
 	PriorityQueueItem<K, T>* push(const K& priority, const T& data) override;
 	T pop() override;
@@ -27,14 +27,14 @@ private:
 
 
 template<typename K, typename T>
-inline BinaryQueue<K, T>::BinaryQueue() :
+inline BinaryHeap<K, T>::BinaryHeap() :
 	PriorityQueue<K, T>(),
 	list_(new std::vector<PriorityQueueItem<K, T>*>())
 {
 }
 
 template<typename K, typename T>
-inline BinaryQueue<K, T>::~BinaryQueue()
+inline BinaryHeap<K, T>::~BinaryHeap()
 {
 	for (PriorityQueueItem<K, T>* item : *this->list_)
 	{
@@ -46,13 +46,13 @@ inline BinaryQueue<K, T>::~BinaryQueue()
 
 
 template<typename K, typename T>
-inline size_t BinaryQueue<K, T>::size() const
+inline size_t BinaryHeap<K, T>::size() const
 {
 	return this->list_->size();
 }
 
 template<typename K, typename T>
-inline PriorityQueueItem<K, T>* BinaryQueue<K, T>::push(const K& priority, const T& data)
+inline PriorityQueueItem<K, T>* BinaryHeap<K, T>::push(const K& priority, const T& data)
 {
 	PriorityQueueItem<K, T>* node = new PriorityQueueItem<K, T>(priority, data);
 	this->list_->push_back(node);
@@ -61,11 +61,11 @@ inline PriorityQueueItem<K, T>* BinaryQueue<K, T>::push(const K& priority, const
 }
 
 template<typename K, typename T>
-inline T BinaryQueue<K, T>::pop()
+inline T BinaryHeap<K, T>::pop()
 {
 	if (this->list_->empty())
 	{
-		throw new std::logic_error("BinaryQueue<K, T>::pop(): Zoznam je prazdny");
+		throw new std::logic_error("BinaryHeap<K, T>::pop(): Zoznam je prazdny");
 	}
 	if (this->size() > 1)
 	{
@@ -80,55 +80,55 @@ inline T BinaryQueue<K, T>::pop()
 }
 
 template<typename K, typename T>
-inline T& BinaryQueue<K, T>::peek()
+inline T& BinaryHeap<K, T>::peek()
 {
 	if (this->list_->empty())
 	{
-		throw new std::logic_error("BinaryQueue<K, T>::peek(): Zoznam je prazdny");
+		throw new std::logic_error("BinaryHeap<K, T>::peek(): Zoznam je prazdny");
 	}
 	return (*this->list_)[0]->data();
 }
 
 template<typename K, typename T>
-inline const T BinaryQueue<K, T>::peek() const
+inline const T BinaryHeap<K, T>::peek() const
 {
 	if (this->list_->empty())
 	{
-		throw new std::logic_error("BinaryQueue<K, T>::peek(): Zoznam je prazdny");
+		throw new std::logic_error("BinaryHeap<K, T>::peek(): Zoznam je prazdny");
 	}
 	return (*this->list_)[0]->data();
 }
 
 template<typename K, typename T>
-inline K BinaryQueue<K, T>::peekPriority()
+inline K BinaryHeap<K, T>::peekPriority()
 {
 	if (this->list_->empty())
 	{
-		throw new std::logic_error("BinaryQueue<K, T>::peekPriority(): Zoznam je prazdny");
+		throw new std::logic_error("BinaryHeap<K, T>::peekPriority(): Zoznam je prazdny");
 	}
 	return (*this->list_)[0]->priority();
 }
 
 template<typename K, typename T>
-inline int BinaryQueue<K, T>::leftSon(const int index)
+inline int BinaryHeap<K, T>::leftSon(const int index)
 {
 	return 2 * index + 1;
 }
 
 template<typename K, typename T>
-inline int BinaryQueue<K, T>::righSon(const int index)
+inline int BinaryHeap<K, T>::righSon(const int index)
 {
 	return 2 * index + 2;
 }
 
 template<typename K, typename T>
-inline int BinaryQueue<K, T>::parent(const int index)
+inline int BinaryHeap<K, T>::parent(const int index)
 {
 	return (index - 1) / 2;
 }
 
 template<typename K, typename T>
-inline int BinaryQueue<K, T>::greaterSon(const int index)
+inline int BinaryHeap<K, T>::greaterSon(const int index)
 {
 	PriorityQueueItem<K, T>* lChild = this->leftSon(index) < this->size() ? (*this->list_)[this->leftSon(index)] : nullptr;
 	PriorityQueueItem<K, T>* rChild = this->righSon(index) < this->size() ? (*this->list_)[this->righSon(index)] : nullptr;
@@ -140,7 +140,7 @@ inline int BinaryQueue<K, T>::greaterSon(const int index)
 }
 
 template<typename K, typename T>
-inline void BinaryQueue<K, T>::heapifyUp(const int index)
+inline void BinaryHeap<K, T>::heapifyUp(const int index)
 {
 	for (int i = index, parent = this->parent(i); i > 0 && (*this->list_)[parent]->priority() > (*this->list_)[i]->priority(); i = parent, parent = this->parent(i))
 	{
@@ -149,7 +149,7 @@ inline void BinaryQueue<K, T>::heapifyUp(const int index)
 }
 
 template<typename K, typename T>
-inline void BinaryQueue<K, T>::heapifyDown(const int index)
+inline void BinaryHeap<K, T>::heapifyDown(const int index)
 {
 	for (int i = index, child = this->greaterSon(i); child < this->size() && (*this->list_)[child]->priority() < (*this->list_)[i]->priority(); i = child, child = this->greaterSon(i))
 	{

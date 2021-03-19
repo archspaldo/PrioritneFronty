@@ -6,6 +6,8 @@ class BinomialHeap : public LazyBinomialHeap<K, T>
 {
 protected:
 	void consolidate_with(BinaryTreeItem<K, T>* node, bool skip_root = true) override;
+	void priority_was_increased(BinaryTreeItem<K, T>* node) override;
+	void priority_was_decreased(BinaryTreeItem<K, T>* node) override;
 public:
 	BinomialHeap();
 	~BinomialHeap();
@@ -109,4 +111,16 @@ inline void BinomialHeap<K, T>::consolidate_with(BinaryTreeItem<K, T>* node, boo
 			}
 		}
 	}
+}
+
+template<typename K, typename T>
+inline void BinomialHeap<K, T>::priority_was_increased(BinaryTreeItem<K, T>* node)
+{
+
+}
+
+template<typename K, typename T>
+inline void BinomialHeap<K, T>::priority_was_decreased(BinaryTreeItem<K, T>* node)
+{
+
 }

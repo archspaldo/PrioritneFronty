@@ -49,7 +49,7 @@ inline void PairingHeapBT<K, T>::priority_was_increased(BinaryTreeItem<K, T>* no
 	if (node->parent())
 	{
 		node->cut();
-		this->root_ = this->root_->merge(casted_node);
+		this->root_ = this->root_->merge(node);
 	}
 }
 
