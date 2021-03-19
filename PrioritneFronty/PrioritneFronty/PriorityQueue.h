@@ -25,7 +25,6 @@ public:
 	void heapify();
 	PriorityQueueLinkedItem<K, T>* merge_with_right_sibling();
 	PriorityQueueLinkedItem<K, T>* merge(PriorityQueueLinkedItem<K, T>* node);
-	void simple_link_on_right(PriorityQueueLinkedItem<K, T>* node);
 	void link_on_right(PriorityQueueLinkedItem<K, T>* node);
 	PriorityQueueLinkedItem<K, T>* isolate();
 	void update_parent(PriorityQueueLinkedItem<K, T>* node);
@@ -37,8 +36,6 @@ public:
 	void right_sibling(PriorityQueueLinkedItem<K, T>* node);
 	PriorityQueueLinkedItem<K, T>* first_son();
 	void first_son(PriorityQueueLinkedItem<K, T>* node);
-	size_t degree();
-	void degree(size_t degree);
 protected:
 	virtual PriorityQueueLinkedItem<K, T>* add_sub_tree(PriorityQueueLinkedItem<K, T>* node);
 	PriorityQueueLinkedItem<K, T>* swap_with_parent();
@@ -47,7 +44,6 @@ private:
 	PriorityQueueLinkedItem<K, T>* left_sibling_;
 	PriorityQueueLinkedItem<K, T>* right_sibling_;
 	PriorityQueueLinkedItem<K, T>* first_son_;
-	size_t degree_;
 };
 
 
@@ -58,7 +54,7 @@ public:
 	virtual ~PriorityQueue() {};
 	virtual void clear() = 0;
 	virtual size_t size() const = 0;
-	virtual PriorityQueueItem<K, T>* push(const K& key, const T& data) const = 0;
+	virtual PriorityQueueItem<K, T>* push(const K& key, const T& data) = 0;
 	virtual T pop() = 0;
 	virtual T& peek() = 0;
 	virtual const T peek() const = 0;
@@ -91,7 +87,7 @@ inline T& PriorityQueueItem<K, T>::data()
 
 template<typename K, typename T>
 inline PriorityQueueLinkedItem<K, T>::PriorityQueueLinkedItem(const K& priority, const T& data) :
-	PriorityQueueItem<K, T>(priority, data), parent_(nullptr), first_son_(nullptr), degree_(0)
+	PriorityQueueItem<K, T>(priority, data), parent_(nullptr), first_son_(nullptr)
 {
 	this->right_sibling_ = this;
 	this->left_sibling_ = this;
@@ -116,7 +112,6 @@ inline PriorityQueueLinkedItem<K, T>::~PriorityQueueLinkedItem()
 		this->first_son_ = nullptr;
 	}
 	this->parent_ = nullptr;
-	this->degree_ = 0;
 }
 
 template<typename K, typename T>
@@ -131,7 +126,7 @@ inline void PriorityQueueLinkedItem<K, T>::heapify()
 template<typename K, typename T>
 inline PriorityQueueLinkedItem<K, T>* PriorityQueueLinkedItem<K, T>::merge_with_right_sibling()
 {
-	if (this->right_sibling_ == this)
+	if (this->right_sibling == this)
 	{
 		return this;
 	}
@@ -158,7 +153,7 @@ inline PriorityQueueLinkedItem<K, T>* PriorityQueueLinkedItem<K, T>::merge(Prior
 }
 
 template<typename K, typename T>
-inline void PriorityQueueLinkedItem<K, T>::simple_link_on_right(PriorityQueueLinkedItem<K, T>* node)
+inline void PriorityQueueLinkedItem<K, T>::link_on_right(PriorityQueueLinkedItem<K, T>* node)
 {
 	if (node)
 	{
@@ -166,16 +161,6 @@ inline void PriorityQueueLinkedItem<K, T>::simple_link_on_right(PriorityQueueLin
 		node->left_sibling_->right_sibling_ = this->right_sibling_;
 		node->left_sibling_ = this;
 		this->right_sibling_ = node;
-	}
-}
-
-template<typename K, typename T>
-inline void PriorityQueueLinkedItem<K, T>::link_on_right(PriorityQueueLinkedItem<K, T>* node)
-{
-	if (node)
-	{
-		node->update_parent(this->parent_);
-		this->simple_link_on_right(node);
 	}
 }
 
@@ -228,67 +213,47 @@ inline void PriorityQueueLinkedItem<K, T>::first_son(PriorityQueueLinkedItem<K, 
 }
 
 template<typename K, typename T>
-inline size_t PriorityQueueLinkedItem<K, T>::degree()
-{
-	return this->degree_;
-}
-
-template<typename K, typename T>
-inline void PriorityQueueLinkedItem<K, T>::degree(size_t degree)
-{
-	this->degree_ = degree;
-}
-
-template<typename K, typename T>
 inline PriorityQueueLinkedItem<K, T>* PriorityQueueLinkedItem<K, T>::add_sub_tree(PriorityQueueLinkedItem<K, T>* node)
 {
-	node->parent_ = this;
-	node->simple_link_on_right(this->first_son_);
+	node->link_on_right(this->first_son_);
 	this->first_son_ = node;
-	this->degree_++;
+	if (this->first_son_)
+	{
+		this->first_son_->update_parent(this);
+	}
 	return this;
 }
 
 template<typename K, typename T>
 inline PriorityQueueLinkedItem<K, T>* PriorityQueueLinkedItem<K, T>::swap_with_parent()
 {
-	PriorityQueueLinkedItem<K, T>* parent = this->parent_, * left_sibling = this->left_sibling_ != this ? this->left_sibling_ : nullptr,
-		* parent_left_sibling = parent->left_sibling_ != parent ? parent->left_sibling_ : nullptr, * first_son = this->first_son_;
+	PriorityQueueLinkedItem<K, T>* parent = this->parent_, * left_sibling = this->left_sibling_ == this ? this->left_sibling_ : nullptr,
+		* parent_left_sibling = parent->left_sibling_ == parent ? parent->left_sibling_ : nullptr, * first_son = this->first_son_;
 	parent->isolate();
 	this->isolate();
 
+	this->parent_ = parent->parent_;
+
+	if (left_sibling)
+	{
+		left_sibling->link_on_right(parent);
+	}
 	if (parent_left_sibling)
 	{
 		parent_left_sibling->link_on_right(this);
-	}
-	else
-	{
-		this->parent_ = parent->parent_;
 	}
 	if (parent->parent_ && parent->parent_->first_son_ == parent)
 	{
 		parent->parent_->first_son_ = this;
 	}
-	if (parent->first_son_ == this)
-	{
-		this->first_son_ = parent;
-	}
-	else
-	{
-		this->first_son_ = parent->first_son_;
-	}
-
-	if (left_sibling)
-	{
-		left_sibling->update_parent(this);
-		left_sibling->link_on_right(parent);
-	}
-	else
-	{
-		parent->parent_ = this;
-	}
-	parent->first_son_ = first_son;
 	
+	this->first_son_ = parent->first_son_ == this ? parent : parent->first_son_;
+	parent->first_son_ = first_son;
+	if (parent->first_son_)
+	{
+		parent->first_son_->update_parent(parent);
+	}
+	this->first_son_->update_parent(this);
 	return this;
 }
 
