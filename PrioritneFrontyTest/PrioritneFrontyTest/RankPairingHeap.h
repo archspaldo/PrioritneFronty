@@ -149,9 +149,10 @@ inline void RankPairingHeap<K, T>::priority_was_increased(BinaryTreeItem<K, T>* 
 	node->degree() = node->left_son() ? node->left_son()->degree() + 1 : 0;
 	if (node->parent())
 	{
+		BinaryTreeItem<K, T>* parent = node->parent();
 		node->cut();
 		this->root_->add_root_item(node);
-		this->restore_degree_rule(node->parent());
+		this->restore_degree_rule(parent);
 	}
 }
 
@@ -164,9 +165,10 @@ inline void RankPairingHeap<K, T>::priority_was_decreased(BinaryTreeItem<K, T>* 
 	{
 		if (node_ptr->priority() < node->priority())
 		{
+			BinaryTreeItem<K, T>* parent = node->parent();
 			node_ptr->cut();
 			node_ptr->degree() = node_ptr->left_son() ? node_ptr->left_son()->degree() + 1 : 0;
-			last_change = node_ptr->parent();
+			last_change = parent;
 		}
 	}
 	this->restore_degree_rule(last_change);
