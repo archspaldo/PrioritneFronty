@@ -8,7 +8,7 @@ private:
 	void cut(FibonacciHeapItem<K, T>* node);
 	void cascading_cut(FibonacciHeapItem<K, T>* node);
 protected:
-	void consolidate_with(BinaryTreeItem<K, T>* node, bool skip_root = true) override;
+	void consolidate_root(BinaryTreeItem<K, T>* node, bool skip_root = true) override;
 	void priority_was_increased(BinaryTreeItem<K, T>* node) override;
 	void priority_was_decreased(BinaryTreeItem<K, T>* node) override;
 public:
@@ -60,7 +60,7 @@ inline void FibonacciHeap<K, T>::cascading_cut(FibonacciHeapItem<K, T>* node)
 }
 
 template<typename K, typename T>
-inline void FibonacciHeap<K, T>::consolidate_with(BinaryTreeItem<K, T>* node, bool skip_root)
+inline void FibonacciHeap<K, T>::consolidate_root(BinaryTreeItem<K, T>* node, bool skip_root)
 {
 	const int degree = (int)(log(this->size_) * 2.1) + 2;
 	size_t node_degree;
@@ -132,7 +132,7 @@ template<typename K, typename T>
 inline void FibonacciHeap<K, T>::priority_was_increased(BinaryTreeItem<K, T>* node)
 {
 	FibonacciHeapItem<K, T>* casted_node = (FibonacciHeapItem<K, T>*)node;
-	if (casted_node->ordered_ancestor() && casted_node->priority() < casted_node->parent()->priority())
+	if (casted_node->ordered_ancestor() && casted_node->priority() < casted_node->ordered_ancestor()->priority())
 	{
 		this->cut(casted_node);
 		this->cascading_cut(casted_node->ordered_ancestor());

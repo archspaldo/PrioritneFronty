@@ -15,7 +15,7 @@ public:
 	~PairingHeapBT();
 	PriorityQueueItem<K, T>* push(const K& key, const T& data) override;
 	void merge(PriorityQueue<K, T>* other_heap) override;
-	void consolidate_with(BinaryTreeItem<K, T>* node, bool skip_root = true) override;
+	void consolidate_root(BinaryTreeItem<K, T>* node, bool skip_root = true) override;
 
 };
 
@@ -123,7 +123,7 @@ inline void PairingHeapBT<K, T>::merge(PriorityQueue<K, T>* other_heap)
 }
 
 template<typename K, typename T>
-inline void PairingHeapBT<K, T>::consolidate_with(BinaryTreeItem<K, T>* node, bool skip_root)
+inline void PairingHeapBT<K, T>::consolidate_root(BinaryTreeItem<K, T>* node, bool skip_root)
 {
 	this->root_ = this->consolidate(this->root_->left_son());
 }

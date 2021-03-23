@@ -25,7 +25,7 @@ protected:
 	BinaryTreeItem<K, T>* root_;
 	size_t size_;
 	template <class I> PriorityQueueItem<K, T>* push(const K& priority, const T& data);
-	virtual void consolidate_with(BinaryTreeItem<K, T>* node, bool skip_root = true) = 0;
+	virtual void consolidate_root(BinaryTreeItem<K, T>* node, bool skip_root = true) = 0;
 	virtual void priority_was_increased(BinaryTreeItem<K, T>* node) = 0;
 	virtual void priority_was_decreased(BinaryTreeItem<K, T>* node) = 0;
 	LazyBinomialHeap();
@@ -86,7 +86,7 @@ inline T LazyBinomialHeap<K, T>::pop()
 	if (this->root_)
 	{
 		BinaryTreeItem<K, T>* root = this->root_;
-		this->consolidate_with(root->left_son());
+		this->consolidate_root(root->left_son());
 		root->left_son(nullptr);
 		this->size_--;
 		T data = root->data();

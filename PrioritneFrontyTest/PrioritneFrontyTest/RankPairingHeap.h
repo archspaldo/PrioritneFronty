@@ -7,7 +7,7 @@ class RankPairingHeap : public LazyBinomialHeap<K, T>
 private:
 	void restore_degree_rule(BinaryTreeItem<K, T>* node);
 protected:
-	void consolidate_with(BinaryTreeItem<K, T>* node, bool skip_root = true) override;
+	void consolidate_root(BinaryTreeItem<K, T>* node, bool skip_root = true) override;
 	void priority_was_increased(BinaryTreeItem<K, T>* node);
 	void priority_was_decreased(BinaryTreeItem<K, T>* node);
 public:
@@ -74,7 +74,7 @@ inline void RankPairingHeap<K, T>::restore_degree_rule(BinaryTreeItem<K, T>* nod
 }
 
 template<typename K, typename T>
-inline void RankPairingHeap<K, T>::consolidate_with(BinaryTreeItem<K, T>* node, bool skip_root)
+inline void RankPairingHeap<K, T>::consolidate_root(BinaryTreeItem<K, T>* node, bool skip_root)
 {
 	const int degree = (int)(log2(this->size_)) + 2;
 	size_t node_degree;
