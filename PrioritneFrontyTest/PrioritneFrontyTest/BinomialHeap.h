@@ -167,12 +167,6 @@ inline BinomialHeapMultiPass<K, T>::~BinomialHeapMultiPass()
 template<typename K, typename T>
 inline void BinomialHeapSinglePass<K, T>::consolidate_root(BinaryTreeItem<K, T>* node, bool skip_root)
 {
-}
-
-template<typename K, typename T>
-inline BinomialHeapSinglePass<K, T>::BinomialHeapSinglePass() :
-	BinomialHeap<K, T>()
-{
 	const int degree = (int)(log2(this->size_)) + 2;
 	size_t node_degree;
 	std::vector<BinaryTreeItem<K, T>*> node_list(degree);
@@ -238,6 +232,13 @@ inline BinomialHeapSinglePass<K, T>::BinomialHeapSinglePass() :
 			}
 		}
 	}
+}
+
+template<typename K, typename T>
+inline BinomialHeapSinglePass<K, T>::BinomialHeapSinglePass() :
+	BinomialHeap<K, T>()
+{
+	
 }
 
 template<typename K, typename T>
