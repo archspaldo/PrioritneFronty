@@ -13,7 +13,7 @@ protected:
 public:
 	RankPairingHeap();
 	~RankPairingHeap();
-	PriorityQueueItem<K, T>* push(const K& priority, const T& data);
+	DataItem<K, T>* push(const K& priority, const T& data);
 };
 
 template<typename K, typename T>
@@ -28,9 +28,10 @@ inline RankPairingHeap<K, T>::~RankPairingHeap()
 }
 
 template<typename K, typename T>
-inline PriorityQueueItem<K, T>* RankPairingHeap<K, T>::push(const K& priority, const T& data)
+inline DataItem<K, T>* RankPairingHeap<K, T>::push(const K& priority, const T& data)
 {
-	return this->LazyBinomialHeap<K, T>::push<BinaryTreeItem<K, T>>(priority, data);;
+	BinaryTreeItem<K, T>* new_node = new BinaryTreeItem<K, T>(priority, data);
+	return this->LazyBinomialHeap<K, T>::push(new_node);
 }
 
 template<typename K, typename T>

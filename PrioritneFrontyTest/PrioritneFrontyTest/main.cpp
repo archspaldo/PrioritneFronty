@@ -3,6 +3,7 @@
 #include "PairingHeap.h"
 #include "heap_monitor.h"
 #include "RankPairingHeap.h"
+#include "BinaryHeap.h"
 #include <iostream>
 
 
@@ -10,7 +11,7 @@ int main()
 {
    
     initHeapMonitor();
-    PriorityQueue<int, int>* h = new BinomialHeapMultiPass<int, int>();
+    PriorityQueue<int, int>* h = new BinaryHeap<int, int>();
     h->push(3, 3);
     h->push(15, 15);
     h->push(10, 10);
@@ -29,5 +30,6 @@ int main()
     }
 
     delete h;
+
     return 0;
 }

@@ -9,11 +9,11 @@ public:
 	BinaryHeap();
 	~BinaryHeap();
 	size_t size() const override;
-	PriorityQueueItem<K, T>* push(const K& priority, const T& data) override;
+	DataItem<K, T>* push(const K& priority, const T& data) override;
 	T pop() override;
-	T& peek() override;
-	const T peek() const override;
-	K peekPriority() override;
+	T& find_min() override;
+	void merge(PriorityQueue<K, T>* other_heap) override;
+	void change_priority(DataItem<K, T>* node, const K& priority) override;
 private:
 	std::vector<PriorityQueueItem<K, T>*>* list_;
 	int leftSon(const int index);
@@ -52,12 +52,12 @@ inline size_t BinaryHeap<K, T>::size() const
 }
 
 template<typename K, typename T>
-inline PriorityQueueItem<K, T>* BinaryHeap<K, T>::push(const K& priority, const T& data)
+inline DataItem<K, T>* BinaryHeap<K, T>::push(const K& priority, const T& data)
 {
 	PriorityQueueItem<K, T>* node = new PriorityQueueItem<K, T>(priority, data);
 	this->list_->push_back(node);
 	this->heapifyUp(this->size() - 1);
-	return node;
+	return node->data_item();
 }
 
 template<typename K, typename T>
@@ -80,7 +80,7 @@ inline T BinaryHeap<K, T>::pop()
 }
 
 template<typename K, typename T>
-inline T& BinaryHeap<K, T>::peek()
+inline T& BinaryHeap<K, T>::find_min()
 {
 	if (this->list_->empty())
 	{
@@ -90,23 +90,38 @@ inline T& BinaryHeap<K, T>::peek()
 }
 
 template<typename K, typename T>
-inline const T BinaryHeap<K, T>::peek() const
+inline void BinaryHeap<K, T>::merge(PriorityQueue<K, T>* other_heap)
 {
-	if (this->list_->empty())
+	BinaryHeap<K, T>* heap = (BinaryHeap<K, T>*)other_heap;
+	this->list_->insert(this->list_->end(), heap->list_->begin(), heap->list_->end());
+	if (this->size() > 1)
 	{
-		throw new std::logic_error("BinaryHeap<K, T>::peek(): Zoznam je prazdny");
+		int greater_son;
+		for (int i = (this->size() - 1) / 2; i <= 0; i--)
+		{
+			greater_son = this->greaterSon(i);
+			if (greater_son < this->size() && (*this->list_)[greater_son]->priority() < (*this->list_)[i]->priority())
+			{
+				std::swap((*this->list_)[greater_son], (*this->list_)[i]);
+			}
+		}
 	}
-	return (*this->list_)[0]->data();
 }
 
 template<typename K, typename T>
-inline K BinaryHeap<K, T>::peekPriority()
+inline void BinaryHeap<K, T>::change_priority(DataItem<K, T>* node, const K& priority)
 {
-	if (this->list_->empty())
+	size_t old_priority = node->priority();
+	PriorityQueueItem<K, T>* item = node->tree_item();
+	size_t index = &item - &(*this->list_)[0];
+	if (priority < old_priority)
 	{
-		throw new std::logic_error("BinaryHeap<K, T>::peekPriority(): Zoznam je prazdny");
+		this->heapifyUp(index);
 	}
-	return (*this->list_)[0]->priority();
+	if (priority > old_priority)
+	{
+		this->heapifyDown(index);
+	}
 }
 
 template<typename K, typename T>

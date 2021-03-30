@@ -2,16 +2,35 @@
 #include <algorithm>
 
 template <typename K, typename T>
-class PriorityQueueItem
+class PriorityQueueItem;
+
+template <typename K, typename T>
+class DataItem
 {
 public:
-	PriorityQueueItem(const K& priority, const T& data);
-	virtual ~PriorityQueueItem() {};
+	DataItem(const K& priority, const T& data);
+	~DataItem() {};
+	PriorityQueueItem<K, T>*& tree_item();
 	K& priority();
 	T& data();
 protected:
 	K priority_;
 	T data_;
+	PriorityQueueItem<K, T>* tree_item_;
+};
+
+template <typename K, typename T>
+class PriorityQueueItem
+{
+public:
+	PriorityQueueItem(const K& priority, const T& data);
+	virtual ~PriorityQueueItem();
+	DataItem<K, T>*& data_item();
+	K& priority();
+	T& data();
+protected:
+	void swap_data_items(PriorityQueueItem<K, T>* other_tree_item);
+	DataItem<K, T>* data_item_;
 };
 
 template <typename K, typename T>
@@ -19,7 +38,7 @@ class BinaryTreeItem : public PriorityQueueItem<K, T>
 {
 protected:
 	BinaryTreeItem<K, T>* left_son_, * right_son_, * parent_;
-	size_t degree_;
+	size_t degree_; // item with negative degree is to be deleted, as such it is not be taken into consideration in algorithms
 public:
 	BinaryTreeItem(const K& priority, const T& data);
 	~BinaryTreeItem();
@@ -78,19 +97,25 @@ public:
 };
 
 template<typename K, typename T>
-inline PriorityQueueItem<K, T>::PriorityQueueItem(const K& priority, const T& data) :
+inline DataItem<K, T>::DataItem(const K& priority, const T& data) :
 	priority_(priority), data_(data)
 {
 }
 
 template<typename K, typename T>
-inline K& PriorityQueueItem<K, T>::priority()
+inline PriorityQueueItem<K, T>*& DataItem<K, T>::tree_item()
+{
+	return this->tree_item_;
+}
+
+template<typename K, typename T>
+inline K& DataItem<K, T>::priority()
 {
 	return this->priority_;
 }
 
 template<typename K, typename T>
-inline T& PriorityQueueItem<K, T>::data()
+inline T& DataItem<K, T>::data()
 {
 	return this->data_;
 }
@@ -149,7 +174,7 @@ inline BinaryTreeItem<K, T>* BinaryTreeItem<K, T>::merge(BinaryTreeItem<K, T>* n
 {
 	if (node)
 	{
-		if (this->priority_ < node->priority_)
+		if (this->priority() < node->priority())
 		{
 			return this->add_left_son(node);
 		}
@@ -333,37 +358,7 @@ inline void BinaryTreeItemWithAncestor<K, T>::swap_with_ordered_ancestor()
 {
 	if (this->ordered_ancestor_)
 	{
-		BinaryTreeItemWithAncestor<K, T>* son = (BinaryTreeItemWithAncestor<K, T>*)this->right_son_, * ordered_ancestor = this->ordered_ancestor_,
-			* parent = (BinaryTreeItemWithAncestor<K, T>*)this->parent_;;
-		if (ordered_ancestor->parent_)
-		{
-			if (ordered_ancestor->parent_ == ordered_ancestor->ordered_ancestor_)
-			{
-				ordered_ancestor->parent_->BinaryTreeItem<K, T>::left_son(this);
-			}
-			else
-			{
-				ordered_ancestor->parent_->BinaryTreeItem<K, T>::right_son(this);
-			}
-		}
-		this->ordered_ancestor_ = ordered_ancestor->ordered_ancestor_;
-
-		this->BinaryTreeItem<K, T>::right_son(ordered_ancestor->right_son_);
-		ordered_ancestor->BinaryTreeItem<K, T>::right_son(son);
-
-		son = (BinaryTreeItemWithAncestor<K, T>*)this->left_son_;
-
-		if (parent == ordered_ancestor)
-		{
-			this->left_son(ordered_ancestor);
-		}
-		else
-		{
-			parent->BinaryTreeItem<K, T>::right_son(ordered_ancestor);
-			this->left_son(ordered_ancestor->left_son_);
-		}
-		ordered_ancestor->left_son(son);
-		std::swap(this->degree_, parent->degree_);
+		this->swap_data_items(this->ordered_ancestor_);
 	}
 }
 
@@ -433,4 +428,42 @@ template<typename K, typename T>
 inline bool& FibonacciHeapItem<K, T>::flag()
 {
 	return this->flag_;
+}
+
+template<typename K, typename T>
+inline PriorityQueueItem<K, T>::PriorityQueueItem(const K& priority, const T& data) :
+	data_item_(new DataItem<K, T>(priority, data))
+{
+	data_item_->tree_item() = this;
+}
+
+template<typename K, typename T>
+inline PriorityQueueItem<K, T>::~PriorityQueueItem()
+{
+	delete this->data_item_;
+}
+
+template<typename K, typename T>
+inline DataItem<K, T>*& PriorityQueueItem<K, T>::data_item()
+{
+	return this->data_item_;
+}
+
+template<typename K, typename T>
+inline void PriorityQueueItem<K, T>::swap_data_items(PriorityQueueItem<K, T>* other_tree_item)
+{
+	std::swap(this->data_item_, other_tree_item->data_item_);
+	std::swap(this->data_item_->tree_item(), other_tree_item->data_item_->tree_item());
+}
+
+template<typename K, typename T>
+inline K& PriorityQueueItem<K, T>::priority()
+{
+	return this->data_item_->priority();
+}
+
+template<typename K, typename T>
+inline T& PriorityQueueItem<K, T>::data()
+{
+	return this->data_item_->data();
 }
