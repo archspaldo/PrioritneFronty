@@ -1,61 +1,62 @@
 #pragma once
-#include "PriorityQueue.h"
+#include "LazyBinomialQueue.h"
 #include <stack>
 #include <queue>
 
 template <typename K, typename T>
-class PairingHeapBT : public LazyBinomialHeap<K, T>
+class PairingHeap : public LazyBinomialHeap<K, T>
 {
 protected:
-	PairingHeapBT();
+	PairingHeap();
 	virtual BinaryTreeItem<K, T>* consolidate(BinaryTreeItem<K, T>* node) = 0;
-	void priority_was_increased(BinaryTreeItem<K, T>* node) override;
-	void priority_was_decreased(BinaryTreeItem<K, T>* node) override;
+	void priority_was_increased(PriorityQueueItem<K, T>* node) override;
+	void priority_was_decreased(PriorityQueueItem<K, T>* node) override;
 public:
-	~PairingHeapBT();
-	DataItem<K, T>* push(const K& key, const T& data) override;
+	~PairingHeap();
+	void push(const int identifier, const K& key, const T& data, DataItem<K, T>*& data_item) override;
 	void merge(PriorityQueue<K, T>* other_heap) override;
-	void consolidate_root(BinaryTreeItem<K, T>* node, bool skip_root = true) override;
+	void consolidate_root(BinaryTreeItem<K, T>* node) override;
 };
 
 template <typename K, typename T>
-class PairingHeapBTTwoPass : public PairingHeapBT<K, T>
+class PairingHeapTwoPass : public PairingHeap<K, T>
 {
 public:
-	PairingHeapBTTwoPass();
+	PairingHeapTwoPass();
 protected:
 	BinaryTreeItem<K, T>* consolidate(BinaryTreeItem<K, T>* node) override;
 };
 
 template <typename K, typename T>
-class PairingHeapBTMultiPass : public PairingHeapBT<K, T>
+class PairingHeapMultiPass : public PairingHeap<K, T>
 {
 public:
-	PairingHeapBTMultiPass();
+	PairingHeapMultiPass();
 protected:
 	BinaryTreeItem<K, T>* consolidate(BinaryTreeItem<K, T>* node) override;
 };
 
 template<typename K, typename T>
-inline PairingHeapBT<K, T>::PairingHeapBT() :
+inline PairingHeap<K, T>::PairingHeap() :
 	LazyBinomialHeap<K, T>()
 {
 }
 
 template<typename K, typename T>
-inline void PairingHeapBT<K, T>::priority_was_increased(BinaryTreeItem<K, T>* node)
+inline void PairingHeap<K, T>::priority_was_increased(PriorityQueueItem<K, T>* node)
 {
-	if (node->parent())
+	BinaryTreeItem<K, T>* casted_node = (BinaryTreeItem<K, T>*)node;
+	if (casted_node->parent())
 	{
-		node->cut();
-		this->root_ = this->root_->merge(node);
+		casted_node->cut();
+		this->root_ = this->root_->merge(casted_node);
 	}
 }
 
 template<typename K, typename T>
-inline void PairingHeapBT<K, T>::priority_was_decreased(BinaryTreeItem<K, T>* node)
+inline void PairingHeap<K, T>::priority_was_decreased(PriorityQueueItem<K, T>* node)
 {
-	BinaryTreeItem<K, T>* parent = node->parent(), * node_ptr = node;
+	BinaryTreeItem<K, T>* node_ptr = (BinaryTreeItem<K, T>*)node, * parent = node_ptr->parent();
 	bool is_left_son = parent ? parent->left_son() == node_ptr : false;
 
 	node_ptr->cut();
@@ -63,7 +64,7 @@ inline void PairingHeapBT<K, T>::priority_was_decreased(BinaryTreeItem<K, T>* no
 	node_ptr->right_son(node_ptr->left_son());
 	node_ptr->left_son(nullptr);
 
-	node_ptr = this->consolidate(node);
+	node_ptr = this->consolidate(node_ptr);
 
 	if (parent)
 	{
@@ -83,14 +84,14 @@ inline void PairingHeapBT<K, T>::priority_was_decreased(BinaryTreeItem<K, T>* no
 }
 
 template<typename K, typename T>
-inline PairingHeapBT<K, T>::~PairingHeapBT()
+inline PairingHeap<K, T>::~PairingHeap()
 {
 }
 
 template<typename K, typename T>
-inline DataItem<K, T>* PairingHeapBT<K, T>::push(const K& key, const T& data)
+inline void PairingHeap<K, T>::push(const int identifier, const K& key, const T& data, DataItem<K, T>*& data_item)
 {
-	BinaryTreeItem<K, T>* new_node = new BinaryTreeItem<K, T>(key, data);
+	BinaryTreeItem<K, T>* new_node = new BinaryTreeItem<K, T>(identifier, key, data);
 	if (this->root_)
 	{
 		this->root_ = this->root_->merge(new_node);
@@ -100,13 +101,13 @@ inline DataItem<K, T>* PairingHeapBT<K, T>::push(const K& key, const T& data)
 		this->root_ = new_node;
 	}
 	this->size_++;
-	return new_node;
+	data_item = new_node->data_item();
 }
 
 template<typename K, typename T>
-inline void PairingHeapBT<K, T>::merge(PriorityQueue<K, T>* other_heap)
+inline void PairingHeap<K, T>::merge(PriorityQueue<K, T>* other_heap)
 {
-	PairingHeapBT<K, T>* heap = (PairingHeapBT<K, T>*)other_heap;
+	PairingHeap<K, T>* heap = (PairingHeap<K, T>*)other_heap;
 	if (this->root_)
 	{
 		this->root_ = this->root_->merge(heap->root_);
@@ -122,19 +123,19 @@ inline void PairingHeapBT<K, T>::merge(PriorityQueue<K, T>* other_heap)
 }
 
 template<typename K, typename T>
-inline void PairingHeapBT<K, T>::consolidate_root(BinaryTreeItem<K, T>* node, bool skip_root)
+inline void PairingHeap<K, T>::consolidate_root(BinaryTreeItem<K, T>* node)
 {
 	this->root_ = this->consolidate(this->root_->left_son());
 }
 
 template<typename K, typename T>
-inline PairingHeapBTTwoPass<K, T>::PairingHeapBTTwoPass() :
-	PairingHeapBT<K, T>()
+inline PairingHeapTwoPass<K, T>::PairingHeapTwoPass() :
+	PairingHeap<K, T>()
 {
 }
 
 template<typename K, typename T>
-inline BinaryTreeItem<K, T>* PairingHeapBTTwoPass<K, T>::consolidate(BinaryTreeItem<K, T>* node)
+inline BinaryTreeItem<K, T>* PairingHeapTwoPass<K, T>::consolidate(BinaryTreeItem<K, T>* node)
 {
 	BinaryTreeItem<K, T>* node_ptr = node, * node_next_ptr;
 
@@ -161,13 +162,13 @@ inline BinaryTreeItem<K, T>* PairingHeapBTTwoPass<K, T>::consolidate(BinaryTreeI
 }
 
 template<typename K, typename T>
-inline PairingHeapBTMultiPass<K, T>::PairingHeapBTMultiPass() :
-	PairingHeapBT<K, T>()
+inline PairingHeapMultiPass<K, T>::PairingHeapMultiPass() :
+	PairingHeap<K, T>()
 {
 }
 
 template<typename K, typename T>
-inline BinaryTreeItem<K, T>* PairingHeapBTMultiPass<K, T>::consolidate(BinaryTreeItem<K, T>* node)
+inline BinaryTreeItem<K, T>* PairingHeapMultiPass<K, T>::consolidate(BinaryTreeItem<K, T>* node)
 {
 	BinaryTreeItem<K, T>* node_ptr = node, * node_next_ptr;
 

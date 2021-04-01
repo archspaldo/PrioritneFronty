@@ -1,19 +1,17 @@
 #pragma once
-#include "PriorityQueue.h"
+#include "LazyBinomialQueue.h"
 
 template <typename K, typename T>
 class BinomialHeap : public LazyBinomialHeap<K, T>
 {
 protected:
-	void priority_was_increased(BinaryTreeItem<K, T>* node) override;
-	void priority_was_decreased(BinaryTreeItem<K, T>* node) override;
+	void priority_was_increased(PriorityQueueItem<K, T>* node) override;
+	void priority_was_decreased(PriorityQueueItem<K, T>* node) override;
 	BinomialHeap();
 public:
 	~BinomialHeap();
-	DataItem<K, T>* push(const K& priority, const T& data) override;
+	void push(const int identifier, const K& priority, const T& data, DataItem<K, T>*& data_item) override;
 	void merge(PriorityQueue<K, T>* other_heap) override;
-	void change_priority(DataItem<K, T>* node, const K& priority) {};
-
 };
 
 template <typename K, typename T>
@@ -48,12 +46,10 @@ inline BinomialHeap<K, T>::~BinomialHeap()
 }
 
 template<typename K, typename T>
-inline DataItem<K, T>* BinomialHeap<K, T>::push(const K& priority, const T& data)
+inline void BinomialHeap<K, T>::push(const int identifier, const K& priority, const T& data, DataItem<K, T>*& data_item)
 {
-	BinaryTreeItemWithAncestor<K, T>* new_node = new BinaryTreeItemWithAncestor<K, T>(priority, data);
-	this->LazyBinomialHeap<K, T>::push(new_node);
+	data_item  = this->LazyBinomialHeap<K, T>::push(new BinaryTreeItemWithAncestor<K, T>(identifier, priority, data));
 	this->consolidate_root(nullptr);
-	return new_node->data_item();
 }
 
 template<typename K, typename T>
@@ -64,7 +60,7 @@ inline void BinomialHeap<K, T>::merge(PriorityQueue<K, T>* other_heap)
 }
 
 template<typename K, typename T>
-inline void BinomialHeap<K, T>::priority_was_increased(BinaryTreeItem<K, T>* node)
+inline void BinomialHeap<K, T>::priority_was_increased(PriorityQueueItem<K, T>* node)
 {
 	BinaryTreeItemWithAncestor<K, T>* casted_node = (BinaryTreeItemWithAncestor<K, T>*)node;
 	while (casted_node->ordered_ancestor() && casted_node->priority() < casted_node->ordered_ancestor()->priority())
@@ -74,7 +70,7 @@ inline void BinomialHeap<K, T>::priority_was_increased(BinaryTreeItem<K, T>* nod
 }
 
 template<typename K, typename T>
-inline void BinomialHeap<K, T>::priority_was_decreased(BinaryTreeItem<K, T>* node)
+inline void BinomialHeap<K, T>::priority_was_decreased(PriorityQueueItem<K, T>* node)
 {
 	BinaryTreeItemWithAncestor<K, T>* casted_node = (BinaryTreeItemWithAncestor<K, T>*)node, * minimal_son = casted_node->find_minimal_left_son();
 	while (minimal_son && minimal_son->priority() < casted_node->priority())

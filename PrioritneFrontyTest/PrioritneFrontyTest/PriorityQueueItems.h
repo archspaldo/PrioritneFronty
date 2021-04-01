@@ -8,12 +8,14 @@ template <typename K, typename T>
 class DataItem
 {
 public:
-	DataItem(const K& priority, const T& data);
+	DataItem(const int identifier, const K& priority, const T& data);
 	~DataItem() {};
 	PriorityQueueItem<K, T>*& tree_item();
+	const int identifier() const;
 	K& priority();
 	T& data();
 protected:
+	int identifier_;
 	K priority_;
 	T data_;
 	PriorityQueueItem<K, T>* tree_item_;
@@ -23,9 +25,10 @@ template <typename K, typename T>
 class PriorityQueueItem
 {
 public:
-	PriorityQueueItem(const K& priority, const T& data);
+	PriorityQueueItem(const int identifier, const K& priority, const T& data);
 	virtual ~PriorityQueueItem();
 	DataItem<K, T>*& data_item();
+	const int identifier() const;
 	K& priority();
 	T& data();
 protected:
@@ -40,7 +43,7 @@ protected:
 	BinaryTreeItem<K, T>* left_son_, * right_son_, * parent_;
 	size_t degree_; // item with negative degree is to be deleted, as such it is not be taken into consideration in algorithms
 public:
-	BinaryTreeItem(const K& priority, const T& data);
+	BinaryTreeItem(const int identifier, const K& priority, const T& data);
 	~BinaryTreeItem();
 
 	virtual BinaryTreeItem* cut();
@@ -48,7 +51,7 @@ public:
 
 	virtual BinaryTreeItem* add_left_son(BinaryTreeItem* node);
 	virtual BinaryTreeItem* add_right_son(BinaryTreeItem* node);
-	void add_root_item(BinaryTreeItem* node);
+	void weak_link(BinaryTreeItem* node);
 
 	BinaryTreeItem* left_son();
 	BinaryTreeItem* right_son();
@@ -68,7 +71,7 @@ protected:
 	BinaryTreeItemWithAncestor<K, T>* ordered_ancestor_;
 
 public:
-	BinaryTreeItemWithAncestor(const K& priority, const T& data);
+	BinaryTreeItemWithAncestor(const int identifier, const K& priority, const T& data);
 	~BinaryTreeItemWithAncestor();
 
 	BinaryTreeItem<K, T>* cut() override;
@@ -91,14 +94,14 @@ class FibonacciHeapItem : public BinaryTreeItemWithAncestor<K, T>
 protected:
 	bool flag_;
 public:
-	FibonacciHeapItem(const K& priority, const T& data);
+	FibonacciHeapItem(const int identifier, const K& priority, const T& data);
 	~FibonacciHeapItem();
 	bool& flag();
 };
 
 template<typename K, typename T>
-inline DataItem<K, T>::DataItem(const K& priority, const T& data) :
-	priority_(priority), data_(data)
+inline DataItem<K, T>::DataItem(const int identifier, const K& priority, const T& data) :
+	identifier_(identifier), priority_(priority), data_(data)
 {
 }
 
@@ -121,8 +124,14 @@ inline T& DataItem<K, T>::data()
 }
 
 template<typename K, typename T>
-inline BinaryTreeItem<K, T>::BinaryTreeItem(const K& priority, const T& data) :
-	PriorityQueueItem<K, T>(priority, data), left_son_(nullptr), right_son_(nullptr), parent_(nullptr), degree_(0)
+inline const int DataItem<K, T>::identifier() const
+{
+	return this->identifier_;
+}
+
+template<typename K, typename T>
+inline BinaryTreeItem<K, T>::BinaryTreeItem(const int identifier, const K& priority, const T& data) :
+	PriorityQueueItem<K, T>(identifier, priority, data), left_son_(nullptr), right_son_(nullptr), parent_(nullptr), degree_(0)
 {
 }
 
@@ -208,7 +217,7 @@ inline BinaryTreeItem<K, T>* BinaryTreeItem<K, T>::add_right_son(BinaryTreeItem<
 }
 
 template<typename K, typename T>
-inline void BinaryTreeItem<K, T>::add_root_item(BinaryTreeItem* node)
+inline void BinaryTreeItem<K, T>::weak_link(BinaryTreeItem* node)
 {
 	if (node)
 	{
@@ -237,6 +246,7 @@ inline void BinaryTreeItem<K, T>::add_root_item(BinaryTreeItem* node)
 				node->right_son_ = this;
 			}
 		}
+		this->parent_ = nullptr;
 	}
 }
 
@@ -295,8 +305,8 @@ inline size_t& BinaryTreeItem<K, T>::degree()
 }
 
 template<typename K, typename T>
-inline BinaryTreeItemWithAncestor<K, T>::BinaryTreeItemWithAncestor(const K& priority, const T& data) :
-	BinaryTreeItem<K, T>(priority, data), ordered_ancestor_(nullptr)
+inline BinaryTreeItemWithAncestor<K, T>::BinaryTreeItemWithAncestor(const int identifier, const K& priority, const T& data) :
+	BinaryTreeItem<K, T>(identifier, priority, data), ordered_ancestor_(nullptr)
 {
 }
 
@@ -414,8 +424,8 @@ inline BinaryTreeItemWithAncestor<K, T>* BinaryTreeItemWithAncestor<K, T>::order
 }
 
 template<typename K, typename T>
-inline FibonacciHeapItem<K, T>::FibonacciHeapItem(const K& priority, const T& data) :
-	BinaryTreeItemWithAncestor<K, T>(priority, data)
+inline FibonacciHeapItem<K, T>::FibonacciHeapItem(const int identifier, const K& priority, const T& data) :
+	BinaryTreeItemWithAncestor<K, T>(identifier, priority, data), flag_(false)
 {
 }
 
@@ -431,8 +441,8 @@ inline bool& FibonacciHeapItem<K, T>::flag()
 }
 
 template<typename K, typename T>
-inline PriorityQueueItem<K, T>::PriorityQueueItem(const K& priority, const T& data) :
-	data_item_(new DataItem<K, T>(priority, data))
+inline PriorityQueueItem<K, T>::PriorityQueueItem(const int identifier, const K& priority, const T& data) :
+	data_item_(new DataItem<K, T>(identifier, priority, data))
 {
 	data_item_->tree_item() = this;
 }
@@ -447,6 +457,12 @@ template<typename K, typename T>
 inline DataItem<K, T>*& PriorityQueueItem<K, T>::data_item()
 {
 	return this->data_item_;
+}
+
+template<typename K, typename T>
+inline const int PriorityQueueItem<K, T>::identifier() const
+{
+	return this->data_item_->identifier();
 }
 
 template<typename K, typename T>

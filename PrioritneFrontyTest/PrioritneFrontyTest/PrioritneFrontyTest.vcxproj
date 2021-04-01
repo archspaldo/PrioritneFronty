@@ -146,6 +146,7 @@
     <ClInclude Include="BinaryHeap.h" />
     <ClInclude Include="BinomialHeap.h" />
     <ClInclude Include="FibonacciHeap.h" />
+    <ClInclude Include="LazyBinomialQueue.h" />
     <ClInclude Include="PairingHeap.h" />
     <ClInclude Include="PriorityQueue.h" />
     <ClInclude Include="PriorityQueueItems.h" />

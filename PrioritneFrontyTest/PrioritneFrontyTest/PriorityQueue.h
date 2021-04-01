@@ -8,320 +8,52 @@ class PriorityQueue
 {
 protected:
 	PriorityQueue();
+	virtual void priority_was_increased(PriorityQueueItem<K, T>* node) = 0;
+	virtual void priority_was_decreased(PriorityQueueItem<K, T>* node) = 0;
 public:
 	virtual ~PriorityQueue();
+	virtual void clear() = 0;
 	virtual size_t size() const = 0;
-	virtual DataItem<K, T>* push(const K& priority, const T& data) = 0;
-	virtual T pop() = 0;
+	virtual void push(const int identifier, const K& priority, const T& data, DataItem<K, T>*&) = 0;
+	virtual T pop(int& identifier) = 0;
 	virtual T& find_min() = 0;
 	virtual void merge(PriorityQueue<K, T>* other_heap) = 0;
-	virtual void change_priority(DataItem<K, T>* node, const K& priority) = 0;
-};
-
-template <typename K, typename T>
-class LazyBinomialHeap : public PriorityQueue<K, T>
-{
-protected:
-	BinaryTreeItem<K, T>* root_;
-	size_t size_;
-	DataItem<K, T>* push(BinaryTreeItem<K, T>* node);
-	virtual void consolidate_root(BinaryTreeItem<K, T>* node) = 0;
-	virtual void priority_was_increased(BinaryTreeItem<K, T>* node) = 0;
-	virtual void priority_was_decreased(BinaryTreeItem<K, T>* node) = 0;
-	void consolidate_root_using_multipass(BinaryTreeItem<K, T>* node, size_t array_size);
-	void consolidate_root_using_singlepass(BinaryTreeItem<K, T>* node, size_t array_size);
-	LazyBinomialHeap();
-public:
-	virtual ~LazyBinomialHeap();
-	size_t size() const;
-	virtual DataItem<K, T>* push(const K& priority, const T& data) = 0;
-	T pop();
-	T& find_min();
-	virtual void merge(PriorityQueue<K, T>* other_heap);
 	void change_priority(DataItem<K, T>* node, const K& priority);
 };
 
-template<typename K, typename T>
-inline void LazyBinomialHeap<K, T>::consolidate_root_using_multipass(BinaryTreeItem<K, T>* node, size_t array_size)
+template <typename K, typename T>
+class PriorityQueueWrapper
 {
-	size_t node_degree;
-	std::vector<BinaryTreeItem<K, T>*> node_list(array_size);
-	BinaryTreeItem<K, T>* node_ptr, * node_next_ptr;
-
-	auto combine = [&](BinaryTreeItem<K, T>*& node)
-	{
-		node_degree = node->degree();
-		while (node_list[node_degree])
-		{
-			node = node->merge(node_list[node_degree]);
-			node_list[node_degree++] = nullptr;
-		}
-		node_list[node_degree] = node;
-	};
-
-	if (node)
-	{
-		for (node_ptr = node, node_next_ptr = node_ptr->right_son(); node_ptr; node_ptr = node_next_ptr, node_next_ptr = node_ptr ? node_ptr->right_son() : nullptr)
-		{
-			node_ptr->cut();
-			combine(node_ptr);
-		}
-	}
-
-	if (this->root_)
-	{
-		node_ptr = this->root_->right_son();
-		this->root_->right_son(nullptr);
-
-		if (node_ptr)
-		{
-			for (node_next_ptr = node_ptr->right_son(); node_ptr != this->root_; node_ptr = node_next_ptr, node_next_ptr = node_ptr->right_son())
-			{
-				node_ptr->right_son(nullptr);
-				combine(node_ptr);
-			}
-		}
-
-		if (this->root_->degree() != -1)
-		{
-			combine(this->root_);
-		}
-
-		this->root_ = nullptr;
-	}
-
-	for (BinaryTreeItem<K, T>* node : node_list)
-	{
-		if (node)
-		{
-			if (this->root_)
-			{
-				this->root_->add_root_item(node);
-				if (node->priority() < this->root_->priority())
-				{
-					this->root_ = node;
-				}
-			}
-			else
-			{
-				this->root_ = node;
-			}
-		}
-	}
-}
+private:
+	std::unordered_map<int, DataItem<K, T>*>* identifier_map_;
+	PriorityQueue<K, T>* priority_queue_;
+public:
+	PriorityQueueWrapper(PriorityQueue<K, T>* priority_queue);
+	~PriorityQueueWrapper();
+	void reset();
+	void push(const int identifier, const K& priority, const T& data);
+	int pop();
+	void find_min();
+	void change_priority(const int identifier, const K& priority);
+	void merge(const int size);
+};
 
 template<typename K, typename T>
-inline void LazyBinomialHeap<K, T>::consolidate_root_using_singlepass(BinaryTreeItem<K, T>* node, size_t array_size)
-{
-	const int degree = array_size;
-	size_t node_degree;
-	std::vector<BinaryTreeItem<K, T>*> node_list(degree);
-	BinaryTreeItem<K, T>* node_ptr, * node_next_ptr, * root = this->root_;
-
-	this->root_ = nullptr;
-
-	if (node)
-	{
-		for (node_ptr = node, node_next_ptr = node_ptr->right_son(); node_ptr; node_ptr = node_next_ptr, node_next_ptr = node_ptr ? node_ptr->right_son() : nullptr)
-		{
-			size_t degree = node_ptr->degree();
-			node_ptr->cut();
-			if (node_list[degree])
-			{
-				node_ptr = node_ptr->merge(node_list[degree]);
-				node_list[degree] = nullptr;
-				if (this->root_)
-				{
-					this->root_->add_root_item(node_ptr);
-					if (node_ptr->priority() < this->root_->priority())
-					{
-						this->root_ = node_ptr;
-					}
-				}
-				else
-				{
-					this->root_ = node_ptr;
-				}
-			}
-			else
-			{
-				node_list[degree] = node_ptr;
-			}
-			
-		}
-	}
-
-	if (root)
-	{
-		node_ptr = root->right_son();
-		root->right_son(nullptr);
-
-		for (node_next_ptr = node_ptr ? node_ptr->right_son() : nullptr; node_ptr != this->root_; node_ptr = node_next_ptr, node_next_ptr = node_ptr->right_son())
-		{
-			node_degree = node_ptr->degree();
-			node_ptr->right_son(nullptr);
-			if (node_list[degree])
-			{
-				node_ptr = node_ptr->merge(node_list[degree]);
-				node_list[degree] = nullptr;
-				if (this->root_)
-				{
-					this->root_->add_root_item(node_ptr);
-					if (node_ptr->priority() < this->root_->priority())
-					{
-						this->root_ = node_ptr;
-					}
-				}
-				else
-				{
-					this->root_ = node_ptr;
-				}
-			}
-			else
-			{
-				node_list[degree] = node_ptr;
-			}
-		}
-
-		if (root->degree() != -1)
-		{
-			node_ptr = root;
-			node_degree = node_ptr->degree();
-			if (node_list[degree])
-			{
-				node_ptr = node_ptr->merge(node_list[degree]);
-				node_list[degree] = nullptr;
-				if (this->root_)
-				{
-					this->root_->add_root_item(node_ptr);
-					if (node_ptr->priority() < this->root_->priority())
-					{
-						this->root_ = node_ptr;
-					}
-				}
-				else
-				{
-					this->root_ = node_ptr;
-				}
-			}
-			else
-			{
-				node_list[degree] = node_ptr;
-			}
-		}
-	}
-
-	for (BinaryTreeItem<K, T>* node : node_list)
-	{
-		if (node)
-		{
-			if (this->root_)
-			{
-				this->root_->add_root_item(node);
-				if (node->priority() < this->root_->priority())
-				{
-					this->root_ = node;
-				}
-			}
-			else
-			{
-				this->root_ = node;
-			}
-		}
-	}
-}
-
-template<typename K, typename T>
-inline LazyBinomialHeap<K, T>::LazyBinomialHeap() :
-	root_(nullptr), size_(0)
+inline PriorityQueue<K, T>::PriorityQueue()
 {
 }
 
 template<typename K, typename T>
-inline LazyBinomialHeap<K, T>::~LazyBinomialHeap()
+inline PriorityQueue<K, T>::~PriorityQueue()
 {
-	delete this->root_;
-	this->root_ = nullptr;
-	this->size_ = 0;
 }
 
 template<typename K, typename T>
-inline size_t LazyBinomialHeap<K, T>::size() const
-{
-	return this->size_;
-}
-
-template<typename K, typename T>
-inline DataItem<K, T>* LazyBinomialHeap<K, T>::push(BinaryTreeItem<K, T>* node)
-{
-	if (this->root_)
-	{
-		this->root_->add_root_item(node);
-		if (node->priority() < this->root_->priority())
-		{
-			this->root_ = node;
-		}
-	}
-	else
-	{
-		this->root_ = node;
-	}
-	this->size_++;
-	return node->data_item();
-}
-
-template<typename K, typename T>
-inline T LazyBinomialHeap<K, T>::pop()
-{
-	if (this->root_)
-	{
-		BinaryTreeItem<K, T>* root = this->root_;
-		root->degree() = -1;
-		this->consolidate_root(root->left_son());
-		root->left_son(nullptr);
-		this->size_--;
-		T data = root->data();
-		delete root;
-		return data;
-	}
-	throw new std::range_error("LazyBinomialHeap<K, T>::pop(): Priority queue is empty!");
-}
-
-template<typename K, typename T>
-inline T& LazyBinomialHeap<K, T>::find_min()
-{
-	return this->root_->data();
-}
-
-template<typename K, typename T>
-inline void LazyBinomialHeap<K, T>::merge(PriorityQueue<K, T>* other_heap)
-{
-	if (other_heap)
-	{
-		LazyBinomialHeap<K, T>* heap = (LazyBinomialHeap<K, T>*)other_heap;
-		if (this->root_)
-		{
-			this->root_->add_root_item(heap->root_);
-			if (heap->root_ && heap->root_->priority() < this->root_->priority())
-			{
-				this->root_ = heap->root_;
-			}
-		}
-		else
-		{
-			this->root_ = heap->root_;
-		}
-		this->size_ += heap->size_;
-		heap->root_ = nullptr;
-		delete heap;
-	}
-}
-
-template<typename K, typename T>
-inline void LazyBinomialHeap<K, T>::change_priority(DataItem<K, T>* node, const K& priority)
+inline void PriorityQueue<K, T>::change_priority(DataItem<K, T>* node, const K& priority)
 {
 	size_t old_priority = node->priority();
-	BinaryTreeItem<K, T>* item = node->tree_item();
+	PriorityQueueItem<K, T>* item = node->tree_item();
+	item->priority() = priority;
 	if (priority < old_priority)
 	{
 		this->priority_was_increased((BinaryTreeItem<K, T>*)item);
@@ -333,11 +65,75 @@ inline void LazyBinomialHeap<K, T>::change_priority(DataItem<K, T>* node, const 
 }
 
 template<typename K, typename T>
-inline PriorityQueue<K, T>::PriorityQueue()
+inline PriorityQueueWrapper<K, T>::PriorityQueueWrapper(PriorityQueue<K, T>* priority_queue) :
+	identifier_map_(new std::unordered_map<int, DataItem<K, T>*>()),
+	priority_queue_(priority_queue)
 {
 }
 
 template<typename K, typename T>
-inline PriorityQueue<K, T>::~PriorityQueue()
+inline PriorityQueueWrapper<K, T>::~PriorityQueueWrapper()
 {
+	delete this->priority_queue_;
+	delete this->identifier_map_;
+	this->priority_queue_ = nullptr;
+	this->identifier_map_ = nullptr;
+}
+
+template<typename K, typename T>
+inline void PriorityQueueWrapper<K, T>::reset()
+{
+	this->priority_queue_->clear();
+}
+
+template<typename K, typename T>
+inline void PriorityQueueWrapper<K, T>::push(const int identifier, const K& priority, const T& data)
+{
+	DataItem<K, T>* data_item;
+	std::chrono::duration<long double> time_difference;
+	std::chrono::high_resolution_clock::time_point begin_time = std::chrono::high_resolution_clock::now(), end_time;
+	this->priority_queue_->push(identifier, priority, data, data_item);
+	end_time = std::chrono::high_resolution_clock::now();
+	time_difference = end_time - begin_time;
+	(*this->identifier_map_)[identifier] = data_item;
+}
+
+template<typename K, typename T>
+inline int PriorityQueueWrapper<K, T>::pop()
+{
+	int identifier;
+	std::chrono::duration<long double> time_difference;
+	std::chrono::high_resolution_clock::time_point begin_time = std::chrono::high_resolution_clock::now(), end_time;
+	this->priority_queue_->pop(identifier);
+	end_time = std::chrono::high_resolution_clock::now();
+	time_difference = end_time - begin_time;
+	this->identifier_map_->erase(identifier);
+	return identifier;
+}
+
+template<typename K, typename T>
+inline void PriorityQueueWrapper<K, T>::find_min()
+{
+	std::chrono::duration<long double> time_difference;
+	std::chrono::high_resolution_clock::time_point begin_time = std::chrono::high_resolution_clock::now(), end_time;
+	this->priority_queue_->find_min();
+	end_time = std::chrono::high_resolution_clock::now();
+	time_difference = end_time - begin_time;
+}
+
+template<typename K, typename T>
+inline void PriorityQueueWrapper<K, T>::change_priority(const int identifier, const K& priority)
+{
+	DataItem<K, T>* data_item = (*this->identifier_map_)[identifier];
+	std::chrono::duration<long double> time_difference;
+	std::chrono::high_resolution_clock::time_point begin_time = std::chrono::high_resolution_clock::now(), end_time;
+	this->priority_queue_->change_priority(data_item, priority);
+	end_time = std::chrono::high_resolution_clock::now();
+	time_difference = end_time - begin_time;
+}
+
+template<typename K, typename T>
+inline void PriorityQueueWrapper<K, T>::merge(const int size)
+{
+
 }

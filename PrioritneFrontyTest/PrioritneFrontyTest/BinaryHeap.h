@@ -5,15 +5,6 @@
 template <typename K, typename T>
 class BinaryHeap : public PriorityQueue<K, T>
 {
-public:
-	BinaryHeap();
-	~BinaryHeap();
-	size_t size() const override;
-	DataItem<K, T>* push(const K& priority, const T& data) override;
-	T pop() override;
-	T& find_min() override;
-	void merge(PriorityQueue<K, T>* other_heap) override;
-	void change_priority(DataItem<K, T>* node, const K& priority) override;
 private:
 	std::vector<PriorityQueueItem<K, T>*>* list_;
 	int leftSon(const int index);
@@ -22,9 +13,19 @@ private:
 	int greaterSon(const int index);
 	void heapifyUp(const int index);
 	void heapifyDown(const int index);
+protected:
+	void priority_was_increased(PriorityQueueItem<K, T>* node) override;
+	void priority_was_decreased(PriorityQueueItem<K, T>* node) override;
+public:
+	BinaryHeap();
+	~BinaryHeap();
+	void clear() override;
+	size_t size() const override;
+	void push(const int identifier, const K& priority, const T& data, DataItem<K, T>*& data_item) override;
+	T pop(int& identifier) override;
+	T& find_min() override;
+	void merge(PriorityQueue<K, T>* other_heap) override;
 };
-
-
 
 template<typename K, typename T>
 inline BinaryHeap<K, T>::BinaryHeap() :
@@ -36,12 +37,18 @@ inline BinaryHeap<K, T>::BinaryHeap() :
 template<typename K, typename T>
 inline BinaryHeap<K, T>::~BinaryHeap()
 {
+	this->clear();
+	delete this->list_;
+}
+
+template<typename K, typename T>
+inline void BinaryHeap<K, T>::clear()
+{
 	for (PriorityQueueItem<K, T>* item : *this->list_)
 	{
 		delete item;
 	}
 	this->list_->clear();
-	delete this->list_;
 }
 
 
@@ -52,20 +59,20 @@ inline size_t BinaryHeap<K, T>::size() const
 }
 
 template<typename K, typename T>
-inline DataItem<K, T>* BinaryHeap<K, T>::push(const K& priority, const T& data)
+inline void BinaryHeap<K, T>::push(const int identifier, const K& priority, const T& data, DataItem<K, T>*& data_item)
 {
-	PriorityQueueItem<K, T>* node = new PriorityQueueItem<K, T>(priority, data);
+	PriorityQueueItem<K, T>* node = new PriorityQueueItem<K, T>(identifier, priority, data);
 	this->list_->push_back(node);
 	this->heapifyUp(this->size() - 1);
-	return node->data_item();
+	data_item = node->data_item();
 }
 
 template<typename K, typename T>
-inline T BinaryHeap<K, T>::pop()
+inline T BinaryHeap<K, T>::pop(int& identifier)
 {
 	if (this->list_->empty())
 	{
-		throw new std::logic_error("BinaryHeap<K, T>::pop(): Zoznam je prazdny");
+		throw new std::out_of_range("BinaryHeap<K, T>::pop(): Zoznam je prazdny");
 	}
 	if (this->size() > 1)
 	{
@@ -75,6 +82,7 @@ inline T BinaryHeap<K, T>::pop()
 	this->list_->pop_back();
 	this->heapifyDown(0);
 	T data = item->data();
+	identifier = item->identifier();
 	delete item;
 	return data;
 }
@@ -84,7 +92,7 @@ inline T& BinaryHeap<K, T>::find_min()
 {
 	if (this->list_->empty())
 	{
-		throw new std::logic_error("BinaryHeap<K, T>::peek(): Zoznam je prazdny");
+		throw new std::out_of_range("BinaryHeap<K, T>::peek(): Zoznam je prazdny");
 	}
 	return (*this->list_)[0]->data();
 }
@@ -105,22 +113,6 @@ inline void BinaryHeap<K, T>::merge(PriorityQueue<K, T>* other_heap)
 				std::swap((*this->list_)[greater_son], (*this->list_)[i]);
 			}
 		}
-	}
-}
-
-template<typename K, typename T>
-inline void BinaryHeap<K, T>::change_priority(DataItem<K, T>* node, const K& priority)
-{
-	size_t old_priority = node->priority();
-	PriorityQueueItem<K, T>* item = node->tree_item();
-	size_t index = &item - &(*this->list_)[0];
-	if (priority < old_priority)
-	{
-		this->heapifyUp(index);
-	}
-	if (priority > old_priority)
-	{
-		this->heapifyDown(index);
 	}
 }
 
@@ -170,5 +162,20 @@ inline void BinaryHeap<K, T>::heapifyDown(const int index)
 	{
 		std::swap((*this->list_)[child], (*this->list_)[i]);
 	}
+}
+
+template<typename K, typename T>
+inline void BinaryHeap<K, T>::priority_was_increased(PriorityQueueItem<K, T>* node)
+{
+	size_t index = (&node - &(*this->list_)[0]) / sizeof(PriorityQueueItem<K, T>*);
+
+	this->heapifyUp(index);
+}
+
+template<typename K, typename T>
+inline void BinaryHeap<K, T>::priority_was_decreased(PriorityQueueItem<K, T>* node)
+{
+	size_t index = (&node - &(*this->list_)[0]) / sizeof(PriorityQueueItem<K, T>*);
+	this->heapifyDown(index);
 }
 
