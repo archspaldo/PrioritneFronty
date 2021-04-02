@@ -53,7 +53,7 @@ inline PriorityQueueList<K, T>::PriorityQueueList() :
 	priority_queue_list_(new std::list<PriorityQueueWrapper<K, T>*>()),
 	identifier_list_(new std::vector<int>())
 {
-	priority_queue_list_->push_back(new PriorityQueueWrapper<K, T>(new BinaryHeap<K, T>()));
+	//priority_queue_list_->push_back(new PriorityQueueWrapper<K, T>(new BinaryHeap<K, T>()));
 	priority_queue_list_->push_back(new PriorityQueueWrapper<K, T>(new PairingHeapTwoPass<K, T>()));
 	priority_queue_list_->push_back(new PriorityQueueWrapper<K, T>(new PairingHeapMultiPass<K, T>()));
 	priority_queue_list_->push_back(new PriorityQueueWrapper<K, T>(new RankPairingHeap<K, T>()));

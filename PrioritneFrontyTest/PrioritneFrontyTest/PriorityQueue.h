@@ -52,7 +52,7 @@ template<typename K, typename T>
 inline void PriorityQueue<K, T>::change_priority(DataItem<K, T>* node, const K& priority)
 {
 	size_t old_priority = node->priority();
-	PriorityQueueItem<K, T>* item = node->tree_item();
+	PriorityQueueItem<K, T>* item = node->wrapper_item_ptr();
 	item->priority() = priority;
 	if (priority < old_priority)
 	{
