@@ -14,7 +14,7 @@ protected:
 public:
 	FibonacciHeap();
 	~FibonacciHeap();
-	void push(const int identifier, const K& priority, const T& data, DataItem<K, T>*& = nullptr) override;
+	void push(const int identifier, const K& priority, const T& data, PriorityQueueItem<K, T>*& = nullptr) override;
 };
 
 template<typename K, typename T>
@@ -28,10 +28,10 @@ inline FibonacciHeap<K, T>::~FibonacciHeap()
 }
 
 template<typename K, typename T>
-inline void FibonacciHeap<K, T>::push(const int identifier, const K& priority, const T& data, DataItem<K, T>*& data_item)
+inline void FibonacciHeap<K, T>::push(const int identifier, const K& priority, const T& data, PriorityQueueItem<K, T>*& data_item)
 {
 	FibonacciHeapItem<K, T>* new_node = new FibonacciHeapItem<K, T>(identifier, priority, data);
-	data_item =  this->LazyBinomialHeap<K, T>::push(new_node);
+	data_item = this->LazyBinomialHeap<K, T>::push(new_node);
 }
 
 template<typename K, typename T>
@@ -77,6 +77,10 @@ inline void FibonacciHeap<K, T>::priority_was_increased(PriorityQueueItem<K, T>*
 		this->cut(casted_node);
 		this->cascading_cut(ordered_ancestor);
 	}
+	if (casted_node->priority() < this->root_->priority())
+	{
+		this->root_ = casted_node;
+	}
 }
 
 template<typename K, typename T>
@@ -84,6 +88,18 @@ inline void FibonacciHeap<K, T>::priority_was_decreased(PriorityQueueItem<K, T>*
 {
 	BinaryTreeItem<K, T>* casted_node = (BinaryTreeItem<K, T>*)node;
 	FibonacciHeapItem<K, T>* ordered_ancestor;
+	if (this->root_ == node)
+	{
+		BinaryTreeItem<K, T>* new_root = this->root_;
+		for (BinaryTreeItem<K, T>* node_ptr = this->root_->right_son(); node_ptr != this->root_; node_ptr = node_ptr->right_son())
+		{
+			if (node_ptr->priority() < new_root->priority())
+			{
+				new_root = node_ptr;
+			}
+		}
+		this->root_ = new_root;
+	}
 	for (BinaryTreeItem<K, T>* node_ptr = casted_node->left_son(), * node_next_ptr = node_ptr ? node_ptr->right_son() : nullptr; node_ptr;
 		node_ptr = node_next_ptr, node_next_ptr = node_ptr ? node_ptr->right_son() : nullptr)
 	{

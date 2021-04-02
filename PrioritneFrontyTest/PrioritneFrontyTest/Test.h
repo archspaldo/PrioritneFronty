@@ -53,13 +53,13 @@ inline PriorityQueueList<K, T>::PriorityQueueList() :
 	priority_queue_list_(new std::list<PriorityQueueWrapper<K, T>*>()),
 	identifier_list_(new std::vector<int>())
 {
-	//priority_queue_list_->push_back(new PriorityQueueWrapper<K, T>(new BinaryHeap<K, T>()));
-	priority_queue_list_->push_back(new PriorityQueueWrapper<K, T>(new PairingHeapTwoPass<K, T>()));
-	priority_queue_list_->push_back(new PriorityQueueWrapper<K, T>(new PairingHeapMultiPass<K, T>()));
-	priority_queue_list_->push_back(new PriorityQueueWrapper<K, T>(new RankPairingHeap<K, T>()));
+	priority_queue_list_->push_back(new PriorityQueueWrapper<K, T>(new BinaryHeap<K, T>()));
+	//priority_queue_list_->push_back(new PriorityQueueWrapper<K, T>(new PairingHeapTwoPass<K, T>()));
+	//priority_queue_list_->push_back(new PriorityQueueWrapper<K, T>(new PairingHeapMultiPass<K, T>()));
+	//priority_queue_list_->push_back(new PriorityQueueWrapper<K, T>(new RankPairingHeap<K, T>()));
 	priority_queue_list_->push_back(new PriorityQueueWrapper<K, T>(new FibonacciHeap<K, T>()));
-	priority_queue_list_->push_back(new PriorityQueueWrapper<K, T>(new BinomialHeapSinglePass<K, T>()));
-	priority_queue_list_->push_back(new PriorityQueueWrapper<K, T>(new BinomialHeapMultiPass<K, T>()));
+	//priority_queue_list_->push_back(new PriorityQueueWrapper<K, T>(new BinomialHeapSinglePass<K, T>()));
+	//priority_queue_list_->push_back(new PriorityQueueWrapper<K, T>(new BinomialHeapMultiPass<K, T>()));
 }
 
 template<typename K, typename T>
@@ -152,14 +152,14 @@ inline void PriorityQueueList<K, T>::merge(const int size)
 
 inline void RandomTest::execute(PriorityQueueList<int, int>* pq_list)
 {
-	for (int i = 0; i < 10000000; i++)
+	for (int i = 0; i < 1000000; i++)
 	{
 		int number = rand() % 100;
-		if (number < 20)
+		if (number < 30)
 		{
-			pq_list->push(rand() % UINT32_MAX, rand() % UINT32_MAX, rand() % UINT32_MAX);
+			pq_list->push(i, rand() % UINT32_MAX, rand() % UINT32_MAX);
 		}
-		else if (number < 40 && pq_list->size() > 0)
+		else if (number < 50 && pq_list->size() > 0)
 		{
 			pq_list->pop();
 		}

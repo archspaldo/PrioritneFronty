@@ -14,18 +14,18 @@ public:
 	virtual ~PriorityQueue();
 	virtual void clear() = 0;
 	virtual size_t size() const = 0;
-	virtual void push(const int identifier, const K& priority, const T& data, DataItem<K, T>*&) = 0;
+	virtual void push(const int identifier, const K& priority, const T& data, PriorityQueueItem<K, T>*& node) = 0;
 	virtual T pop(int& identifier) = 0;
 	virtual T& find_min() = 0;
 	virtual void merge(PriorityQueue<K, T>* other_heap) = 0;
-	void change_priority(DataItem<K, T>* node, const K& priority);
+	void change_priority(PriorityQueueItem<K, T>* node, const K& priority);
 };
 
 template <typename K, typename T>
 class PriorityQueueWrapper
 {
 private:
-	std::unordered_map<int, DataItem<K, T>*>* identifier_map_;
+	std::unordered_map<int, PriorityQueueItem<K, T>*>* identifier_map_;
 	PriorityQueue<K, T>* priority_queue_;
 public:
 	PriorityQueueWrapper(PriorityQueue<K, T>* priority_queue);
@@ -49,24 +49,23 @@ inline PriorityQueue<K, T>::~PriorityQueue()
 }
 
 template<typename K, typename T>
-inline void PriorityQueue<K, T>::change_priority(DataItem<K, T>* node, const K& priority)
+inline void PriorityQueue<K, T>::change_priority(PriorityQueueItem<K, T>* node, const K& priority)
 {
-	size_t old_priority = node->priority();
-	PriorityQueueItem<K, T>* item = node->wrapper_item_ptr();
-	item->priority() = priority;
+	K old_priority = node->priority();
+	node->priority() = priority;
 	if (priority < old_priority)
 	{
-		this->priority_was_increased((BinaryTreeItem<K, T>*)item);
+		this->priority_was_increased(node);
 	}
-	if (priority > old_priority)
+	else if (priority > old_priority)
 	{
-		this->priority_was_decreased((BinaryTreeItem<K, T>*)item);
+		this->priority_was_decreased(node);
 	}
 }
 
 template<typename K, typename T>
 inline PriorityQueueWrapper<K, T>::PriorityQueueWrapper(PriorityQueue<K, T>* priority_queue) :
-	identifier_map_(new std::unordered_map<int, DataItem<K, T>*>()),
+	identifier_map_(new std::unordered_map<int, PriorityQueueItem<K, T>*>()),
 	priority_queue_(priority_queue)
 {
 }
@@ -89,13 +88,13 @@ inline void PriorityQueueWrapper<K, T>::reset()
 template<typename K, typename T>
 inline void PriorityQueueWrapper<K, T>::push(const int identifier, const K& priority, const T& data)
 {
-	DataItem<K, T>* data_item;
+	PriorityQueueItem<K, T>* priority_queue_item;
 	std::chrono::duration<long double> time_difference;
-	std::chrono::high_resolution_clock::time_point begin_time = std::chrono::high_resolution_clock::now(), end_time;
-	this->priority_queue_->push(identifier, priority, data, data_item);
+	std::chrono::high_resolution_clock::time_point end_time, begin_time = std::chrono::high_resolution_clock::now();
+	this->priority_queue_->push(identifier, priority, data, priority_queue_item);
 	end_time = std::chrono::high_resolution_clock::now();
 	time_difference = end_time - begin_time;
-	(*this->identifier_map_)[identifier] = data_item;
+	(*this->identifier_map_)[identifier] = priority_queue_item;
 }
 
 template<typename K, typename T>
@@ -124,10 +123,10 @@ inline void PriorityQueueWrapper<K, T>::find_min()
 template<typename K, typename T>
 inline void PriorityQueueWrapper<K, T>::change_priority(const int identifier, const K& priority)
 {
-	DataItem<K, T>* data_item = (*this->identifier_map_)[identifier];
+	PriorityQueueItem<K, T>* priority_queue_item = (*this->identifier_map_)[identifier];
 	std::chrono::duration<long double> time_difference;
 	std::chrono::high_resolution_clock::time_point begin_time = std::chrono::high_resolution_clock::now(), end_time;
-	this->priority_queue_->change_priority(data_item, priority);
+	this->priority_queue_->change_priority(priority_queue_item, priority);
 	end_time = std::chrono::high_resolution_clock::now();
 	time_difference = end_time - begin_time;
 }

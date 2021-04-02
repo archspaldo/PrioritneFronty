@@ -13,7 +13,7 @@ protected:
 	void priority_was_decreased(PriorityQueueItem<K, T>* node) override;
 public:
 	~PairingHeap();
-	void push(const int identifier, const K& key, const T& data, DataItem<K, T>*& data_item) override;
+	void push(const int identifier, const K& key, const T& data, PriorityQueueItem<K, T>*& data_item) override;
 	void merge(PriorityQueue<K, T>* other_heap) override;
 	void consolidate_root(BinaryTreeItem<K, T>* node) override;
 };
@@ -61,7 +61,6 @@ inline void PairingHeap<K, T>::priority_was_decreased(PriorityQueueItem<K, T>* n
 	bool is_left_son = parent ? parent->left_son() == node_ptr : false;
 
 	node_ptr->cut();
-	node_ptr->degree() = 0;
 	node_ptr->right_son(node_ptr->left_son());
 	node_ptr->left_son(nullptr);
 
@@ -90,7 +89,7 @@ inline PairingHeap<K, T>::~PairingHeap()
 }
 
 template<typename K, typename T>
-inline void PairingHeap<K, T>::push(const int identifier, const K& key, const T& data, DataItem<K, T>*& data_item)
+inline void PairingHeap<K, T>::push(const int identifier, const K& key, const T& data, PriorityQueueItem<K, T>*& data_item)
 {
 	BinaryTreeItem<K, T>* new_node = new BinaryTreeItem<K, T>(identifier, key, data);
 	if (this->root_->node())
@@ -102,7 +101,7 @@ inline void PairingHeap<K, T>::push(const int identifier, const K& key, const T&
 		this->root_->node() = new_node;
 	}
 	this->size_++;
-	data_item = new_node->data_item();
+	data_item = new_node;
 }
 
 template<typename K, typename T>

@@ -5,7 +5,7 @@
 
 int main()
 {
-   
+    srand(time(NULL));
     initHeapMonitor();
     /*h->push(3, 3);
     h->push(15, 15);
@@ -23,7 +23,21 @@ int main()
     {
         std::cout << h->pop() << "\n";
     }*/
-    RandomTest().execute(new PriorityQueueList<int, int>());
+    PriorityQueueList<int, int>* list = new PriorityQueueList<int, int>();
+    RandomTest().execute(list);
+    delete list;
+
+    /*PriorityQueueItem<int, int>* a = new FibonacciHeapItem<int, int>(1, 1, 1), * b = nullptr;
+
+    std::chrono::system_clock::time_point thetime = std::chrono::system_clock::now();
+    std::chrono::system_clock::time_point time1 = std::chrono::system_clock::now();
+    for (int i = 0; i < 1000000; i++)
+    {
+        b = a;
+    }
+    thetime = std::chrono::system_clock::now();
+
+    std::cout << (thetime - time1).count() << '\n' << thetime.time_since_epoch().count() << '\n' << time1.time_since_epoch().count() ;*/
 
     return 0;
 }

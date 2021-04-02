@@ -10,7 +10,7 @@ protected:
 	BinomialHeap();
 public:
 	~BinomialHeap();
-	void push(const int identifier, const K& priority, const T& data, DataItem<K, T>*& data_item) override;
+	void push(const int identifier, const K& priority, const T& data, PriorityQueueItem<K, T>*& data_item) override;
 	void merge(PriorityQueue<K, T>* other_heap) override;
 };
 
@@ -46,7 +46,7 @@ inline BinomialHeap<K, T>::~BinomialHeap()
 }
 
 template<typename K, typename T>
-inline void BinomialHeap<K, T>::push(const int identifier, const K& priority, const T& data, DataItem<K, T>*& data_item)
+inline void BinomialHeap<K, T>::push(const int identifier, const K& priority, const T& data, PriorityQueueItem<K, T>*& data_item)
 {
 	data_item  = this->LazyBinomialHeap<K, T>::push(new BinaryTreeItemWithAncestor<K, T>(identifier, priority, data));
 	this->consolidate_root(nullptr);

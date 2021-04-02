@@ -2,49 +2,25 @@
 #include <algorithm>
 
 template <typename K, typename T>
-class PriorityQueueItem;
-
-template <typename K, typename T>
-class DataItem
+class PriorityQueueItem
 {
-public:
-	DataItem(const int identifier, const K& priority, const T& data);
-	~DataItem() {};
-	PriorityQueueItem<K, T>*& wrapper_item_ptr();
-	const int identifier() const;
-	K& priority();
-	T& data();
 protected:
 	int identifier_;
 	K priority_;
 	T data_;
-	PriorityQueueItem<K, T>* wrapper_item_ptr_;
-};
-
-template <typename K, typename T>
-class PriorityQueueItem
-{
-protected:
-	DataItem<K, T>* data_item_;
 
 	PriorityQueueItem(const int identifier, const K& priority, const T& data);
-	void swap_data_items(PriorityQueueItem<K, T>* other_tree_item);
+
+	void swap(PriorityQueueItem<K, T>* other_tree_item);
 public:
 	virtual ~PriorityQueueItem();
-	DataItem<K, T>*& data_item();
+
 	const int identifier() const;
 	K& priority();
 	T& data();
 };
 
-template <typename K, typename T>
-class ArrayItem : public PriorityQueueItem<K, T>
-{
-protected:
-	int index_;
-public:
-	ArrayItem(const int identifier, const K& priority, const T& data, const int index);
-};
+
 
 template <typename K, typename T>
 class BinaryTreeItem : public PriorityQueueItem<K, T>
@@ -61,13 +37,12 @@ public:
 	virtual BinaryTreeItem* add_left_son(BinaryTreeItem* node);
 	virtual BinaryTreeItem* add_right_son(BinaryTreeItem* node);
 
-	BinaryTreeItem* left_son();
-	BinaryTreeItem* right_son();
-	BinaryTreeItem* parent();
+	BinaryTreeItem*& left_son();
+	BinaryTreeItem*& right_son();
+	BinaryTreeItem*& parent();
 
 	virtual BinaryTreeItem<K, T>* left_son(BinaryTreeItem* node);
 	virtual BinaryTreeItem<K, T>* right_son(BinaryTreeItem* node);
-	BinaryTreeItem<K, T>* parent(BinaryTreeItem* node);
 };
 
 template <typename K, typename T>
@@ -76,9 +51,9 @@ class DegreeBinaryTreeItem : public BinaryTreeItem<K, T>
 protected:
 	int degree_;
 public:
-	DegreeBinaryTreeItem(const int identifier, const K& priority, const T& data, const int degree);
+	DegreeBinaryTreeItem(const int identifier, const K& priority, const T& data);
 
-	BinaryTreeItem* add_left_son(BinaryTreeItem* node) override;
+	DegreeBinaryTreeItem<K, T>* add_left_son(BinaryTreeItem<K, T>* node) override;
 	
 	int& degree();
 };
@@ -93,17 +68,17 @@ public:
 	BinaryTreeItemWithAncestor(const int identifier, const K& priority, const T& data);
 	~BinaryTreeItemWithAncestor();
 
-	BinaryTreeItem<K, T>* cut() override;
-	BinaryTreeItem<K, T>* add_left_son(BinaryTreeItem<K, T>* node) override;
-	BinaryTreeItem<K, T>* add_right_son(BinaryTreeItem<K, T>* node) override;
+	BinaryTreeItemWithAncestor<K, T>* cut() override;
+	BinaryTreeItemWithAncestor<K, T>* add_left_son(BinaryTreeItem<K, T>* node) override;
+	BinaryTreeItemWithAncestor<K, T>* add_right_son(BinaryTreeItem<K, T>* node) override;
 
 	BinaryTreeItemWithAncestor* find_minimal_left_son();
 	void swap_with_ordered_ancestor();
 
 	BinaryTreeItemWithAncestor<K, T>* ordered_ancestor();
 
-	BinaryTreeItem<K, T>* left_son(BinaryTreeItem<K, T>* node) override;
-	BinaryTreeItem<K, T>* right_son(BinaryTreeItem<K, T>* node) override;
+	BinaryTreeItemWithAncestor<K, T>* left_son(BinaryTreeItem<K, T>* node) override;
+	BinaryTreeItemWithAncestor<K, T>* right_son(BinaryTreeItem<K, T>* node) override;
 	BinaryTreeItemWithAncestor<K, T>* ordered_ancestor(BinaryTreeItemWithAncestor<K, T>* node);
 };
 
@@ -119,38 +94,8 @@ public:
 };
 
 template<typename K, typename T>
-inline DataItem<K, T>::DataItem(const int identifier, const K& priority, const T& data) :
-	identifier_(identifier), priority_(priority), data_(data)
-{
-}
-
-template<typename K, typename T>
-inline PriorityQueueItem<K, T>*& DataItem<K, T>::wrapper_item_ptr()
-{
-	return this->wrapper_item_ptr_;
-}
-
-template<typename K, typename T>
-inline K& DataItem<K, T>::priority()
-{
-	return this->priority_;
-}
-
-template<typename K, typename T>
-inline T& DataItem<K, T>::data()
-{
-	return this->data_;
-}
-
-template<typename K, typename T>
-inline const int DataItem<K, T>::identifier() const
-{
-	return this->identifier_;
-}
-
-template<typename K, typename T>
 inline BinaryTreeItem<K, T>::BinaryTreeItem(const int identifier, const K& priority, const T& data) :
-	PriorityQueueItem<K, T>(identifier, priority, data), left_son_(nullptr), right_son_(nullptr), parent_(nullptr), degree_(0)
+	PriorityQueueItem<K, T>(identifier, priority, data), left_son_(nullptr), right_son_(nullptr), parent_(nullptr)
 {
 }
 
@@ -233,19 +178,19 @@ inline BinaryTreeItem<K, T>* BinaryTreeItem<K, T>::add_right_son(BinaryTreeItem<
 }
 
 template<typename K, typename T>
-inline BinaryTreeItem<K, T>* BinaryTreeItem<K, T>::left_son()
+inline BinaryTreeItem<K, T>*& BinaryTreeItem<K, T>::left_son()
 {
 	return this->left_son_;
 }
 
 template<typename K, typename T>
-inline BinaryTreeItem<K, T>* BinaryTreeItem<K, T>::right_son()
+inline BinaryTreeItem<K, T>*& BinaryTreeItem<K, T>::right_son()
 {
 	return this->right_son_;
 }
 
 template<typename K, typename T>
-inline BinaryTreeItem<K, T>* BinaryTreeItem<K, T>::parent()
+inline BinaryTreeItem<K, T>*& BinaryTreeItem<K, T>::parent()
 {
 	return this->parent_;
 }
@@ -274,15 +219,8 @@ inline BinaryTreeItem<K, T>* BinaryTreeItem<K, T>::right_son(BinaryTreeItem<K, T
 }
 
 template<typename K, typename T>
-inline BinaryTreeItem<K, T>* BinaryTreeItem<K, T>::parent(BinaryTreeItem<K, T>* node)
-{
-	this->parent_ = node;
-	return this;
-}
-
-template<typename K, typename T>
 inline BinaryTreeItemWithAncestor<K, T>::BinaryTreeItemWithAncestor(const int identifier, const K& priority, const T& data) :
-	BinaryTreeItem<K, T>(identifier, priority, data), ordered_ancestor_(nullptr)
+	DegreeBinaryTreeItem<K, T>(identifier, priority, data), ordered_ancestor_(nullptr)
 {
 }
 
@@ -293,7 +231,7 @@ inline BinaryTreeItemWithAncestor<K, T>::~BinaryTreeItemWithAncestor()
 }
 
 template<typename K, typename T>
-inline BinaryTreeItem<K, T>* BinaryTreeItemWithAncestor<K, T>::cut()
+inline BinaryTreeItemWithAncestor<K, T>* BinaryTreeItemWithAncestor<K, T>::cut()
 {
 	this->BinaryTreeItem<K, T>::cut();
 	this->ordered_ancestor_ = nullptr;
@@ -301,7 +239,7 @@ inline BinaryTreeItem<K, T>* BinaryTreeItemWithAncestor<K, T>::cut()
 }
 
 template<typename K, typename T>
-inline BinaryTreeItem<K, T>* BinaryTreeItemWithAncestor<K, T>::add_left_son(BinaryTreeItem<K, T>* node)
+inline BinaryTreeItemWithAncestor<K, T>* BinaryTreeItemWithAncestor<K, T>::add_left_son(BinaryTreeItem<K, T>* node)
 {
 	if (node)
 	{
@@ -314,7 +252,7 @@ inline BinaryTreeItem<K, T>* BinaryTreeItemWithAncestor<K, T>::add_left_son(Bina
 }
 
 template<typename K, typename T>
-inline BinaryTreeItem<K, T>* BinaryTreeItemWithAncestor<K, T>::add_right_son(BinaryTreeItem<K, T>* node)
+inline BinaryTreeItemWithAncestor<K, T>* BinaryTreeItemWithAncestor<K, T>::add_right_son(BinaryTreeItem<K, T>* node)
 {
 	if (node)
 	{
@@ -344,7 +282,7 @@ inline void BinaryTreeItemWithAncestor<K, T>::swap_with_ordered_ancestor()
 {
 	if (this->ordered_ancestor_)
 	{
-		this->swap_data_items(this->ordered_ancestor_);
+		this->swap(this->ordered_ancestor_);
 	}
 }
 
@@ -355,7 +293,7 @@ inline BinaryTreeItemWithAncestor<K, T>* BinaryTreeItemWithAncestor<K, T>::order
 }
 
 template<typename K, typename T>
-inline BinaryTreeItem<K, T>* BinaryTreeItemWithAncestor<K, T>::left_son(BinaryTreeItem<K, T>* node)
+inline BinaryTreeItemWithAncestor<K, T>* BinaryTreeItemWithAncestor<K, T>::left_son(BinaryTreeItem<K, T>* node)
 {
 	if (node)
 	{
@@ -374,7 +312,7 @@ inline BinaryTreeItem<K, T>* BinaryTreeItemWithAncestor<K, T>::left_son(BinaryTr
 }
 
 template<typename K, typename T>
-inline BinaryTreeItem<K, T>* BinaryTreeItemWithAncestor<K, T>::right_son(BinaryTreeItem<K, T>* node)
+inline BinaryTreeItemWithAncestor<K, T>* BinaryTreeItemWithAncestor<K, T>::right_son(BinaryTreeItem<K, T>* node)
 {
 	if (node)
 	{
@@ -418,69 +356,57 @@ inline bool& FibonacciHeapItem<K, T>::flag()
 
 template<typename K, typename T>
 inline PriorityQueueItem<K, T>::PriorityQueueItem(const int identifier, const K& priority, const T& data) :
-	data_item_(new DataItem<K, T>(identifier, priority, data))
+	identifier_(identifier), priority_(priority), data_(data)
 {
-	data_item_->wrapper_item_ptr() = this;
 }
 
 template<typename K, typename T>
 inline PriorityQueueItem<K, T>::~PriorityQueueItem()
 {
-	delete this->data_item_;
 }
 
-template<typename K, typename T>
-inline DataItem<K, T>*& PriorityQueueItem<K, T>::data_item()
-{
-	return this->data_item_;
-}
 
 template<typename K, typename T>
 inline const int PriorityQueueItem<K, T>::identifier() const
 {
-	return this->data_item_->identifier();
+	return this->identifier_;
 }
 
 template<typename K, typename T>
-inline void PriorityQueueItem<K, T>::swap_data_items(PriorityQueueItem<K, T>* other_tree_item)
+inline void PriorityQueueItem<K, T>::swap(PriorityQueueItem<K, T>* other_priority_queue_item)
 {
-	std::swap(this->data_item_, other_tree_item->data_item_);
-	std::swap(this->data_item_->wrapper_item_ptr(), other_tree_item->data_item_->wrapper_item_ptr());
+	std::swap(this->identifier_, other_priority_queue_item->identifier_);
+	std::swap(this->priority_, other_priority_queue_item->priority_);
+	std::swap(this->data_, other_priority_queue_item->data_);
 }
 
 template<typename K, typename T>
 inline K& PriorityQueueItem<K, T>::priority()
 {
-	return this->data_item_->priority();
+	return this->priority_;
 }
 
 template<typename K, typename T>
 inline T& PriorityQueueItem<K, T>::data()
 {
-	return this->data_item_->data();
+	return this->data_;
 }
 
 template<typename K, typename T>
-inline DegreeBinaryTreeItem<K, T>::DegreeBinaryTreeItem(const int identifier, const K& priority, const T& data, const int degree) :
-	BinaryTreeItem<K, T>(identifier, priority, data), degree_(degree)
+inline DegreeBinaryTreeItem<K, T>::DegreeBinaryTreeItem(const int identifier, const K& priority, const T& data) :
+	BinaryTreeItem<K, T>(identifier, priority, data), degree_(0)
 {
 }
 
 template<typename K, typename T>
-inline BinaryTreeItem<K, T>* DegreeBinaryTreeItem<K, T>::add_left_son(BinaryTreeItem<K, T>* node)
+inline DegreeBinaryTreeItem<K, T>* DegreeBinaryTreeItem<K, T>::add_left_son(BinaryTreeItem<K, T>* node)
 {
 	this->degree_++;
-	return this->BinaryTreeItem<K, T>::add_left_son(node);
+	return (DegreeBinaryTreeItem*)this->BinaryTreeItem<K, T>::add_left_son(node);
 }
 
 template<typename K, typename T>
 inline int& DegreeBinaryTreeItem<K, T>::degree()
 {
 	return this->degree_;
-}
-
-template<typename K, typename T>
-inline ArrayItem<K, T>::ArrayItem(const int identifier, const K& priority, const T& data, const int index) :
-	PriorityQueueItem<K, T>(identifier, priority, data), index_(index)
-{
 }
