@@ -27,6 +27,19 @@ public:
 template<typename K, typename T>
 inline void LazyBinomialHeap<K, T>::consolidate_root_using_multipass(BinaryTreeItem<K, T>* node, size_t array_size)
 {
+	auto it = [](BinaryTreeItem<K, T>* i)
+	{
+		if (i && i->parent())
+		{
+			BinaryTreeItem<K, T>* p = i->parent();
+			while (p->parent() && p->parent() != p)
+			{
+				p = p->parent();
+			}
+			return p;
+		}
+		return i;
+	};
 	std::vector<BinaryTreeItem<K, T>*> node_list(array_size);
 	size_t node_degree;
 
@@ -49,11 +62,13 @@ inline void LazyBinomialHeap<K, T>::consolidate_root_using_multipass(BinaryTreeI
 
 	if (this->root_)
 	{
+		int size = this->size_;
 		BinaryTreeItem<K, T>* node_ptr = this->root_->right_son();
 		this->root_->right_son() = nullptr;
+		
 
-		for (BinaryTreeItem<K, T>* node_next_ptr = node_ptr->right_son(); node_ptr != this->root_;
-			node_ptr = node_next_ptr, node_next_ptr = node_ptr->right_son())
+		for (BinaryTreeItem<K, T>* node_next_ptr = it(node_ptr->right_son()); node_ptr != this->root_;
+			node_ptr = node_next_ptr, node_next_ptr = it(node_ptr->right_son()))
 		{
 			node_ptr->right_son() = nullptr;
 			node_degree = static_cast<DegreeBinaryTreeItem<K, T>*>(node_ptr)->degree();
@@ -78,6 +93,7 @@ inline void LazyBinomialHeap<K, T>::consolidate_root_using_multipass(BinaryTreeI
 			}
 			node_list[node_degree] = node_ptr;
 		}
+
 		this->root_ = nullptr;
 	}
 
@@ -93,6 +109,19 @@ inline void LazyBinomialHeap<K, T>::consolidate_root_using_multipass(BinaryTreeI
 template<typename K, typename T>
 inline void LazyBinomialHeap<K, T>::consolidate_root_using_singlepass(BinaryTreeItem<K, T>* node, size_t array_size)
 {
+	BinaryTreeItem<K, T>* it = [](BinaryTreeItem<K, T>* i)
+	{
+		if (i && i->parent())
+		{
+			BinaryTreeItem<K, T>* p = i->parent();
+			while (p->parent() && p->parent() != p)
+			{
+				p = p->parent();
+			}
+			return p;
+		}
+		return i;
+	};
 	std::vector<BinaryTreeItem<K, T>*> node_list(array_size);
 	BinaryTreeItem<K, T>* root = this->root_;
 	size_t node_degree;
@@ -121,11 +150,11 @@ inline void LazyBinomialHeap<K, T>::consolidate_root_using_singlepass(BinaryTree
 
 	if (root)
 	{
-		BinaryTreeItem<K, T>* node_ptr = this->root_->right_son();
-		this->root_->right_son() = nullptr;
+		BinaryTreeItem<K, T>* node_ptr = root->right_son();
+		root->right_son() = nullptr;
 
-		for (BinaryTreeItem<K, T>*  node_next_ptr = node_ptr->right_son(); node_ptr != root;
-			node_ptr = node_next_ptr, node_next_ptr = node_ptr->right_son())
+		for (BinaryTreeItem<K, T>*  node_next_ptr = it(node_ptr->right_son()); node_ptr != root;
+			node_ptr = node_next_ptr, node_next_ptr = it(node_ptr->right_son()))
 		{
 			node_ptr->right_son() = nullptr;
 
@@ -160,7 +189,6 @@ inline void LazyBinomialHeap<K, T>::consolidate_root_using_singlepass(BinaryTree
 				node_list[node_degree] = node_ptr;
 			}
 		}
-		this->root_ = nullptr;
 	}
 
 	for (BinaryTreeItem<K, T>* node : node_list)

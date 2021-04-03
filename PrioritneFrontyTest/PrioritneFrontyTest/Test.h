@@ -53,13 +53,13 @@ inline PriorityQueueList<K, T>::PriorityQueueList() :
 	priority_queue_list_(new std::list<PriorityQueueWrapper<K, T>*>()),
 	identifier_list_(new std::vector<int>())
 {
-	priority_queue_list_->push_back(new PriorityQueueWrapper<K, T>(new BinaryHeap<K, T>()));
-	//priority_queue_list_->push_back(new PriorityQueueWrapper<K, T>(new PairingHeapTwoPass<K, T>()));
-	//priority_queue_list_->push_back(new PriorityQueueWrapper<K, T>(new PairingHeapMultiPass<K, T>()));
-	//priority_queue_list_->push_back(new PriorityQueueWrapper<K, T>(new RankPairingHeap<K, T>()));
-	priority_queue_list_->push_back(new PriorityQueueWrapper<K, T>(new FibonacciHeap<K, T>()));
+	/*priority_queue_list_->push_back(new PriorityQueueWrapper<K, T>(new BinaryHeap<K, T>()));
+	priority_queue_list_->push_back(new PriorityQueueWrapper<K, T>(new PairingHeapTwoPass<K, T>()));
+	priority_queue_list_->push_back(new PriorityQueueWrapper<K, T>(new PairingHeapMultiPass<K, T>()));
+	priority_queue_list_->push_back(new PriorityQueueWrapper<K, T>(new RankPairingHeap<K, T>()));
+	priority_queue_list_->push_back(new PriorityQueueWrapper<K, T>(new FibonacciHeap<K, T>()));*/
 	//priority_queue_list_->push_back(new PriorityQueueWrapper<K, T>(new BinomialHeapSinglePass<K, T>()));
-	//priority_queue_list_->push_back(new PriorityQueueWrapper<K, T>(new BinomialHeapMultiPass<K, T>()));
+	priority_queue_list_->push_back(new PriorityQueueWrapper<K, T>(new BinomialHeapMultiPass<K, T>()));
 }
 
 template<typename K, typename T>
@@ -110,20 +110,21 @@ inline void PriorityQueueList<K, T>::push(const int identifier, const K& priorit
 template<typename K, typename T>
 inline void PriorityQueueList<K, T>::pop()
 {
-	int identifier = -1, last;
+	std::queue<int> queue;
+	int identifier;
 	for (PriorityQueueWrapper<K, T>* item : *this->priority_queue_list_)
 	{
-		last = identifier;
 		identifier = item->pop();
-		if (last != -1 && last != identifier)
-		{
-			std::cout << "error on\t" << last << "\n";
-		}
+		queue.push(identifier);
 	}
-	std::vector<int>::iterator index_iterator = std::find(this->identifier_list_->begin(), this->identifier_list_->end(), identifier);
-	if (index_iterator != this->identifier_list_->end())
+	while (!queue.empty())
 	{
-		this->identifier_list_->erase(index_iterator);
+		std::vector<int>::iterator index_iterator = std::find(this->identifier_list_->begin(), this->identifier_list_->end(), queue.front());
+		if (index_iterator != this->identifier_list_->end())
+		{
+			this->identifier_list_->erase(index_iterator);
+		}
+		queue.pop();
 	}
 }
 

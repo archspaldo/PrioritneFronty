@@ -88,7 +88,7 @@ inline void FibonacciHeap<K, T>::priority_was_decreased(PriorityQueueItem<K, T>*
 {
 	BinaryTreeItem<K, T>* casted_node = (BinaryTreeItem<K, T>*)node;
 	FibonacciHeapItem<K, T>* ordered_ancestor;
-	if (this->root_ == node)
+	if (this->root_ == casted_node)
 	{
 		BinaryTreeItem<K, T>* new_root = this->root_;
 		for (BinaryTreeItem<K, T>* node_ptr = this->root_->right_son(); node_ptr != this->root_; node_ptr = node_ptr->right_son())

@@ -10,8 +10,6 @@ protected:
 	T data_;
 
 	PriorityQueueItem(const int identifier, const K& priority, const T& data);
-
-	void swap(PriorityQueueItem<K, T>* other_tree_item);
 public:
 	virtual ~PriorityQueueItem();
 
@@ -33,9 +31,10 @@ public:
 
 	virtual BinaryTreeItem* cut();
 	virtual BinaryTreeItem* merge(BinaryTreeItem* node);
-
+	virtual void swap_with_parent();
 	virtual BinaryTreeItem* add_left_son(BinaryTreeItem* node);
 	virtual BinaryTreeItem* add_right_son(BinaryTreeItem* node);
+	BinaryTreeItem* higher_priority_son();
 
 	BinaryTreeItem*& left_son();
 	BinaryTreeItem*& right_son();
@@ -53,44 +52,31 @@ protected:
 public:
 	DegreeBinaryTreeItem(const int identifier, const K& priority, const T& data);
 
+	void swap_with_parent() override;
 	DegreeBinaryTreeItem<K, T>* add_left_son(BinaryTreeItem<K, T>* node) override;
 	
 	int& degree();
 };
 
-template <typename K, typename T>
-class BinaryTreeItemWithAncestor : public DegreeBinaryTreeItem<K, T>
-{
-protected:
-	BinaryTreeItemWithAncestor<K, T>* ordered_ancestor_;
-
-public:
-	BinaryTreeItemWithAncestor(const int identifier, const K& priority, const T& data);
-	~BinaryTreeItemWithAncestor();
-
-	BinaryTreeItemWithAncestor<K, T>* cut() override;
-	BinaryTreeItemWithAncestor<K, T>* add_left_son(BinaryTreeItem<K, T>* node) override;
-	BinaryTreeItemWithAncestor<K, T>* add_right_son(BinaryTreeItem<K, T>* node) override;
-
-	BinaryTreeItemWithAncestor* find_minimal_left_son();
-	void swap_with_ordered_ancestor();
-
-	BinaryTreeItemWithAncestor<K, T>* ordered_ancestor();
-
-	BinaryTreeItemWithAncestor<K, T>* left_son(BinaryTreeItem<K, T>* node) override;
-	BinaryTreeItemWithAncestor<K, T>* right_son(BinaryTreeItem<K, T>* node) override;
-	BinaryTreeItemWithAncestor<K, T>* ordered_ancestor(BinaryTreeItemWithAncestor<K, T>* node);
-};
 
 template <typename K, typename T>
-class FibonacciHeapItem : public BinaryTreeItemWithAncestor<K, T>
+class FibonacciHeapItem : public DegreeBinaryTreeItem<K, T>
 {
 protected:
 	bool flag_;
+	FibonacciHeapItem<K, T>* ordered_ancestor_;
 public:
 	FibonacciHeapItem(const int identifier, const K& priority, const T& data);
 	~FibonacciHeapItem();
+	
+	FibonacciHeapItem<K, T>* cut() override;
+	FibonacciHeapItem<K, T>* add_left_son(BinaryTreeItem<K, T>* node) override;
+	FibonacciHeapItem<K, T>* add_right_son(BinaryTreeItem<K, T>* node) override;
+
+	FibonacciHeapItem<K, T>*& ordered_ancestor();
 	bool& flag();
+
+	FibonacciHeapItem<K, T>* left_son(BinaryTreeItem<K, T>* node) override;
 };
 
 template<typename K, typename T>
@@ -158,6 +144,47 @@ inline BinaryTreeItem<K, T>* BinaryTreeItem<K, T>::merge(BinaryTreeItem<K, T>* n
 }
 
 template<typename K, typename T>
+inline void BinaryTreeItem<K, T>::swap_with_parent()
+{
+	if (this->parent_)
+	{
+		BinaryTreeItem* parent = this->parent_, * son;
+		if (parent->parent_)
+		{
+			if (parent->parent_->left_son_ == parent)
+			{
+				parent->parent_->left_son(this);
+			}
+			else
+			{
+				parent->parent_->right_son(this);
+			}
+		}
+		else
+		{
+			this->parent_ = nullptr;
+		}
+		if (parent->left_son_ == this)
+		{
+			parent->left_son(this->left_son_);
+			this->left_son(parent);
+			son = this->right_son();
+			this->right_son(parent->right_son_);
+			parent->right_son(son);
+		}
+		else
+		{
+			parent->right_son(this->right_son_);
+			this->right_son(parent);
+			son = this->left_son();
+			this->left_son(parent->left_son_);
+			parent->left_son(son);
+
+		}
+	}
+}
+
+template<typename K, typename T>
 inline BinaryTreeItem<K, T>* BinaryTreeItem<K, T>::add_left_son(BinaryTreeItem<K, T>* node)
 {
 	if (node)
@@ -175,6 +202,26 @@ inline BinaryTreeItem<K, T>* BinaryTreeItem<K, T>::add_right_son(BinaryTreeItem<
 		this->right_son(node->right_son(this->right_son_));
 	}
 	return this;
+}
+
+template<typename K, typename T>
+inline BinaryTreeItem<K, T>* BinaryTreeItem<K, T>::higher_priority_son()
+{
+	if (this->right_son_ && this->right_son_->parent_)
+	{
+		if (this->left_son_)
+		{
+			return this->left_son_->priority_ < this->right_son_->priority_ ? this->left_son_ : this->right_son_;
+		}
+		else
+		{
+			return this->right_son_;
+		}
+	}
+	else
+	{
+		return this->left_son_;
+	}
 }
 
 template<typename K, typename T>
@@ -219,19 +266,19 @@ inline BinaryTreeItem<K, T>* BinaryTreeItem<K, T>::right_son(BinaryTreeItem<K, T
 }
 
 template<typename K, typename T>
-inline BinaryTreeItemWithAncestor<K, T>::BinaryTreeItemWithAncestor(const int identifier, const K& priority, const T& data) :
-	DegreeBinaryTreeItem<K, T>(identifier, priority, data), ordered_ancestor_(nullptr)
+inline FibonacciHeapItem<K, T>::FibonacciHeapItem(const int identifier, const K& priority, const T& data) :
+	DegreeBinaryTreeItem<K, T>(identifier, priority, data), ordered_ancestor_(nullptr), flag_(false)
 {
 }
 
 template<typename K, typename T>
-inline BinaryTreeItemWithAncestor<K, T>::~BinaryTreeItemWithAncestor()
+inline FibonacciHeapItem<K, T>::~FibonacciHeapItem()
 {
 	this->ordered_ancestor_ = nullptr;
 }
 
 template<typename K, typename T>
-inline BinaryTreeItemWithAncestor<K, T>* BinaryTreeItemWithAncestor<K, T>::cut()
+inline FibonacciHeapItem<K, T>* FibonacciHeapItem<K, T>::cut()
 {
 	this->BinaryTreeItem<K, T>::cut();
 	this->ordered_ancestor_ = nullptr;
@@ -239,11 +286,11 @@ inline BinaryTreeItemWithAncestor<K, T>* BinaryTreeItemWithAncestor<K, T>::cut()
 }
 
 template<typename K, typename T>
-inline BinaryTreeItemWithAncestor<K, T>* BinaryTreeItemWithAncestor<K, T>::add_left_son(BinaryTreeItem<K, T>* node)
+inline FibonacciHeapItem<K, T>* FibonacciHeapItem<K, T>::add_left_son(BinaryTreeItem<K, T>* node)
 {
 	if (node)
 	{
-		BinaryTreeItemWithAncestor* casted_node = (BinaryTreeItemWithAncestor*)node;
+		FibonacciHeapItem* casted_node = (FibonacciHeapItem*)node;
 		casted_node->ordered_ancestor_ = this;
 		this->BinaryTreeItem<K, T>::left_son(casted_node->BinaryTreeItem<K, T>::right_son(this->left_son_));
 		this->degree_++;
@@ -252,11 +299,11 @@ inline BinaryTreeItemWithAncestor<K, T>* BinaryTreeItemWithAncestor<K, T>::add_l
 }
 
 template<typename K, typename T>
-inline BinaryTreeItemWithAncestor<K, T>* BinaryTreeItemWithAncestor<K, T>::add_right_son(BinaryTreeItem<K, T>* node)
+inline FibonacciHeapItem<K, T>* FibonacciHeapItem<K, T>::add_right_son(BinaryTreeItem<K, T>* node)
 {
 	if (node)
 	{
-		BinaryTreeItemWithAncestor* casted_node = (BinaryTreeItemWithAncestor*)node;
+		FibonacciHeapItem* casted_node = (FibonacciHeapItem*)node;
 		casted_node->ordered_ancestor_ = this->ordered_ancestor_;
 		this->BinaryTreeItem<K, T>::right_son(casted_node->BinaryTreeItem<K, T>::right_son(this->right_son_));
 	}
@@ -264,44 +311,27 @@ inline BinaryTreeItemWithAncestor<K, T>* BinaryTreeItemWithAncestor<K, T>::add_r
 }
 
 template<typename K, typename T>
-inline BinaryTreeItemWithAncestor<K, T>* BinaryTreeItemWithAncestor<K, T>::find_minimal_left_son()
-{
-	BinaryTreeItem<K, T>* node = this->BinaryTreeItem<K, T>::left_son();
-	for (BinaryTreeItem<K, T>* node_ptr = this->BinaryTreeItem<K, T>::left_son(); node_ptr; node_ptr = node_ptr->right_son())
-	{
-		if (node_ptr->priority() < node->priority())
-		{
-			node = node_ptr;
-		}
-	}
-	return (BinaryTreeItemWithAncestor*)node;
-}
-
-template<typename K, typename T>
-inline void BinaryTreeItemWithAncestor<K, T>::swap_with_ordered_ancestor()
-{
-	if (this->ordered_ancestor_)
-	{
-		this->swap(this->ordered_ancestor_);
-	}
-}
-
-template<typename K, typename T>
-inline BinaryTreeItemWithAncestor<K, T>* BinaryTreeItemWithAncestor<K, T>::ordered_ancestor()
+inline FibonacciHeapItem<K, T>*& FibonacciHeapItem<K, T>::ordered_ancestor()
 {
 	return this->ordered_ancestor_;
 }
 
 template<typename K, typename T>
-inline BinaryTreeItemWithAncestor<K, T>* BinaryTreeItemWithAncestor<K, T>::left_son(BinaryTreeItem<K, T>* node)
+inline bool& FibonacciHeapItem<K, T>::flag()
+{
+	return this->flag_;
+}
+
+template<typename K, typename T>
+inline FibonacciHeapItem<K, T>* FibonacciHeapItem<K, T>::left_son(BinaryTreeItem<K, T>* node)
 {
 	if (node)
 	{
-		BinaryTreeItemWithAncestor* casted_node = (BinaryTreeItemWithAncestor*)node;
+		FibonacciHeapItem* casted_node = (FibonacciHeapItem*)node;
 		casted_node->parent_ = this;
 		if (casted_node->ordered_ancestor_ != this)
 		{
-			for (BinaryTreeItemWithAncestor* node_ptr = casted_node; node_ptr; node_ptr = (BinaryTreeItemWithAncestor*)(node_ptr->right_son_))
+			for (FibonacciHeapItem* node_ptr = casted_node; node_ptr; node_ptr = (FibonacciHeapItem*)(node_ptr->right_son_))
 			{
 				node_ptr->ordered_ancestor_ = this;
 			}
@@ -309,49 +339,6 @@ inline BinaryTreeItemWithAncestor<K, T>* BinaryTreeItemWithAncestor<K, T>::left_
 	}
 	this->left_son_ = node;
 	return this;
-}
-
-template<typename K, typename T>
-inline BinaryTreeItemWithAncestor<K, T>* BinaryTreeItemWithAncestor<K, T>::right_son(BinaryTreeItem<K, T>* node)
-{
-	if (node)
-	{
-		BinaryTreeItemWithAncestor* casted_node = (BinaryTreeItemWithAncestor*)node;
-		casted_node->parent_ = this;
-		if (casted_node->ordered_ancestor_ != this->ordered_ancestor_)
-		{
-			for (BinaryTreeItemWithAncestor* node_ptr = casted_node; node_ptr; node_ptr = (BinaryTreeItemWithAncestor*)(node_ptr->right_son_))
-			{
-				node_ptr->ordered_ancestor_ = this->ordered_ancestor_;
-			}
-		}
-	}
-	this->right_son_ = node;
-	return this;
-}
-
-template<typename K, typename T>
-inline BinaryTreeItemWithAncestor<K, T>* BinaryTreeItemWithAncestor<K, T>::ordered_ancestor(BinaryTreeItemWithAncestor<K, T>* node)
-{
-	this->ordered_ancestor_ = node;
-	return this;
-}
-
-template<typename K, typename T>
-inline FibonacciHeapItem<K, T>::FibonacciHeapItem(const int identifier, const K& priority, const T& data) :
-	BinaryTreeItemWithAncestor<K, T>(identifier, priority, data), flag_(false)
-{
-}
-
-template<typename K, typename T>
-inline FibonacciHeapItem<K, T>::~FibonacciHeapItem()
-{
-}
-
-template<typename K, typename T>
-inline bool& FibonacciHeapItem<K, T>::flag()
-{
-	return this->flag_;
 }
 
 template<typename K, typename T>
@@ -373,14 +360,6 @@ inline const int PriorityQueueItem<K, T>::identifier() const
 }
 
 template<typename K, typename T>
-inline void PriorityQueueItem<K, T>::swap(PriorityQueueItem<K, T>* other_priority_queue_item)
-{
-	std::swap(this->identifier_, other_priority_queue_item->identifier_);
-	std::swap(this->priority_, other_priority_queue_item->priority_);
-	std::swap(this->data_, other_priority_queue_item->data_);
-}
-
-template<typename K, typename T>
 inline K& PriorityQueueItem<K, T>::priority()
 {
 	return this->priority_;
@@ -396,6 +375,16 @@ template<typename K, typename T>
 inline DegreeBinaryTreeItem<K, T>::DegreeBinaryTreeItem(const int identifier, const K& priority, const T& data) :
 	BinaryTreeItem<K, T>(identifier, priority, data), degree_(0)
 {
+}
+
+template<typename K, typename T>
+inline void DegreeBinaryTreeItem<K, T>::swap_with_parent()
+{
+	if (this->parent_)
+	{
+		std::swap(this->degree_, ((DegreeBinaryTreeItem*)this->parent_)->degree_);
+		this->BinaryTreeItem<K, T>::swap_with_parent();
+	}
 }
 
 template<typename K, typename T>

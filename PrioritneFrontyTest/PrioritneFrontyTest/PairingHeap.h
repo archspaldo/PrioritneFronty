@@ -40,7 +40,6 @@ template<typename K, typename T>
 inline PairingHeap<K, T>::PairingHeap() :
 	LazyBinomialHeap<K, T>()
 {
-	this->root_ = new typename LazyBinomialHeap<K, T>::RootItem(nullptr);
 }
 
 template<typename K, typename T>
@@ -49,8 +48,7 @@ inline void PairingHeap<K, T>::priority_was_increased(PriorityQueueItem<K, T>* n
 	BinaryTreeItem<K, T>* casted_node = (BinaryTreeItem<K, T>*)node;
 	if (casted_node->parent())
 	{
-		casted_node->cut();
-		this->root_->node() = this->root_->node()->merge(casted_node);
+		this->root_ = this->root_->merge(casted_node->cut());
 	}
 }
 
@@ -79,7 +77,7 @@ inline void PairingHeap<K, T>::priority_was_decreased(PriorityQueueItem<K, T>* n
 	}
 	else
 	{
-		this->root_->node() = node_ptr;
+		this->root_ = node_ptr;
 	}
 }
 
@@ -92,13 +90,13 @@ template<typename K, typename T>
 inline void PairingHeap<K, T>::push(const int identifier, const K& key, const T& data, PriorityQueueItem<K, T>*& data_item)
 {
 	BinaryTreeItem<K, T>* new_node = new BinaryTreeItem<K, T>(identifier, key, data);
-	if (this->root_->node())
+	if (this->root_)
 	{
-		this->root_->node() = this->root_->node()->merge(new_node);
+		this->root_ = this->root_->merge(new_node);
 	}
 	else
 	{
-		this->root_->node() = new_node;
+		this->root_ = new_node;
 	}
 	this->size_++;
 	data_item = new_node;
@@ -108,26 +106,25 @@ template<typename K, typename T>
 inline void PairingHeap<K, T>::merge(PriorityQueue<K, T>* other_heap)
 {
 	PairingHeap<K, T>* heap = (PairingHeap<K, T>*)other_heap;
-	if (this->root_->node())
+	if (this->root_)
 	{
-		this->root_->node() = this->root_->node()->merge(heap->root_->node());
-		this->size_ += heap->size_;
+		this->root_ = this->root_->merge(heap->root_);
 	}
 	else
 	{
 		std::swap(this->root_, heap->root_);
-		this->size_ = heap->size_;
 	}
+	this->size_ += heap->size_;
 	delete heap;
 }
 
 template<typename K, typename T>
 inline void PairingHeap<K, T>::consolidate_root(BinaryTreeItem<K, T>* node)
 {
-	this->root_->node() = this->consolidate(this->root_->node()->left_son());
-	if (this->root_->node())
+	this->root_ = this->consolidate(this->root_->left_son());
+	if (this->root_)
 	{
-		this->root_->node()->parent(nullptr);
+		this->root_->parent() = nullptr;
 	}
 }
 
