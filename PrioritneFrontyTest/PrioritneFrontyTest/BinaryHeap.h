@@ -83,11 +83,13 @@ inline T BinaryHeap<K, T>::pop(int& identifier)
 	{
 		swap((*this->list_)[0], (*this->list_)[this->size() - 1]);
 	}
+	
 	PriorityQueueItem<K, T>* item = this->list_->back();
 	this->list_->pop_back();
 	this->heapifyDown(0);
 	T data = item->data();
 	identifier = item->identifier();
+	//std::cout << "BH\t" << item->priority() << "\t" << item->identifier() << "\n";
 	delete item;
 	return data;
 }

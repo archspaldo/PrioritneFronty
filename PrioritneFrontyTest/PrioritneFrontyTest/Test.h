@@ -110,10 +110,15 @@ inline void PriorityQueueList<K, T>::push(const int identifier, const K& priorit
 template<typename K, typename T>
 inline void PriorityQueueList<K, T>::pop()
 {
-	int identifier;
+	int identifier = -1, last;
 	for (PriorityQueueWrapper<K, T>* item : *this->priority_queue_list_)
 	{
+		last = identifier;
 		identifier = item->pop();
+		if (last != -1 && last != identifier)
+		{
+			std::cout << "error on\t" << last << "\n";
+		}
 	}
 	std::vector<int>::iterator index_iterator = std::find(this->identifier_list_->begin(), this->identifier_list_->end(), identifier);
 	if (index_iterator != this->identifier_list_->end())

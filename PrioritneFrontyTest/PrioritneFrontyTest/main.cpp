@@ -5,7 +5,7 @@
 
 int main()
 {
-    srand(time(NULL));
+    srand(420);
     initHeapMonitor();
     /*h->push(3, 3);
     h->push(15, 15);

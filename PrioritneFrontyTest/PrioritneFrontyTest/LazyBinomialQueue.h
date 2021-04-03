@@ -243,6 +243,7 @@ inline T LazyBinomialHeap<K, T>::pop(int& identifier)
 {
 	if (this->root_)
 	{
+		
 		BinaryTreeItem<K, T>* root = this->root_;
 		this->root_->parent() = this->root_;
 		this->consolidate_root(root->left_son());
@@ -250,6 +251,7 @@ inline T LazyBinomialHeap<K, T>::pop(int& identifier)
 		this->size_--;
 		T data = root->data();
 		identifier = root->identifier();
+		//std::cout << "LH\t" << root->priority() << "\t" << root->identifier() << "\n";
 		delete root;
 		return data;
 	}
