@@ -154,6 +154,7 @@
     <ClInclude Include="PriorityQueueItems.h" />
     <ClInclude Include="RankPairingHeap.h" />
     <ClInclude Include="Test.h" />
+    <ClInclude Include="Wrapper.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />

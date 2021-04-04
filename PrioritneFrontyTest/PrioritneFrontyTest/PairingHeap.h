@@ -49,6 +49,7 @@ inline void PairingHeap<K, T>::priority_was_increased(PriorityQueueItem<K, T>* n
 	if (casted_node->parent())
 	{
 		this->root_ = this->root_->merge(casted_node->cut());
+		this->root_->parent() = nullptr;
 	}
 }
 
@@ -78,6 +79,7 @@ inline void PairingHeap<K, T>::priority_was_decreased(PriorityQueueItem<K, T>* n
 	else
 	{
 		this->root_ = node_ptr;
+		this->root_->parent() = nullptr;
 	}
 }
 
@@ -146,7 +148,7 @@ inline BinaryTreeItem<K, T>* PairingHeapTwoPass<K, T>::consolidate(BinaryTreeIte
 		{
 			node_next_ptr = node_ptr->right_son() ? node_ptr->right_son()->right_son() : nullptr;
 			node_ptr = node_ptr->merge(node_ptr->right_son());
-			node_ptr->right_son(nullptr);
+			node_ptr->right_son() = nullptr;
 			stack.push(node_ptr);
 			node_ptr = node_next_ptr;
 		}
@@ -179,7 +181,7 @@ inline BinaryTreeItem<K, T>* PairingHeapMultiPass<K, T>::consolidate(BinaryTreeI
 		{
 			node_next_ptr = node_ptr->right_son() ? node_ptr->right_son()->right_son() : nullptr;
 			node_ptr = node_ptr->merge(node_ptr->right_son());
-			node_ptr->right_son(nullptr);
+			node_ptr->right_son() = nullptr;
 			queue.push(node_ptr);
 			node_ptr = node_next_ptr;
 		}

@@ -16,9 +16,9 @@ public:
 	const int identifier() const;
 	K& priority();
 	T& data();
+
+	bool operator<(PriorityQueueItem<K, T>& operand);
 };
-
-
 
 template <typename K, typename T>
 class BinaryTreeItem : public PriorityQueueItem<K, T>
@@ -131,7 +131,7 @@ inline BinaryTreeItem<K, T>* BinaryTreeItem<K, T>::merge(BinaryTreeItem<K, T>* n
 {
 	if (node)
 	{
-		if (this->priority() < node->priority())
+		if (*this < *node)
 		{
 			return this->add_left_son(node);
 		}
@@ -169,7 +169,11 @@ inline void BinaryTreeItem<K, T>::swap_with_parent()
 			parent->left_son(this->left_son_);
 			this->left_son(parent);
 			son = this->right_son();
-			this->right_son(parent->right_son_);
+			this->right_son_ = parent->right_son_;
+			if (this->right_son_ && this->right_son_->parent_)
+			{
+				this->right_son_->parent_ = this;
+			}
 			parent->right_son(son);
 		}
 		else
@@ -211,7 +215,7 @@ inline BinaryTreeItem<K, T>* BinaryTreeItem<K, T>::higher_priority_son()
 	{
 		if (this->left_son_)
 		{
-			return this->left_son_->priority_ < this->right_son_->priority_ ? this->left_son_ : this->right_son_;
+			return *this->left_son_ < *this->right_son_ ? this->left_son_ : this->right_son_;
 		}
 		else
 		{
@@ -369,6 +373,12 @@ template<typename K, typename T>
 inline T& PriorityQueueItem<K, T>::data()
 {
 	return this->data_;
+}
+
+template<typename K, typename T>
+inline bool PriorityQueueItem<K, T>::operator<(PriorityQueueItem<K, T>& operand)
+{
+	return this->priority_ <= operand.priority_ && (this->priority_ < operand.priority_ || this->identifier_ <= operand.identifier_);
 }
 
 template<typename K, typename T>
