@@ -111,11 +111,9 @@ template<typename K, typename T>
 inline void PriorityQueueList<K, T>::pop()
 {
 	std::queue<int> queue;
-	int identifier;
 	for (PriorityQueueWrapper<K, T>* item : *this->priority_queue_list_)
 	{
-		identifier = item->pop();
-		queue.push(identifier);
+		queue.push(item->pop());
 	}
 	while (!queue.empty())
 	{
