@@ -1,40 +1,40 @@
 #pragma once
 #include "LazyBinomialQueue.h"
 
-template <typename K, typename T>
-class FibonacciHeap : public LazyBinomialHeap<K, T>
+template <typename Priority, typename Data>
+class FibonacciHeap : public LazyBinomialHeap<Priority, Data>
 {
 private:
-	void cut(FibonacciHeapItem<K, T>* node);
-	void cascading_cut(FibonacciHeapItem<K, T>* node);
+	void cut(FibonacciHeapItem<Priority, Data>* node);
+	void cascading_cut(FibonacciHeapItem<Priority, Data>* node);
 protected:
-	void consolidate_root(BinaryTreeItem<K, T>* node) override;
-	void priority_was_increased(PriorityQueueItem<K, T>* node) override;
-	void priority_was_decreased(PriorityQueueItem<K, T>* node) override;
+	void consolidate_root(BinaryTreeItem<Priority, Data>* node) override;
+	void priority_was_increased(PriorityQueueItem<Priority, Data>* node) override;
+	void priority_was_decreased(PriorityQueueItem<Priority, Data>* node) override;
 public:
 	FibonacciHeap();
 	~FibonacciHeap();
-	void push(const int identifier, const K& priority, const T& data, PriorityQueueItem<K, T>*& = nullptr) override;
+	void push(const int identifier, const Priority& priority, const Data& data, PriorityQueueItem<Priority, Data>*& = nullptr) override;
 };
 
-template<typename K, typename T>
-inline FibonacciHeap<K, T>::FibonacciHeap()
+template<typename Priority, typename Data>
+inline FibonacciHeap<Priority, Data>::FibonacciHeap()
 {
 }
 
-template<typename K, typename T>
-inline FibonacciHeap<K, T>::~FibonacciHeap()
+template<typename Priority, typename Data>
+inline FibonacciHeap<Priority, Data>::~FibonacciHeap()
 {
 }
 
-template<typename K, typename T>
-inline void FibonacciHeap<K, T>::push(const int identifier, const K& priority, const T& data, PriorityQueueItem<K, T>*& data_item)
+template<typename Priority, typename Data>
+inline void FibonacciHeap<Priority, Data>::push(const int identifier, const Priority& priority, const Data& data, PriorityQueueItem<Priority, Data>*& data_item)
 {
-	data_item = this->LazyBinomialHeap<K, T>::push(new FibonacciHeapItem<K, T>(identifier, priority, data));
+	data_item = this->LazyBinomialHeap<Priority, Data>::push(new FibonacciHeapItem<Priority, Data>(identifier, priority, data));
 }
 
-template<typename K, typename T>
-inline void FibonacciHeap<K, T>::cut(FibonacciHeapItem<K, T>* node)
+template<typename Priority, typename Data>
+inline void FibonacciHeap<Priority, Data>::cut(FibonacciHeapItem<Priority, Data>* node)
 {
 	node->ordered_ancestor()->degree()--;
 	node->cut();
@@ -42,14 +42,14 @@ inline void FibonacciHeap<K, T>::cut(FibonacciHeapItem<K, T>* node)
 	node->flag() = false;
 }
 
-template<typename K, typename T>
-inline void FibonacciHeap<K, T>::cascading_cut(FibonacciHeapItem<K, T>* node)
+template<typename Priority, typename Data>
+inline void FibonacciHeap<Priority, Data>::cascading_cut(FibonacciHeapItem<Priority, Data>* node)
 {
 	if (node->ordered_ancestor())
 	{
 		if (node->flag())
 		{
-			FibonacciHeapItem<K, T>* ordered_ancestor = (FibonacciHeapItem<K, T>*)node->ordered_ancestor();
+			FibonacciHeapItem<Priority, Data>* ordered_ancestor = (FibonacciHeapItem<Priority, Data>*)node->ordered_ancestor();
 			this->cut(node);
 			this->cascading_cut(ordered_ancestor);
 		}
@@ -60,19 +60,19 @@ inline void FibonacciHeap<K, T>::cascading_cut(FibonacciHeapItem<K, T>* node)
 	}
 }
 
-template<typename K, typename T>
-inline void FibonacciHeap<K, T>::consolidate_root(BinaryTreeItem<K, T>* node)
+template<typename Priority, typename Data>
+inline void FibonacciHeap<Priority, Data>::consolidate_root(BinaryTreeItem<Priority, Data>* node)
 {
 	this->consolidate_root_using_multipass(node, (int)(log(this->size_) * 2.1) + 2);
 }
 
-template<typename K, typename T>
-inline void FibonacciHeap<K, T>::priority_was_increased(PriorityQueueItem<K, T>* node)
+template<typename Priority, typename Data>
+inline void FibonacciHeap<Priority, Data>::priority_was_increased(PriorityQueueItem<Priority, Data>* node)
 {
-	FibonacciHeapItem<K, T>* casted_node = (FibonacciHeapItem<K, T>*)node;
-	if (casted_node->ordered_ancestor() && casted_node->priority() < casted_node->ordered_ancestor()->priority())
+	FibonacciHeapItem<Priority, Data>* casted_node = (FibonacciHeapItem<Priority, Data>*)node;
+	if (casted_node->ordered_ancestor() && *casted_node < *casted_node->ordered_ancestor())
 	{
-		FibonacciHeapItem<K, T>* ordered_ancestor = (FibonacciHeapItem<K, T>*)((FibonacciHeapItem<K, T>*)node)->ordered_ancestor();
+		FibonacciHeapItem<Priority, Data>* ordered_ancestor = (FibonacciHeapItem<Priority, Data>*)((FibonacciHeapItem<Priority, Data>*)node)->ordered_ancestor();
 		this->cut(casted_node);
 		this->cascading_cut(ordered_ancestor);
 	}
@@ -82,15 +82,15 @@ inline void FibonacciHeap<K, T>::priority_was_increased(PriorityQueueItem<K, T>*
 	}
 }
 
-template<typename K, typename T>
-inline void FibonacciHeap<K, T>::priority_was_decreased(PriorityQueueItem<K, T>* node)
+template<typename Priority, typename Data>
+inline void FibonacciHeap<Priority, Data>::priority_was_decreased(PriorityQueueItem<Priority, Data>* node)
 {
-	BinaryTreeItem<K, T>* casted_node = (BinaryTreeItem<K, T>*)node;
-	FibonacciHeapItem<K, T>* ordered_ancestor;
+	BinaryTreeItem<Priority, Data>* casted_node = (BinaryTreeItem<Priority, Data>*)node;
+	FibonacciHeapItem<Priority, Data>* ordered_ancestor;
 	if (this->root_ == casted_node)
 	{
-		BinaryTreeItem<K, T>* new_root = this->root_;
-		for (BinaryTreeItem<K, T>* node_ptr = this->root_->right_son(); node_ptr != this->root_; node_ptr = node_ptr->right_son())
+		BinaryTreeItem<Priority, Data>* new_root = this->root_;
+		for (BinaryTreeItem<Priority, Data>* node_ptr = this->root_->right_son(); node_ptr != this->root_; node_ptr = node_ptr->right_son())
 		{
 			if (*node_ptr < *new_root)
 			{
@@ -99,13 +99,13 @@ inline void FibonacciHeap<K, T>::priority_was_decreased(PriorityQueueItem<K, T>*
 		}
 		this->root_ = new_root;
 	}
-	for (BinaryTreeItem<K, T>* node_ptr = casted_node->left_son(), * node_next_ptr = node_ptr ? node_ptr->right_son() : nullptr; node_ptr;
+	for (BinaryTreeItem<Priority, Data>* node_ptr = casted_node->left_son(), *node_next_ptr = node_ptr ? node_ptr->right_son() : nullptr; node_ptr;
 		node_ptr = node_next_ptr, node_next_ptr = node_ptr ? node_ptr->right_son() : nullptr)
 	{
 		if (*node_ptr < *node)
 		{
-			ordered_ancestor = (FibonacciHeapItem<K, T>*)((FibonacciHeapItem<K, T>*)node_ptr)->ordered_ancestor();
-			this->cut((FibonacciHeapItem<K, T>*)node_ptr);
+			ordered_ancestor = (FibonacciHeapItem<Priority, Data>*)((FibonacciHeapItem<Priority, Data>*)node_ptr)->ordered_ancestor();
+			this->cut((FibonacciHeapItem<Priority, Data>*)node_ptr);
 			this->cascading_cut(ordered_ancestor);
 		}
 	}

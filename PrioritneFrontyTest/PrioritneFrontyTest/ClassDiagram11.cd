@@ -1,0 +1,151 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="PriorityQueueItem&lt;Priority, Data&gt;">
+    <Position X="5" Y="5.75" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AAAEAIAAAAQAAAAAAAAAAAAAAAAgAABAAAAwAAAAAAA=</HashCode>
+      <FileName>PriorityQueueItems.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ArrayItem&lt;Priority, Data&gt;">
+    <Position X="8.25" Y="8" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAABAAA=</HashCode>
+      <FileName>PriorityQueueItems.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="BinaryTreeItem&lt;Priority, Data&gt;">
+    <Position X="8.25" Y="3.5" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAgAAEAAAAAABAAAAAEAAAgAQBAAAAQAEAAAAAJAI=</HashCode>
+      <FileName>PriorityQueueItems.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="DegreeBinaryTreeItem&lt;Priority, Data&gt;">
+    <Position X="11.5" Y="3.5" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAQAAAAAAAAAAAAEAAAAAAAEAAAIAAAAAAABAA=</HashCode>
+      <FileName>PriorityQueueItems.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="FibonacciHeapItem&lt;Priority, Data&gt;">
+    <Position X="11.5" Y="6.25" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>BAAAACAEBAAAAAAAAIAAEAAAAAAAAAAAAAAAAABAIEI=</HashCode>
+      <FileName>PriorityQueueItems.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PriorityQueue&lt;Priority, Data&gt;">
+    <Position X="20" Y="10.75" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>IEAAAAAAIAAAAAAAAIAAAYAAAAAAAICAAAEIAAAAABA=</HashCode>
+      <FileName>PriorityQueue.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="BinaryHeap&lt;Priority, Data&gt;">
+    <Position X="17.75" Y="14.75" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AFACAAAAAAgAAABAAIAAAYAAAAAEQIGACQEIABAAAAA=</HashCode>
+      <FileName>BinaryHeap.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="BinomialHeap&lt;Priority, Data&gt;" Collapsed="true">
+    <Position X="23.25" Y="12.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAEAgQAAAAAAAIAAAAEIAAEAAAA=</HashCode>
+      <FileName>BinomialHeap.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="BinomialHeapMultiPass&lt;Priority, Data&gt;" Collapsed="true">
+    <Position X="22" Y="13.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAICAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgA=</HashCode>
+      <FileName>BinomialHeap.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="BinomialHeapSinglePass&lt;Priority, Data&gt;" Collapsed="true">
+    <Position X="24.25" Y="13.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAACAAAAAIAAAACAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>BinomialHeap.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="FibonacciHeap&lt;Priority, Data&gt;" Collapsed="true">
+    <Position X="31" Y="12.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAACAEAAAAAAAAAAAAAQAIAAAAAIAAAAAIIACAAAA=</HashCode>
+      <FileName>FibonacciHeap.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="LazyBinomialHeap&lt;Priority, Data&gt;" Collapsed="true">
+    <Position X="27.75" Y="10.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AUAAACAAAAAAAAEAAKAAAIBAQgAAABCAAAEIAAAAAAA=</HashCode>
+      <FileName>LazyBinomialQueue.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PairingHeap&lt;Priority, Data&gt;" Collapsed="true">
+    <Position X="27.75" Y="12.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EAAAACAAAAAABAAAAAAAAQAAAAAAAIAABAEIAAAAAAA=</HashCode>
+      <FileName>PairingHeap.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PairingHeapTwoPass&lt;Priority, Data&gt;" Collapsed="true">
+    <Position X="26.5" Y="13.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAA=</HashCode>
+      <FileName>PairingHeap.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PairingHeapMultiPass&lt;Priority, Data&gt;" Collapsed="true">
+    <Position X="28.75" Y="13.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>PairingHeap.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RankPairingHeap&lt;Priority, Data&gt;" Collapsed="true">
+    <Position X="33.25" Y="12.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ABAAACAAAAAAAAAAAAAAAQAAAAAAAIAAAAAIAAQAAAA=</HashCode>
+      <FileName>RankPairingHeap.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Test&lt;Priority, Data&gt;" Collapsed="true">
+    <Position X="4.25" Y="10.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Test.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PushTest" Collapsed="true">
+    <Position X="3.25" Y="11.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Test.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RandomTest" Collapsed="true">
+    <Position X="5.5" Y="11.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Test.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PriorityQueueWrapper&lt;Priority, Data&gt;" Collapsed="true">
+    <Position X="32.25" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAEAAAAAAAEAAQAAIAAAAAAAACAAgFIAAAAABA=</HashCode>
+      <FileName>Wrapper.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PriorityQueueList&lt;Priority, Data&gt;" Collapsed="true">
+    <Position X="30.5" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEAAAAAEAACAAAAAAIAAAIAAgAAAABGAAAEIAAAAABA=</HashCode>
+      <FileName>Wrapper.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

@@ -1,42 +1,41 @@
 #pragma once
 #include "PriorityQueue.h"
 
-template <typename K, typename T>
-class LazyBinomialHeap : public PriorityQueue<K, T>
+template <typename Priority, typename Data>
+class LazyBinomialHeap : public PriorityQueue<Priority, Data>
 {
 protected:
-	BinaryTreeItem<K, T>* root_;
+	BinaryTreeItem<Priority, Data>* root_;
 	size_t size_;
-	PriorityQueueItem<K, T>* push(BinaryTreeItem<K, T>* node);
-	void add_root_item(BinaryTreeItem<K, T>* node);
-	virtual void consolidate_root(BinaryTreeItem<K, T>* node) = 0;
-	void consolidate_root_using_multipass(BinaryTreeItem<K, T>* node, size_t array_size);
-	void consolidate_root_using_singlepass(BinaryTreeItem<K, T>* node, size_t array_size);
+	PriorityQueueItem<Priority, Data>* push(BinaryTreeItem<Priority, Data>* node);
+	void add_root_item(BinaryTreeItem<Priority, Data>* node);
+	virtual void consolidate_root(BinaryTreeItem<Priority, Data>* node) = 0;
+	void consolidate_root_using_multipass(BinaryTreeItem<Priority, Data>* node, size_t array_size);
+	void consolidate_root_using_singlepass(BinaryTreeItem<Priority, Data>* node, size_t array_size);
 	LazyBinomialHeap();
 public:
 	virtual ~LazyBinomialHeap();
-	void clear() override;
+	virtual void clear() override;
 	size_t size() const override;
-	virtual void push(const int identifier, const K& priority, const T& data, PriorityQueueItem<K, T>*&) = 0;
-	T pop(int& identifier) override;
-	T& find_min() override;
-	virtual void merge(PriorityQueue<K, T>* other_heap) override;
+	virtual void push(const int identifier, const Priority& priority, const Data& data, PriorityQueueItem<Priority, Data>*&) = 0;
+	virtual Data pop(int& identifier) override;
+	Data& find_min() override;
+	virtual void merge(PriorityQueue<Priority, Data>* other_heap) override;
 };
 
-
-template<typename K, typename T>
-inline void LazyBinomialHeap<K, T>::consolidate_root_using_multipass(BinaryTreeItem<K, T>* node, size_t array_size)
+template<typename Priority, typename Data>
+inline void LazyBinomialHeap<Priority, Data>::consolidate_root_using_multipass(BinaryTreeItem<Priority, Data>* node, size_t array_size)
 {
-	std::vector<BinaryTreeItem<K, T>*> node_list(array_size);
+	std::vector<BinaryTreeItem<Priority, Data>*> node_list(array_size);
 	size_t node_degree;
 
 	if (node)
 	{
-		for (BinaryTreeItem<K, T>* node_ptr = node, * node_next_ptr = node_ptr->right_son(); node_ptr;
+		for (BinaryTreeItem<Priority, Data>* node_ptr = node, *node_next_ptr = node_ptr->right_son(); node_ptr;
 			node_ptr = node_next_ptr, node_next_ptr = node_ptr ? node_ptr->right_son() : nullptr)
 		{
 			node_ptr->cut();
-			node_degree = dynamic_cast<DegreeBinaryTreeItem<K, T>*>(node_ptr)->degree();
+			node_degree = dynamic_cast<DegreeBinaryTreeItem<Priority, Data>*>(node_ptr)->degree();
 
 			while (node_list[node_degree])
 			{
@@ -50,15 +49,14 @@ inline void LazyBinomialHeap<K, T>::consolidate_root_using_multipass(BinaryTreeI
 	if (this->root_)
 	{
 		int size = this->size_;
-		BinaryTreeItem<K, T>* node_ptr = this->root_->right_son();
+		BinaryTreeItem<Priority, Data>* node_ptr = this->root_->right_son();
 		this->root_->right_son() = nullptr;
-		
 
-		for (BinaryTreeItem<K, T>* node_next_ptr = node_ptr->right_son(); node_ptr != this->root_;
+		for (BinaryTreeItem<Priority, Data>* node_next_ptr = node_ptr->right_son(); node_ptr != this->root_;
 			node_ptr = node_next_ptr, node_next_ptr = node_ptr->right_son())
 		{
 			node_ptr->right_son() = nullptr;
-			node_degree = static_cast<DegreeBinaryTreeItem<K, T>*>(node_ptr)->degree();
+			node_degree = static_cast<DegreeBinaryTreeItem<Priority, Data>*>(node_ptr)->degree();
 
 			while (node_list[node_degree])
 			{
@@ -71,7 +69,7 @@ inline void LazyBinomialHeap<K, T>::consolidate_root_using_multipass(BinaryTreeI
 		if (!this->root_->parent())
 		{
 			node_ptr = this->root_;
-			node_degree = static_cast<DegreeBinaryTreeItem<K, T>*>(node_ptr)->degree();
+			node_degree = static_cast<DegreeBinaryTreeItem<Priority, Data>*>(node_ptr)->degree();
 
 			while (node_list[node_degree])
 			{
@@ -84,7 +82,7 @@ inline void LazyBinomialHeap<K, T>::consolidate_root_using_multipass(BinaryTreeI
 		this->root_ = nullptr;
 	}
 
-	for (BinaryTreeItem<K, T>* node : node_list)
+	for (BinaryTreeItem<Priority, Data>* node : node_list)
 	{
 		if (node)
 		{
@@ -93,21 +91,21 @@ inline void LazyBinomialHeap<K, T>::consolidate_root_using_multipass(BinaryTreeI
 	}
 }
 
-template<typename K, typename T>
-inline void LazyBinomialHeap<K, T>::consolidate_root_using_singlepass(BinaryTreeItem<K, T>* node, size_t array_size)
+template<typename Priority, typename Data>
+inline void LazyBinomialHeap<Priority, Data>::consolidate_root_using_singlepass(BinaryTreeItem<Priority, Data>* node, size_t array_size)
 {
-	std::vector<BinaryTreeItem<K, T>*> node_list(array_size);
-	BinaryTreeItem<K, T>* root = this->root_;
+	std::vector<BinaryTreeItem<Priority, Data>*> node_list(array_size);
+	BinaryTreeItem<Priority, Data>* root = this->root_;
 	size_t node_degree;
 	this->root_ = nullptr;
 
 	if (node)
 	{
-		for (BinaryTreeItem<K, T>* node_ptr = node, * node_next_ptr = node_ptr->right_son(); node_ptr;
+		for (BinaryTreeItem<Priority, Data>* node_ptr = node, *node_next_ptr = node_ptr->right_son(); node_ptr;
 			node_ptr = node_next_ptr, node_next_ptr = node_ptr ? node_ptr->right_son() : nullptr)
 		{
 			node_ptr->cut();
-			node_degree = dynamic_cast<DegreeBinaryTreeItem<K, T>*>(node_ptr)->degree();
+			node_degree = dynamic_cast<DegreeBinaryTreeItem<Priority, Data>*>(node_ptr)->degree();
 
 			if (node_list[node_degree])
 			{
@@ -124,15 +122,15 @@ inline void LazyBinomialHeap<K, T>::consolidate_root_using_singlepass(BinaryTree
 
 	if (root)
 	{
-		BinaryTreeItem<K, T>* node_ptr = root->right_son();
+		BinaryTreeItem<Priority, Data>* node_ptr = root->right_son();
 		root->right_son() = nullptr;
 
-		for (BinaryTreeItem<K, T>*  node_next_ptr = node_ptr->right_son(); node_ptr != root;
+		for (BinaryTreeItem<Priority, Data>* node_next_ptr = node_ptr->right_son(); node_ptr != root;
 			node_ptr = node_next_ptr, node_next_ptr = node_ptr->right_son())
 		{
 			node_ptr->right_son() = nullptr;
 
-			node_degree = dynamic_cast<DegreeBinaryTreeItem<K, T>*>(node_ptr)->degree();
+			node_degree = dynamic_cast<DegreeBinaryTreeItem<Priority, Data>*>(node_ptr)->degree();
 
 			if (node_list[node_degree])
 			{
@@ -144,13 +142,12 @@ inline void LazyBinomialHeap<K, T>::consolidate_root_using_singlepass(BinaryTree
 			{
 				node_list[node_degree] = node_ptr;
 			}
-
 		}
 
 		if (!root->parent())
 		{
 			node_ptr = root;
-			node_degree = dynamic_cast<DegreeBinaryTreeItem<K, T>*>(node_ptr)->degree();
+			node_degree = dynamic_cast<DegreeBinaryTreeItem<Priority, Data>*>(node_ptr)->degree();
 
 			if (node_list[node_degree])
 			{
@@ -165,7 +162,7 @@ inline void LazyBinomialHeap<K, T>::consolidate_root_using_singlepass(BinaryTree
 		}
 	}
 
-	for (BinaryTreeItem<K, T>* node : node_list)
+	for (BinaryTreeItem<Priority, Data>* node : node_list)
 	{
 		if (node)
 		{
@@ -174,24 +171,24 @@ inline void LazyBinomialHeap<K, T>::consolidate_root_using_singlepass(BinaryTree
 	}
 }
 
-template<typename K, typename T>
-inline LazyBinomialHeap<K, T>::LazyBinomialHeap() :
+template<typename Priority, typename Data>
+inline LazyBinomialHeap<Priority, Data>::LazyBinomialHeap() :
 	root_(nullptr), size_(0)
 {
 }
 
-template<typename K, typename T>
-inline LazyBinomialHeap<K, T>::~LazyBinomialHeap()
+template<typename Priority, typename Data>
+inline LazyBinomialHeap<Priority, Data>::~LazyBinomialHeap()
 {
 	this->clear();
 }
 
-template<typename K, typename T>
-inline void LazyBinomialHeap<K, T>::clear()
+template<typename Priority, typename Data>
+inline void LazyBinomialHeap<Priority, Data>::clear()
 {
 	if (this->root_)
 	{
-		BinaryTreeItem<K, T>* root = this->root_->right_son();
+		BinaryTreeItem<Priority, Data>* root = this->root_->right_son();
 		this->root_->right_son(nullptr);
 		delete root;
 	}
@@ -199,22 +196,22 @@ inline void LazyBinomialHeap<K, T>::clear()
 	this->size_ = 0;
 }
 
-template<typename K, typename T>
-inline size_t LazyBinomialHeap<K, T>::size() const
+template<typename Priority, typename Data>
+inline size_t LazyBinomialHeap<Priority, Data>::size() const
 {
 	return this->size_;
 }
 
-template<typename K, typename T>
-inline PriorityQueueItem<K, T>* LazyBinomialHeap<K, T>::push(BinaryTreeItem<K, T>* node)
+template<typename Priority, typename Data>
+inline PriorityQueueItem<Priority, Data>* LazyBinomialHeap<Priority, Data>::push(BinaryTreeItem<Priority, Data>* node)
 {
 	this->add_root_item(node);
 	this->size_++;
 	return node;
 }
 
-template<typename K, typename T>
-inline void LazyBinomialHeap<K, T>::add_root_item(BinaryTreeItem<K, T>* node)
+template<typename Priority, typename Data>
+inline void LazyBinomialHeap<Priority, Data>::add_root_item(BinaryTreeItem<Priority, Data>* node)
 {
 	if (this->root_)
 	{
@@ -239,43 +236,41 @@ inline void LazyBinomialHeap<K, T>::add_root_item(BinaryTreeItem<K, T>* node)
 	}
 }
 
-
-template<typename K, typename T>
-inline T LazyBinomialHeap<K, T>::pop(int& identifier)
+template<typename Priority, typename Data>
+inline Data LazyBinomialHeap<Priority, Data>::pop(int& identifier)
 {
 	if (this->root_)
 	{
-		
-		BinaryTreeItem<K, T>* root = this->root_;
+		BinaryTreeItem<Priority, Data>* root = this->root_;
 		this->root_->parent() = this->root_;
 		this->consolidate_root(root->left_son());
 		root->left_son(nullptr);
 		this->size_--;
-		T data = root->data();
+		Data data = root->data();
 		identifier = root->identifier();
 		//std::cout << "LH\t" << root->priority() << "\t" << root->identifier() << "\n";
 		delete root;
 		return data;
 	}
-	throw new std::range_error("LazyBinomialHeap<K, T>::pop(): Priority queue is empty!");
+	throw new std::range_error("LazyBinomialHeap<Priority, Data>::pop(): Priority queue is empty!");
 }
 
-template<typename K, typename T>
-inline T& LazyBinomialHeap<K, T>::find_min()
+template<typename Priority, typename Data>
+inline Data& LazyBinomialHeap<Priority, Data>::find_min()
 {
 	if (this->root_)
 	{
 		return this->root_->data();
 	}
-	throw new std::range_error("LazyBinomialHeap<K, T>::find_min(): Priority queue is empty!");
+	throw new std::range_error("LazyBinomialHeap<Priority, Data>::find_min(): Priority queue is empty!");
 }
 
-template<typename K, typename T>
-inline void LazyBinomialHeap<K, T>::merge(PriorityQueue<K, T>* other_heap)
+template<typename Priority, typename Data>
+inline void LazyBinomialHeap<Priority, Data>::merge(PriorityQueue<Priority, Data>* other_heap)
 {
 	if (other_heap)
 	{
-		LazyBinomialHeap<K, T>* heap = (LazyBinomialHeap<K, T>*)other_heap;
+		LazyBinomialHeap<Priority, Data>* heap = (LazyBinomialHeap<Priority, Data>*)other_heap;
 		this->add_root_item(heap->root_);
 		this->size_ += heap->size_;
 		heap->root_ = nullptr;

@@ -3,60 +3,60 @@
 #include <stack>
 #include <queue>
 
-template <typename K, typename T>
-class PairingHeap : public LazyBinomialHeap<K, T>
+template <typename Priority, typename Data>
+class PairingHeap : public LazyBinomialHeap<Priority, Data>
 {
 protected:
 	PairingHeap();
-	virtual BinaryTreeItem<K, T>* consolidate(BinaryTreeItem<K, T>* node) = 0;
-	void priority_was_increased(PriorityQueueItem<K, T>* node) override;
-	void priority_was_decreased(PriorityQueueItem<K, T>* node) override;
+	virtual BinaryTreeItem<Priority, Data>* consolidate(BinaryTreeItem<Priority, Data>* node) = 0;
+	void priority_was_increased(PriorityQueueItem<Priority, Data>* node) override;
+	void priority_was_decreased(PriorityQueueItem<Priority, Data>* node) override;
 public:
 	~PairingHeap();
-	void push(const int identifier, const K& key, const T& data, PriorityQueueItem<K, T>*& data_item) override;
-	void merge(PriorityQueue<K, T>* other_heap) override;
-	void consolidate_root(BinaryTreeItem<K, T>* node) override;
+	void push(const int identifier, const Priority& key, const Data& data, PriorityQueueItem<Priority, Data>*& data_item) override;
+	void clear() override;
+	void merge(PriorityQueue<Priority, Data>* other_heap) override;
+	void consolidate_root(BinaryTreeItem<Priority, Data>* node) override;
 };
 
-template <typename K, typename T>
-class PairingHeapTwoPass : public PairingHeap<K, T>
+template <typename Priority, typename Data>
+class PairingHeapTwoPass : public PairingHeap<Priority, Data>
 {
 public:
 	PairingHeapTwoPass();
 protected:
-	BinaryTreeItem<K, T>* consolidate(BinaryTreeItem<K, T>* node) override;
+	BinaryTreeItem<Priority, Data>* consolidate(BinaryTreeItem<Priority, Data>* node) override;
 };
 
-template <typename K, typename T>
-class PairingHeapMultiPass : public PairingHeap<K, T>
+template <typename Priority, typename Data>
+class PairingHeapMultiPass : public PairingHeap<Priority, Data>
 {
 public:
 	PairingHeapMultiPass();
 protected:
-	BinaryTreeItem<K, T>* consolidate(BinaryTreeItem<K, T>* node) override;
+	BinaryTreeItem<Priority, Data>* consolidate(BinaryTreeItem<Priority, Data>* node) override;
 };
 
-template<typename K, typename T>
-inline PairingHeap<K, T>::PairingHeap() :
-	LazyBinomialHeap<K, T>()
+template<typename Priority, typename Data>
+inline PairingHeap<Priority, Data>::PairingHeap() :
+	LazyBinomialHeap<Priority, Data>()
 {
 }
 
-template<typename K, typename T>
-inline void PairingHeap<K, T>::priority_was_increased(PriorityQueueItem<K, T>* node)
+template<typename Priority, typename Data>
+inline void PairingHeap<Priority, Data>::priority_was_increased(PriorityQueueItem<Priority, Data>* node)
 {
-	BinaryTreeItem<K, T>* casted_node = (BinaryTreeItem<K, T>*)node;
-	if (casted_node->parent())
+	BinaryTreeItem<Priority, Data>* casted_node = (BinaryTreeItem<Priority, Data>*)node;
+	if (casted_node != this->root_)
 	{
 		this->root_ = this->root_->merge(casted_node->cut());
-		this->root_->parent() = nullptr;
 	}
 }
 
-template<typename K, typename T>
-inline void PairingHeap<K, T>::priority_was_decreased(PriorityQueueItem<K, T>* node)
+template<typename Priority, typename Data>
+inline void PairingHeap<Priority, Data>::priority_was_decreased(PriorityQueueItem<Priority, Data>* node)
 {
-	BinaryTreeItem<K, T>* node_ptr = (BinaryTreeItem<K, T>*)node, * parent = node_ptr->parent();
+	BinaryTreeItem<Priority, Data>* node_ptr = (BinaryTreeItem<Priority, Data>*)node, * parent = node_ptr->parent();
 	bool is_left_son = parent ? parent->left_son() == node_ptr : false;
 
 	node_ptr->cut();
@@ -83,18 +83,20 @@ inline void PairingHeap<K, T>::priority_was_decreased(PriorityQueueItem<K, T>* n
 	}
 }
 
-template<typename K, typename T>
-inline PairingHeap<K, T>::~PairingHeap()
+template<typename Priority, typename Data>
+inline PairingHeap<Priority, Data>::~PairingHeap()
 {
+	this->clear();
 }
 
-template<typename K, typename T>
-inline void PairingHeap<K, T>::push(const int identifier, const K& key, const T& data, PriorityQueueItem<K, T>*& data_item)
+template<typename Priority, typename Data>
+inline void PairingHeap<Priority, Data>::push(const int identifier, const Priority& key, const Data& data, PriorityQueueItem<Priority, Data>*& data_item)
 {
-	BinaryTreeItem<K, T>* new_node = new BinaryTreeItem<K, T>(identifier, key, data);
+	BinaryTreeItem<Priority, Data>* new_node = new BinaryTreeItem<Priority, Data>(identifier, key, data);
 	if (this->root_)
 	{
 		this->root_ = this->root_->merge(new_node);
+		this->root_->parent() = nullptr;
 	}
 	else
 	{
@@ -104,13 +106,22 @@ inline void PairingHeap<K, T>::push(const int identifier, const K& key, const T&
 	data_item = new_node;
 }
 
-template<typename K, typename T>
-inline void PairingHeap<K, T>::merge(PriorityQueue<K, T>* other_heap)
+template<typename Priority, typename Data>
+inline void PairingHeap<Priority, Data>::clear()
 {
-	PairingHeap<K, T>* heap = (PairingHeap<K, T>*)other_heap;
+	delete this->root_;
+	this->root_ = nullptr;
+}
+
+template<typename Priority, typename Data>
+inline void PairingHeap<Priority, Data>::merge(PriorityQueue<Priority, Data>* other_heap)
+{
+	PairingHeap<Priority, Data>* heap = (PairingHeap<Priority, Data>*)other_heap;
 	if (this->root_)
 	{
 		this->root_ = this->root_->merge(heap->root_);
+		this->root_->parent() = nullptr;
+		heap->root_ = nullptr;
 	}
 	else
 	{
@@ -120,8 +131,8 @@ inline void PairingHeap<K, T>::merge(PriorityQueue<K, T>* other_heap)
 	delete heap;
 }
 
-template<typename K, typename T>
-inline void PairingHeap<K, T>::consolidate_root(BinaryTreeItem<K, T>* node)
+template<typename Priority, typename Data>
+inline void PairingHeap<Priority, Data>::consolidate_root(BinaryTreeItem<Priority, Data>* node)
 {
 	this->root_ = this->consolidate(this->root_->left_son());
 	if (this->root_)
@@ -130,53 +141,54 @@ inline void PairingHeap<K, T>::consolidate_root(BinaryTreeItem<K, T>* node)
 	}
 }
 
-template<typename K, typename T>
-inline PairingHeapTwoPass<K, T>::PairingHeapTwoPass() :
-	PairingHeap<K, T>()
+template<typename Priority, typename Data>
+inline PairingHeapTwoPass<Priority, Data>::PairingHeapTwoPass() :
+	PairingHeap<Priority, Data>()
 {
 }
 
-template<typename K, typename T>
-inline BinaryTreeItem<K, T>* PairingHeapTwoPass<K, T>::consolidate(BinaryTreeItem<K, T>* node)
+template<typename Priority, typename Data>
+inline BinaryTreeItem<Priority, Data>* PairingHeapTwoPass<Priority, Data>::consolidate(BinaryTreeItem<Priority, Data>* node)
 {
-	BinaryTreeItem<K, T>* node_ptr = node, * node_next_ptr;
+	BinaryTreeItem<Priority, Data>* node_ptr = node, * node_next_ptr;
 
 	if (node_ptr && node_ptr->right_son())
 	{
-		std::stack<BinaryTreeItem<K, T>*> stack;
+		std::stack<BinaryTreeItem<Priority, Data>*>* stack = new std::stack<BinaryTreeItem<Priority, Data>*>();
 		while (node_ptr)
 		{
 			node_next_ptr = node_ptr->right_son() ? node_ptr->right_son()->right_son() : nullptr;
 			node_ptr = node_ptr->merge(node_ptr->right_son());
 			node_ptr->right_son() = nullptr;
-			stack.push(node_ptr);
+			stack->push(node_ptr);
 			node_ptr = node_next_ptr;
 		}
-		node_ptr = stack.top();
-		stack.pop();
-		while (!stack.empty())
+		node_ptr = stack->top();
+		stack->pop();
+		while (!stack->empty())
 		{
-			node_ptr = node_ptr->merge(stack.top());
-			stack.pop();
+			node_ptr = node_ptr->merge(stack->top());
+			stack->pop();
 		}
+		delete stack;
 	}
 	return node_ptr;
 }
 
-template<typename K, typename T>
-inline PairingHeapMultiPass<K, T>::PairingHeapMultiPass() :
-	PairingHeap<K, T>()
+template<typename Priority, typename Data>
+inline PairingHeapMultiPass<Priority, Data>::PairingHeapMultiPass() :
+	PairingHeap<Priority, Data>()
 {
 }
 
-template<typename K, typename T>
-inline BinaryTreeItem<K, T>* PairingHeapMultiPass<K, T>::consolidate(BinaryTreeItem<K, T>* node)
+template<typename Priority, typename Data>
+inline BinaryTreeItem<Priority, Data>* PairingHeapMultiPass<Priority, Data>::consolidate(BinaryTreeItem<Priority, Data>* node)
 {
-	BinaryTreeItem<K, T>* node_ptr = node, * node_next_ptr;
+	BinaryTreeItem<Priority, Data>* node_ptr = node, * node_next_ptr;
 
 	if (node_ptr && node_ptr->right_son())
 	{
-		std::queue<BinaryTreeItem<K, T>*> queue;
+		std::queue<BinaryTreeItem<Priority, Data>*> queue;
 		while (node_ptr)
 		{
 			node_next_ptr = node_ptr->right_son() ? node_ptr->right_son()->right_son() : nullptr;

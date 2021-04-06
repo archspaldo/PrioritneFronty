@@ -7,11 +7,11 @@
 #include <chrono>
 #include "Wrapper.h"
 
-template  <typename K, typename T>
+template  <typename Priority, typename Data>
 class Test
 {
 public:
-	virtual void execute(PriorityQueueList<K, T>* = nullptr) = 0;
+	virtual void execute(PriorityQueueList<Priority, Data>* = nullptr) = 0;
 };
 
 class PushTest : public Test<int, int>
@@ -28,7 +28,7 @@ public:
 
 inline void RandomTest::execute(PriorityQueueList<int, int>* pq_list)
 {
-	for (int j = 0; j < 100; j++)
+	for (int j = 0; j < 10; j++)
 	{
 		for (int i = 0; i < 100000; i++)
 		{
