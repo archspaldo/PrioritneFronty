@@ -5,6 +5,17 @@
 #include "PairingHeap.h"
 #include "RankPairingHeap.h"
 #include <iostream>
+#include <chrono>
+#include <unordered_map>
+
+class Timer
+{
+private:
+	std::chrono::system_clock::time_point start_time_, end_time_;
+public:
+	void start_measuring();
+	double stop_measuring();
+};
 
 template <typename Priority, typename Data>
 class PriorityQueueWrapper
@@ -14,6 +25,7 @@ private:
 	PriorityQueue<Priority, Data>* priority_queue_;
 	std::ofstream output_stream_;
 	std::string structure_name_;
+	Timer timer;
 public:
 	PriorityQueueWrapper(PriorityQueue<Priority, Data>* priority_queue);
 	~PriorityQueueWrapper();
@@ -85,12 +97,11 @@ template<typename Priority, typename Data>
 inline void PriorityQueueWrapper<Priority, Data>::push(const int identifier, const Priority& priority, const Data& data)
 {
 	PriorityQueueItem<Priority, Data>* priority_queue_item;
-	std::chrono::duration<long double> time_difference;
-	std::chrono::system_clock::time_point end_time, begin_time = std::chrono::system_clock::now();
+	double time;
+	timer.start_measuring();
 	this->priority_queue_->push(identifier, priority, data, priority_queue_item);
-	end_time = std::chrono::system_clock::now();
-	time_difference = end_time - begin_time;
-	this->output_stream_ << "push;" << time_difference.count() << ";" << this->priority_queue_->size() << "\n";
+	time = timer.stop_measuring();
+	this->output_stream_ << "push;" << time << ";" << this->priority_queue_->size() << "\n";
 	(*this->identifier_map_)[identifier] = priority_queue_item;
 }
 
@@ -98,12 +109,11 @@ template<typename Priority, typename Data>
 inline int PriorityQueueWrapper<Priority, Data>::pop()
 {
 	int identifier;
-	std::chrono::duration<long double> time_difference;
-	std::chrono::system_clock::time_point begin_time = std::chrono::system_clock::now(), end_time;
+	double time;
+	timer.start_measuring();
 	this->priority_queue_->pop(identifier);
-	end_time = std::chrono::system_clock::now();
-	time_difference = end_time - begin_time;
-	this->output_stream_ << "pop;" << time_difference.count() << ";" << this->priority_queue_->size() << "\n";
+	time = timer.stop_measuring();
+	this->output_stream_ << "pop;" << time << ";" << this->priority_queue_->size() << "\n";
 	this->identifier_map_->erase(identifier);
 	return identifier;
 }
@@ -112,12 +122,11 @@ template<typename Priority, typename Data>
 inline void PriorityQueueWrapper<Priority, Data>::change_priority(const int identifier, const Priority& priority)
 {
 	PriorityQueueItem<Priority, Data>* priority_queue_item = (*this->identifier_map_)[identifier];
-	std::chrono::duration<long double> time_difference;
-	std::chrono::system_clock::time_point begin_time = std::chrono::system_clock::now(), end_time;
+	double time;
+	timer.start_measuring();
 	this->priority_queue_->change_priority(priority_queue_item, priority);
-	end_time = std::chrono::system_clock::now();
-	time_difference = end_time - begin_time;
-	this->output_stream_ << "change priority;" << time_difference.count() << ";" << this->priority_queue_->size() << "\n";
+	time = timer.stop_measuring();
+	this->output_stream_ << "change priority;" << time << ";" << this->priority_queue_->size() << "\n";
 }
 
 template<typename Priority, typename Data>

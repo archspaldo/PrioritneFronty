@@ -3,7 +3,7 @@
 void TestSuit1::execute(PriorityQueueList<int, int>* pq_list, TestSuit1Scenario* scenario)
 {
 	pq_list->start_write(scenario->scenario_name());
-	for (int j = 0; j < 1; j++)
+	for (int j = 0; j < 100; j++)
 	{
 		for (int i = 0; i < 100000; i++)
 		{

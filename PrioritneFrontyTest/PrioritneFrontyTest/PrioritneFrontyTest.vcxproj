@@ -133,8 +133,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalOptions> /GH /Gh %(AdditionalOptions)</AdditionalOptions>
-      <BrowseInformation>true</BrowseInformation>
+      <LanguageStandard>Default</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -142,17 +141,14 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <Profile>true</Profile>
-      <AdditionalDependencies>$(MICROPROFILERDIR)/micro-profiler_$(PlatformName).lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
-    <Bscmake>
-      <PreserveSbr>true</PreserveSbr>
-    </Bscmake>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="BinaryHeap.h" />
     <ClInclude Include="BinomialHeap.h" />
     <ClInclude Include="ExplicitPriorityQueue.h" />
     <ClInclude Include="FibonacciHeap.h" />
+    <ClInclude Include="heap_monitor.h" />
     <ClInclude Include="LazyBinomialQueue.h" />
     <ClInclude Include="PairingHeap.h" />
     <ClInclude Include="PriorityQueue.h" />
@@ -166,9 +162,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Test.cpp" />
     <ClCompile Include="TestScenarios.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="ClassDiagram11.cd" />
+    <ClCompile Include="Wrapper.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
