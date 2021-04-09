@@ -2,6 +2,8 @@
 #include "PriorityQueueItems.h"
 #include <stdexcept>
 #include <vector>
+#include <iostream>
+#include <fstream>
 
 template <typename Priority, typename Data>
 class PriorityQueue
@@ -42,6 +44,6 @@ inline void PriorityQueue<Priority, Data>::change_priority(PriorityQueueItem<Pri
 	}
 	else if (priority > old_priority)
 	{
-		//this->priority_was_decreased(node);
+		this->priority_was_decreased(node);
 	}
 }

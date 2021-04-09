@@ -7,7 +7,7 @@ class BinomialHeap : public LazyBinomialHeap<Priority, Data>
 protected:
 	void priority_was_increased(PriorityQueueItem<Priority, Data>* node) override;
 	void priority_was_decreased(PriorityQueueItem<Priority, Data>* node) override;
-	void fix_broken_root_list();
+	void repair_broken_root_list();
 	BinomialHeap();
 public:
 	~BinomialHeap();
@@ -58,42 +58,48 @@ inline void BinomialHeap<Priority, Data>::push(const int identifier, const Prior
 template<typename Priority, typename Data>
 inline void BinomialHeap<Priority, Data>::merge(PriorityQueue<Priority, Data>* other_heap)
 {
-	this->LazyBinomialHeap<Priority, Data>::merge(other_heap);
-	this->consolidate_root(nullptr);
+	BinomialHeap<Priority, Data>* heap = (BinomialHeap<Priority, Data>*)other_heap;
+	this->size_ += heap->size_;
+	this->consolidate_root(heap->root_);
+	heap->root_ = nullptr;
+	delete other_heap;
 }
 
 template<typename Priority, typename Data>
 inline void BinomialHeap<Priority, Data>::priority_was_increased(PriorityQueueItem<Priority, Data>* node)
 {
 	DegreeBinaryTreeItem<Priority, Data>* casted_node = (DegreeBinaryTreeItem<Priority, Data>*)node;
-	while (casted_node->parent() && *casted_node < *casted_node->parent())
+	BinaryTreeItem<Priority, Data>* ordered_ancestor = casted_node->ancestor();
+	while (ordered_ancestor && *casted_node < *ordered_ancestor)
 	{
-		casted_node->swap_with_parent();
+		casted_node->swap_with_ancestor_node(ordered_ancestor);
+		ordered_ancestor = casted_node->ancestor();
 	}
 	if (!casted_node->parent() && casted_node != this->root_)
 	{
-		this->fix_broken_root_list();
+		this->repair_broken_root_list();
 	}
 }
 
 template<typename Priority, typename Data>
 inline void BinomialHeap<Priority, Data>::priority_was_decreased(PriorityQueueItem<Priority, Data>* node)
 {
-	BinaryTreeItem<Priority, Data>* casted_node = (BinaryTreeItem<Priority, Data>*)node, * minimal_son = casted_node->higher_priority_son();
+	DegreeBinaryTreeItem<Priority, Data>* casted_node = (DegreeBinaryTreeItem<Priority, Data>*)node;
+	BinaryTreeItem<Priority, Data>*minimal_son = casted_node->highest_priority_son();
 	bool is_root_item = !casted_node->parent();
 	while (minimal_son && *minimal_son < *casted_node)
 	{
-		minimal_son->swap_with_parent();
-		minimal_son = casted_node->higher_priority_son();
+		minimal_son->swap_with_ancestor_node(casted_node);
+		minimal_son = casted_node->highest_priority_son();
 	}
 	if (is_root_item)
 	{
-		this->fix_broken_root_list();
+		this->repair_broken_root_list();
 	}
 }
 
 template<typename Priority, typename Data>
-inline void BinomialHeap<Priority, Data>::fix_broken_root_list()
+inline void BinomialHeap<Priority, Data>::repair_broken_root_list()
 {
 	auto get_highest_node = [](BinaryTreeItem<Priority, Data>* node)
 	{

@@ -36,23 +36,28 @@ class BinaryTreeItem : public PriorityQueueItem<Priority, Data>
 {
 protected:
 	BinaryTreeItem<Priority, Data>* left_son_, * right_son_, * parent_;
+
+	void swap_with_parent();
 public:
 	BinaryTreeItem(const int identifier, const Priority& priority, const Data& data);
 	~BinaryTreeItem();
 
 	virtual BinaryTreeItem* cut();
 	virtual BinaryTreeItem* merge(BinaryTreeItem* node);
-	virtual void swap_with_parent();
+	
 	virtual BinaryTreeItem* add_left_son(BinaryTreeItem* node);
 	virtual BinaryTreeItem* add_right_son(BinaryTreeItem* node);
-	BinaryTreeItem* higher_priority_son();
+	BinaryTreeItem* highest_priority_son();
+	BinaryTreeItem* ancestor();
+	virtual void swap_with_ancestor_node(BinaryTreeItem* node);
 
 	BinaryTreeItem*& left_son();
 	BinaryTreeItem*& right_son();
 	BinaryTreeItem*& parent();
 
-	virtual BinaryTreeItem<Priority, Data>* left_son(BinaryTreeItem* node);
-	virtual BinaryTreeItem<Priority, Data>* right_son(BinaryTreeItem* node);
+	virtual BinaryTreeItem* left_son(BinaryTreeItem* node);
+	virtual BinaryTreeItem* right_son(BinaryTreeItem* node);
+
 };
 
 template <typename Priority, typename Data>
@@ -63,9 +68,8 @@ protected:
 public:
 	DegreeBinaryTreeItem(const int identifier, const Priority& priority, const Data& data);
 
-	void swap_with_parent() override;
-	DegreeBinaryTreeItem<Priority, Data>* add_left_son(BinaryTreeItem<Priority, Data>* node) override;
-
+	void swap_with_ancestor_node(BinaryTreeItem<Priority, Data>* node) override;
+	DegreeBinaryTreeItem* add_left_son(BinaryTreeItem<Priority, Data>* node) override;
 	int& degree();
 };
 
@@ -79,14 +83,14 @@ public:
 	FibonacciHeapItem(const int identifier, const Priority& priority, const Data& data);
 	~FibonacciHeapItem();
 
-	FibonacciHeapItem<Priority, Data>* cut() override;
-	FibonacciHeapItem<Priority, Data>* add_left_son(BinaryTreeItem<Priority, Data>* node) override;
-	FibonacciHeapItem<Priority, Data>* add_right_son(BinaryTreeItem<Priority, Data>* node) override;
+	FibonacciHeapItem* cut() override;
+	FibonacciHeapItem* add_left_son(BinaryTreeItem<Priority, Data>* node) override;
+	FibonacciHeapItem* add_right_son(BinaryTreeItem<Priority, Data>* node) override;
 
-	FibonacciHeapItem<Priority, Data>*& ordered_ancestor();
+	FibonacciHeapItem*& ordered_ancestor();
 	bool& flag();
 
-	FibonacciHeapItem<Priority, Data>* left_son(BinaryTreeItem<Priority, Data>* node) override;
+	FibonacciHeapItem* left_son(BinaryTreeItem<Priority, Data>* node) override;
 };
 
 template <typename Priority, typename Data>
@@ -230,22 +234,77 @@ inline BinaryTreeItem<Priority, Data>* BinaryTreeItem<Priority, Data>::add_right
 }
 
 template<typename Priority, typename Data>
-inline BinaryTreeItem<Priority, Data>* BinaryTreeItem<Priority, Data>::higher_priority_son()
+inline BinaryTreeItem<Priority, Data>* BinaryTreeItem<Priority, Data>::highest_priority_son()
 {
-	if (this->right_son_ && this->right_son_->parent_)
+	BinaryTreeItem<Priority, Data>* node = this, * node_ptr = this->left_son_;
+	while (node_ptr)
 	{
-		if (this->left_son_)
+		if (*node_ptr < *node)
 		{
-			return (*this->left_son_ < *this->right_son_) ? this->left_son_ : this->right_son_;
+			node = node_ptr;
+		}
+		node_ptr = node_ptr->right_son_;
+	}
+	return node == this ? nullptr : node;
+}
+
+template<typename Priority, typename Data>
+inline BinaryTreeItem<Priority, Data>* BinaryTreeItem<Priority, Data>::ancestor()
+{
+	BinaryTreeItem* node_ptr = this, * parent_ptr = this->parent_;
+	while (parent_ptr && parent_ptr->right_son_ == node_ptr)
+	{
+		node_ptr = parent_ptr;
+		parent_ptr = parent_ptr->parent_;
+	}
+	return parent_ptr;
+}
+
+template<typename Priority, typename Data>
+inline void BinaryTreeItem<Priority, Data>::swap_with_ancestor_node(BinaryTreeItem* node)
+{
+	if (node)
+	{
+		if (this->parent() == node)
+		{
+			this->swap_with_parent();
+			return;
+		}
+		BinaryTreeItem* parent = node->parent_, * son = this->left_son_;
+		this->left_son(node->left_son_);
+		node->left_son(son);
+		std::swap(this->right_son_, node->right_son_);
+		if (this->right_son_ && this->right_son_->parent_)
+		{
+			this->right_son_->parent_ = this;
+		}
+		if (node->right_son_)
+		{
+			node->right_son_->parent_ = node;
+		}
+		if (this->parent_->left_son_ == this)
+		{
+			this->parent_->left_son(node);
 		}
 		else
 		{
-			return this->right_son_;
+			this->parent_->right_son(node);
 		}
-	}
-	else
-	{
-		return this->left_son_;
+		if (parent)
+		{
+			if (parent->left_son_ == node)
+			{
+				parent->left_son(this);
+			}
+			else
+			{
+				parent->right_son(this);
+			}
+		}
+		else
+		{
+			this->parent_ = nullptr;
+		}
 	}
 }
 
@@ -407,13 +466,10 @@ inline DegreeBinaryTreeItem<Priority, Data>::DegreeBinaryTreeItem(const int iden
 }
 
 template<typename Priority, typename Data>
-inline void DegreeBinaryTreeItem<Priority, Data>::swap_with_parent()
+inline void DegreeBinaryTreeItem<Priority, Data>::swap_with_ancestor_node(BinaryTreeItem<Priority, Data>* node)
 {
-	if (this->parent_)
-	{
-		std::swap(this->degree_, ((DegreeBinaryTreeItem*)this->parent_)->degree_);
-		this->BinaryTreeItem<Priority, Data>::swap_with_parent();
-	}
+	std::swap(this->degree_, ((DegreeBinaryTreeItem*)node)->degree_);
+	this->BinaryTreeItem<Priority, Data>::swap_with_ancestor_node(node);
 }
 
 template<typename Priority, typename Data>

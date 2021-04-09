@@ -1,12 +1,10 @@
 #pragma once
-#include "PriorityQueue.h"
+#include "ExplicitPriorityQueue.h"
 
 template <typename Priority, typename Data>
-class LazyBinomialHeap : public PriorityQueue<Priority, Data>
+class LazyBinomialHeap : public ExplicitPriorityQueue<Priority, Data>
 {
 protected:
-	BinaryTreeItem<Priority, Data>* root_;
-	size_t size_;
 	PriorityQueueItem<Priority, Data>* push(BinaryTreeItem<Priority, Data>* node);
 	void add_root_item(BinaryTreeItem<Priority, Data>* node);
 	virtual void consolidate_root(BinaryTreeItem<Priority, Data>* node) = 0;
@@ -16,10 +14,8 @@ protected:
 public:
 	virtual ~LazyBinomialHeap();
 	virtual void clear() override;
-	size_t size() const override;
 	virtual void push(const int identifier, const Priority& priority, const Data& data, PriorityQueueItem<Priority, Data>*&) = 0;
 	virtual Data pop(int& identifier) override;
-	Data& find_min() override;
 	virtual void merge(PriorityQueue<Priority, Data>* other_heap) override;
 };
 
@@ -173,7 +169,7 @@ inline void LazyBinomialHeap<Priority, Data>::consolidate_root_using_singlepass(
 
 template<typename Priority, typename Data>
 inline LazyBinomialHeap<Priority, Data>::LazyBinomialHeap() :
-	root_(nullptr), size_(0)
+	ExplicitPriorityQueue<Priority, Data>()
 {
 }
 
@@ -196,11 +192,6 @@ inline void LazyBinomialHeap<Priority, Data>::clear()
 	this->size_ = 0;
 }
 
-template<typename Priority, typename Data>
-inline size_t LazyBinomialHeap<Priority, Data>::size() const
-{
-	return this->size_;
-}
 
 template<typename Priority, typename Data>
 inline PriorityQueueItem<Priority, Data>* LazyBinomialHeap<Priority, Data>::push(BinaryTreeItem<Priority, Data>* node)
@@ -253,16 +244,6 @@ inline Data LazyBinomialHeap<Priority, Data>::pop(int& identifier)
 		return data;
 	}
 	throw new std::range_error("LazyBinomialHeap<Priority, Data>::pop(): Priority queue is empty!");
-}
-
-template<typename Priority, typename Data>
-inline Data& LazyBinomialHeap<Priority, Data>::find_min()
-{
-	if (this->root_)
-	{
-		return this->root_->data();
-	}
-	throw new std::range_error("LazyBinomialHeap<Priority, Data>::find_min(): Priority queue is empty!");
 }
 
 template<typename Priority, typename Data>

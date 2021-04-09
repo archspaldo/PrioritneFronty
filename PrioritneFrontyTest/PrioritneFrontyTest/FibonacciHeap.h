@@ -18,7 +18,8 @@ public:
 };
 
 template<typename Priority, typename Data>
-inline FibonacciHeap<Priority, Data>::FibonacciHeap()
+inline FibonacciHeap<Priority, Data>::FibonacciHeap() :
+	LazyBinomialHeap<Priority, Data>()
 {
 }
 

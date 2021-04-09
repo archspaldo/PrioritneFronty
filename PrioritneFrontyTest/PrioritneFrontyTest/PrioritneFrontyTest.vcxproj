@@ -151,6 +151,7 @@
   <ItemGroup>
     <ClInclude Include="BinaryHeap.h" />
     <ClInclude Include="BinomialHeap.h" />
+    <ClInclude Include="ExplicitPriorityQueue.h" />
     <ClInclude Include="FibonacciHeap.h" />
     <ClInclude Include="LazyBinomialQueue.h" />
     <ClInclude Include="PairingHeap.h" />
@@ -158,15 +159,15 @@
     <ClInclude Include="PriorityQueueItems.h" />
     <ClInclude Include="RankPairingHeap.h" />
     <ClInclude Include="Test.h" />
+    <ClInclude Include="TestScenarios.h" />
     <ClInclude Include="Wrapper.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Test.cpp" />
+    <ClCompile Include="TestScenarios.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="ClassDiagram.cd" />
-    <None Include="ClassDiagram1.cd" />
     <None Include="ClassDiagram11.cd" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

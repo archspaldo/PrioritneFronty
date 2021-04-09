@@ -1,22 +1,22 @@
 #pragma once
-#include "LazyBinomialQueue.h"
+#include "ExplicitPriorityQueue.h"
 #include <stack>
 #include <queue>
 
 template <typename Priority, typename Data>
-class PairingHeap : public LazyBinomialHeap<Priority, Data>
+class PairingHeap : public ExplicitPriorityQueue<Priority, Data>
 {
 protected:
 	PairingHeap();
-	virtual BinaryTreeItem<Priority, Data>* consolidate(BinaryTreeItem<Priority, Data>* node) = 0;
+	virtual BinaryTreeItem<Priority, Data>* create_binary_tree(BinaryTreeItem<Priority, Data>* node) = 0;
 	void priority_was_increased(PriorityQueueItem<Priority, Data>* node) override;
 	void priority_was_decreased(PriorityQueueItem<Priority, Data>* node) override;
 public:
 	~PairingHeap();
-	void push(const int identifier, const Priority& key, const Data& data, PriorityQueueItem<Priority, Data>*& data_item) override;
 	void clear() override;
+	void push(const int identifier, const Priority& key, const Data& data, PriorityQueueItem<Priority, Data>*& data_item) override;
+	Data pop(int& identifier) override;
 	void merge(PriorityQueue<Priority, Data>* other_heap) override;
-	void consolidate_root(BinaryTreeItem<Priority, Data>* node) override;
 };
 
 template <typename Priority, typename Data>
@@ -25,7 +25,7 @@ class PairingHeapTwoPass : public PairingHeap<Priority, Data>
 public:
 	PairingHeapTwoPass();
 protected:
-	BinaryTreeItem<Priority, Data>* consolidate(BinaryTreeItem<Priority, Data>* node) override;
+	BinaryTreeItem<Priority, Data>* create_binary_tree(BinaryTreeItem<Priority, Data>* node) override;
 };
 
 template <typename Priority, typename Data>
@@ -34,12 +34,12 @@ class PairingHeapMultiPass : public PairingHeap<Priority, Data>
 public:
 	PairingHeapMultiPass();
 protected:
-	BinaryTreeItem<Priority, Data>* consolidate(BinaryTreeItem<Priority, Data>* node) override;
+	BinaryTreeItem<Priority, Data>* create_binary_tree(BinaryTreeItem<Priority, Data>* node) override;
 };
 
 template<typename Priority, typename Data>
 inline PairingHeap<Priority, Data>::PairingHeap() :
-	LazyBinomialHeap<Priority, Data>()
+	ExplicitPriorityQueue<Priority, Data>()
 {
 }
 
@@ -63,7 +63,7 @@ inline void PairingHeap<Priority, Data>::priority_was_decreased(PriorityQueueIte
 	node_ptr->right_son(node_ptr->left_son());
 	node_ptr->left_son(nullptr);
 
-	node_ptr = this->consolidate(node_ptr);
+	node_ptr = this->create_binary_tree(node_ptr);
 
 	if (parent)
 	{
@@ -96,7 +96,6 @@ inline void PairingHeap<Priority, Data>::push(const int identifier, const Priori
 	if (this->root_)
 	{
 		this->root_ = this->root_->merge(new_node);
-		this->root_->parent() = nullptr;
 	}
 	else
 	{
@@ -107,10 +106,29 @@ inline void PairingHeap<Priority, Data>::push(const int identifier, const Priori
 }
 
 template<typename Priority, typename Data>
+inline Data PairingHeap<Priority, Data>::pop(int& identifier)
+{
+	if (this->root_)
+	{
+		BinaryTreeItem<Priority, Data>* root = this->root_;
+		this->root_ = this->create_binary_tree(root->left_son());
+		root->left_son() = nullptr;
+		this->size_--;
+		Data data = root->data();
+		identifier = root->identifier();
+		//std::cout << "LH\t" << root->priority() << "\t" << root->identifier() << "\n";
+		delete root;
+		return data;
+	}
+	throw new std::range_error("PairingHeap<Priority, Data>::pop(): Priority queue is empty!");
+}
+
+template<typename Priority, typename Data>
 inline void PairingHeap<Priority, Data>::clear()
 {
 	delete this->root_;
 	this->root_ = nullptr;
+	this->size_ = 0;
 }
 
 template<typename Priority, typename Data>
@@ -132,45 +150,38 @@ inline void PairingHeap<Priority, Data>::merge(PriorityQueue<Priority, Data>* ot
 }
 
 template<typename Priority, typename Data>
-inline void PairingHeap<Priority, Data>::consolidate_root(BinaryTreeItem<Priority, Data>* node)
-{
-	this->root_ = this->consolidate(this->root_->left_son());
-	if (this->root_)
-	{
-		this->root_->parent() = nullptr;
-	}
-}
-
-template<typename Priority, typename Data>
 inline PairingHeapTwoPass<Priority, Data>::PairingHeapTwoPass() :
 	PairingHeap<Priority, Data>()
 {
 }
 
 template<typename Priority, typename Data>
-inline BinaryTreeItem<Priority, Data>* PairingHeapTwoPass<Priority, Data>::consolidate(BinaryTreeItem<Priority, Data>* node)
+inline BinaryTreeItem<Priority, Data>* PairingHeapTwoPass<Priority, Data>::create_binary_tree(BinaryTreeItem<Priority, Data>* node)
 {
 	BinaryTreeItem<Priority, Data>* node_ptr = node, * node_next_ptr;
 
-	if (node_ptr && node_ptr->right_son())
+	if (node_ptr)
 	{
-		std::stack<BinaryTreeItem<Priority, Data>*>* stack = new std::stack<BinaryTreeItem<Priority, Data>*>();
-		while (node_ptr)
+		if (node_ptr->right_son())
 		{
-			node_next_ptr = node_ptr->right_son() ? node_ptr->right_son()->right_son() : nullptr;
-			node_ptr = node_ptr->merge(node_ptr->right_son());
-			node_ptr->right_son() = nullptr;
-			stack->push(node_ptr);
-			node_ptr = node_next_ptr;
+			std::stack<BinaryTreeItem<Priority, Data>*> stack;
+			while (node_ptr)
+			{
+				node_next_ptr = node_ptr->right_son() ? node_ptr->right_son()->right_son() : nullptr;
+				node_ptr = node_ptr->merge(node_ptr->right_son());
+				node_ptr->right_son() = nullptr;
+				stack.push(node_ptr);
+				node_ptr = node_next_ptr;
+			}
+			node_ptr = stack.top();
+			stack.pop();
+			while (!stack.empty())
+			{
+				node_ptr = node_ptr->merge(stack.top());
+				stack.pop();
+			}
 		}
-		node_ptr = stack->top();
-		stack->pop();
-		while (!stack->empty())
-		{
-			node_ptr = node_ptr->merge(stack->top());
-			stack->pop();
-		}
-		delete stack;
+		node_ptr->parent() = nullptr;
 	}
 	return node_ptr;
 }
@@ -182,31 +193,35 @@ inline PairingHeapMultiPass<Priority, Data>::PairingHeapMultiPass() :
 }
 
 template<typename Priority, typename Data>
-inline BinaryTreeItem<Priority, Data>* PairingHeapMultiPass<Priority, Data>::consolidate(BinaryTreeItem<Priority, Data>* node)
+inline BinaryTreeItem<Priority, Data>* PairingHeapMultiPass<Priority, Data>::create_binary_tree(BinaryTreeItem<Priority, Data>* node)
 {
 	BinaryTreeItem<Priority, Data>* node_ptr = node, * node_next_ptr;
 
-	if (node_ptr && node_ptr->right_son())
+	if (node_ptr)
 	{
-		std::queue<BinaryTreeItem<Priority, Data>*> queue;
-		while (node_ptr)
+		if (node_ptr->right_son())
 		{
-			node_next_ptr = node_ptr->right_son() ? node_ptr->right_son()->right_son() : nullptr;
-			node_ptr = node_ptr->merge(node_ptr->right_son());
-			node_ptr->right_son() = nullptr;
-			queue.push(node_ptr);
-			node_ptr = node_next_ptr;
-		}
-		node_ptr = queue.front();
-		queue.pop();
-		while (!queue.empty())
-		{
-			node_ptr = node_ptr->merge(queue.front());
-			queue.pop();
-			queue.push(node_ptr);
+			std::queue<BinaryTreeItem<Priority, Data>*> queue;
+			while (node_ptr)
+			{
+				node_next_ptr = node_ptr->right_son() ? node_ptr->right_son()->right_son() : nullptr;
+				node_ptr = node_ptr->merge(node_ptr->right_son());
+				node_ptr->right_son() = nullptr;
+				queue.push(node_ptr);
+				node_ptr = node_next_ptr;
+			}
 			node_ptr = queue.front();
 			queue.pop();
+			while (!queue.empty())
+			{
+				node_ptr = node_ptr->merge(queue.front());
+				queue.pop();
+				queue.push(node_ptr);
+				node_ptr = queue.front();
+				queue.pop();
+			}
 		}
+		node_ptr->parent() = nullptr;
 	}
 	return node_ptr;
 }
