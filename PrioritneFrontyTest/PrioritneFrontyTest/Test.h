@@ -8,14 +8,9 @@
 #include "Wrapper.h"
 #include "TestScenarios.h"
 
-class TestSuit1
+class Tests
 {
 public:
 	static void execute(PriorityQueueList<int, int>* pq_list, TestSuit1Scenario* scenario);
-};
-
-class TestSuit2
-{
-public:
 	static void execute(PriorityQueueList<int, int>* pq_list, TestSuit2Scenario* scenario);
 };

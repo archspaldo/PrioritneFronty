@@ -1,8 +1,8 @@
 #include "Test.h"
 
-void TestSuit1::execute(PriorityQueueList<int, int>* pq_list, TestSuit1Scenario* scenario)
+void Tests::execute(PriorityQueueList<int, int>* pq_list, TestSuit1Scenario* scenario)
 {
-	pq_list->start_write(scenario->scenario_name());
+	//pq_list->start_write(scenario->scenario_name());
 	for (int j = 0; j < 100; j++)
 	{
 		for (int i = 0; i < 100000; i++)
@@ -27,5 +27,5 @@ void TestSuit1::execute(PriorityQueueList<int, int>* pq_list, TestSuit1Scenario*
 		}
 		pq_list->clear_structures();
 	}
-	pq_list->end_write();
+	//pq_list->end_write();
 }

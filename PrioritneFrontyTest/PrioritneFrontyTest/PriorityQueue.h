@@ -20,7 +20,7 @@ public:
 	virtual Data pop(int& identifier) = 0;
 	virtual Data& find_min() = 0;
 	virtual void merge(PriorityQueue<Priority, Data>* other_heap) = 0;
-	void change_priority(PriorityQueueItem<Priority, Data>* node, const Priority& priority);
+	virtual void change_priority(PriorityQueueItem<Priority, Data>* node, const Priority& priority);
 };
 
 template<typename Priority, typename Data>
