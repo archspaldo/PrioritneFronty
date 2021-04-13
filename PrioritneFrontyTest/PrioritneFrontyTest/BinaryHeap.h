@@ -22,12 +22,15 @@ protected:
 public:
 	BinaryHeap();
 	~BinaryHeap();
+
 	void clear() override;
 	size_t size() const override;
 	void push(const int identifier, const Priority& priority, const Data& data, PriorityQueueItem<Priority, Data>*& data_item) override;
 	Data pop(int& identifier) override;
 	Data& find_min() override;
 	void merge(PriorityQueue<Priority, Data>* other_heap) override;
+
+	void change_priority(PriorityQueueItem<Priority, Data>* node, const Priority& priority) override { this->PriorityQueue<Priority, Data>::change_priority(node, priority); };
 };
 
 template<typename Priority, typename Data>
@@ -108,7 +111,6 @@ inline void BinaryHeap<Priority, Data>::merge(PriorityQueue<Priority, Data>* oth
 	this->list_->insert(this->list_->end(), heap->list_->begin(), heap->list_->end());
 	if (this->size() > 1)
 	{
-		int greater_son;
 		for (int i = (this->size() - 1) / 2; i <= 0; i--)
 		{
 			this->heapifyDown(i);

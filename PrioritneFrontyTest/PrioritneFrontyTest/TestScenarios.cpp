@@ -19,10 +19,6 @@ TestSuit1Scenario::TestSuit1Scenario(std::string scenario_name, int p_push, int 
 {
 }
 
-TestSuit1Scenario::~TestSuit1Scenario()
-{
-}
-
 int TestSuit1Scenario::p_push()
 {
 	return this->p_push_;
@@ -43,16 +39,8 @@ TS1ScenarioA::TS1ScenarioA() :
 {
 }
 
-TS1ScenarioA::~TS1ScenarioA()
-{
-}
-
 TS1ScenarioB::TS1ScenarioB() :
 	TestSuit1Scenario("ScenarioB\\", 50, 20, 30)
-{
-}
-
-TS1ScenarioB::~TS1ScenarioB()
 {
 }
 
@@ -61,6 +49,33 @@ TS1ScenarioC::TS1ScenarioC() :
 {
 }
 
-TS1ScenarioC::~TS1ScenarioC()
+TS1ScenarioD::TS1ScenarioD() :
+	TestSuit1Scenario("ScenarioD\\", 70, 10, 20)
 {
+}
+
+TestSuit2Scenario::TestSuit2Scenario(std::string scenario_name) :
+	Scenario("TestSuit2\\" + scenario_name)
+{
+	
+}
+
+TS2ScenarioA::TS2ScenarioA() :
+	TestSuit2Scenario("ScenarioA\\")
+{
+}
+
+int TS2ScenarioA::p_push()
+{
+	return 100;
+}
+
+int TS2ScenarioA::p_pop()
+{
+	return 30;
+}
+
+int TS2ScenarioA::p_change()
+{
+	return 70;
 }

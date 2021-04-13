@@ -9,10 +9,9 @@ int main()
 	srand(time(NULL));
 	initHeapMonitor();
 	PriorityQueueList<int, int>* list = new PriorityQueueList<int, int>();
-	TestSuit1Scenario* scenario = new TS1ScenarioC();
+	TestSuit1Scenario* scenario = new TestSuit1Scenario("Custom1\\", 70, 10, 20);
 	Tests::execute(list, scenario);
 	delete list;
 	delete scenario;
-	system("pause");
 	return 0;
 }

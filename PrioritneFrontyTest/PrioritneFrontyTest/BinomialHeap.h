@@ -23,6 +23,10 @@ protected:
 public:
 	BinomialHeapMultiPass();
 	~BinomialHeapMultiPass();
+
+	void push(const int identifier, const Priority& priority, const Data& data, PriorityQueueItem<Priority, Data>*& data_item) override { this->BinomialHeap<Priority, Data>::push(identifier, priority, data, data_item); };
+	Data pop(int& identifier) override { return this->LazyBinomialHeap<Priority, Data>::pop(identifier); };
+	void change_priority(PriorityQueueItem<Priority, Data>* node, const Priority& priority) override { this->PriorityQueue<Priority, Data>::change_priority(node, priority); };
 };
 
 template <typename Priority, typename Data>
@@ -33,6 +37,10 @@ protected:
 public:
 	BinomialHeapSinglePass();
 	~BinomialHeapSinglePass();
+
+	void push(const int identifier, const Priority& priority, const Data& data, PriorityQueueItem<Priority, Data>*& data_item) override { this->BinomialHeap<Priority, Data>::push(identifier, priority, data, data_item); };
+	Data pop(int& identifier) override { return this->LazyBinomialHeap<Priority, Data>::pop(identifier); };
+	void change_priority(PriorityQueueItem<Priority, Data>* node, const Priority& priority) override { this->PriorityQueue<Priority, Data>::change_priority(node, priority); };
 };
 
 template<typename Priority, typename Data>

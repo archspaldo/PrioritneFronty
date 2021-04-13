@@ -22,19 +22,27 @@ public:
 template <typename Priority, typename Data>
 class PairingHeapTwoPass : public PairingHeap<Priority, Data>
 {
-public:
-	PairingHeapTwoPass();
 protected:
 	BinaryTreeItem<Priority, Data>* create_binary_tree(BinaryTreeItem<Priority, Data>* node) override;
+public:
+	PairingHeapTwoPass();
+
+	void push(const int identifier, const Priority& priority, const Data& data, PriorityQueueItem<Priority, Data>*& data_item) override { this->PairingHeap<Priority, Data>::push(identifier, priority, data, data_item); };
+	Data pop(int& identifier) override { return this->PairingHeap<Priority, Data>::pop(identifier); };
+	void change_priority(PriorityQueueItem<Priority, Data>* node, const Priority& priority) override { this->PriorityQueue<Priority, Data>::change_priority(node, priority); };
 };
 
 template <typename Priority, typename Data>
 class PairingHeapMultiPass : public PairingHeap<Priority, Data>
 {
-public:
-	PairingHeapMultiPass();
 protected:
 	BinaryTreeItem<Priority, Data>* create_binary_tree(BinaryTreeItem<Priority, Data>* node) override;
+public:
+	PairingHeapMultiPass();
+
+	void push(const int identifier, const Priority& priority, const Data& data, PriorityQueueItem<Priority, Data>*& data_item) override { this->PairingHeap<Priority, Data>::push(identifier, priority, data, data_item); };
+	Data pop(int& identifier) override { return this->PairingHeap<Priority, Data>::pop(identifier); };
+	void change_priority(PriorityQueueItem<Priority, Data>* node, const Priority& priority) override { this->PriorityQueue<Priority, Data>::change_priority(node, priority); };
 };
 
 template<typename Priority, typename Data>
