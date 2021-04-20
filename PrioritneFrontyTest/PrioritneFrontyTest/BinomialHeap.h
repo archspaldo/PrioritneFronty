@@ -85,7 +85,7 @@ template<typename Priority, typename Data>
 inline void BinomialHeap<Priority, Data>::priority_was_decreased(PriorityQueueItem<Priority, Data>* node)
 {
 	DegreeBinaryTreeItem<Priority, Data>* casted_node = (DegreeBinaryTreeItem<Priority, Data>*)node;
-	BinaryTreeItem<Priority, Data>*minimal_son = casted_node->highest_priority_son();
+	BinaryTreeItem<Priority, Data>* minimal_son = casted_node->highest_priority_son();
 	bool is_root_item = !casted_node->parent();
 	while (minimal_son && *minimal_son < *casted_node)
 	{

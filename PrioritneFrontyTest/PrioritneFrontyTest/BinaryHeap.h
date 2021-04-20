@@ -174,13 +174,13 @@ inline void BinaryHeap<Priority, Data>::swap(ArrayItem<Priority, Data>*& item_1,
 template<typename Priority, typename Data>
 inline void BinaryHeap<Priority, Data>::priority_was_increased(PriorityQueueItem<Priority, Data>* node)
 {
-	int index = dynamic_cast<ArrayItem<Priority, Data>*>(node)->index();
+	int index = ((ArrayItem<Priority, Data>*)node)->index();
 	this->heapifyUp(index);
 }
 
 template<typename Priority, typename Data>
 inline void BinaryHeap<Priority, Data>::priority_was_decreased(PriorityQueueItem<Priority, Data>* node)
 {
-	int index = dynamic_cast<ArrayItem<Priority, Data>*>(node)->index();
+	int index = ((ArrayItem<Priority, Data>*)node)->index();
 	this->heapifyDown(index);
 }

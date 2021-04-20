@@ -22,19 +22,45 @@ public:
 template <typename Priority, typename Data>
 class PairingHeapTwoPass : public PairingHeap<Priority, Data>
 {
+<<<<<<< Updated upstream
 public:
 	PairingHeapTwoPass();
 protected:
 	BinaryTreeItem<Priority, Data>* create_binary_tree(BinaryTreeItem<Priority, Data>* node) override;
+=======
+private:
+	std::stack<BinaryTreeItem<Priority, Data>*>* stack_;
+protected:
+	BinaryTreeItem<Priority, Data>* create_binary_tree(BinaryTreeItem<Priority, Data>* node) override;
+public:
+	PairingHeapTwoPass();
+	~PairingHeapTwoPass();
+	void push(const int identifier, const Priority& priority, const Data& data, PriorityQueueItem<Priority, Data>*& data_item) override { this->PairingHeap<Priority, Data>::push(identifier, priority, data, data_item); };
+	Data pop(int& identifier) override { return this->PairingHeap<Priority, Data>::pop(identifier); };
+	void change_priority(PriorityQueueItem<Priority, Data>* node, const Priority& priority) override { this->PriorityQueue<Priority, Data>::change_priority(node, priority); };
+>>>>>>> Stashed changes
 };
 
 template <typename Priority, typename Data>
 class PairingHeapMultiPass : public PairingHeap<Priority, Data>
 {
+<<<<<<< Updated upstream
 public:
 	PairingHeapMultiPass();
 protected:
 	BinaryTreeItem<Priority, Data>* create_binary_tree(BinaryTreeItem<Priority, Data>* node) override;
+=======
+private:
+	std::queue<BinaryTreeItem<Priority, Data>*>* queue_;
+protected:
+	BinaryTreeItem<Priority, Data>* create_binary_tree(BinaryTreeItem<Priority, Data>* node) override;
+public:
+	PairingHeapMultiPass();
+	~PairingHeapMultiPass();
+	void push(const int identifier, const Priority& priority, const Data& data, PriorityQueueItem<Priority, Data>*& data_item) override { this->PairingHeap<Priority, Data>::push(identifier, priority, data, data_item); };
+	Data pop(int& identifier) override { return this->PairingHeap<Priority, Data>::pop(identifier); };
+	void change_priority(PriorityQueueItem<Priority, Data>* node, const Priority& priority) override { this->PriorityQueue<Priority, Data>::change_priority(node, priority); };
+>>>>>>> Stashed changes
 };
 
 template<typename Priority, typename Data>
@@ -151,8 +177,14 @@ inline void PairingHeap<Priority, Data>::merge(PriorityQueue<Priority, Data>* ot
 
 template<typename Priority, typename Data>
 inline PairingHeapTwoPass<Priority, Data>::PairingHeapTwoPass() :
-	PairingHeap<Priority, Data>()
+	PairingHeap<Priority, Data>(), stack_(new std::stack<BinaryTreeItem<Priority, Data>*>())
 {
+}
+
+template<typename Priority, typename Data>
+inline PairingHeapTwoPass<Priority, Data>::~PairingHeapTwoPass()
+{
+	delete this->stack_;
 }
 
 template<typename Priority, typename Data>
@@ -164,21 +196,20 @@ inline BinaryTreeItem<Priority, Data>* PairingHeapTwoPass<Priority, Data>::creat
 	{
 		if (node_ptr->right_son())
 		{
-			std::stack<BinaryTreeItem<Priority, Data>*> stack;
 			while (node_ptr)
 			{
 				node_next_ptr = node_ptr->right_son() ? node_ptr->right_son()->right_son() : nullptr;
 				node_ptr = node_ptr->merge(node_ptr->right_son());
 				node_ptr->right_son() = nullptr;
-				stack.push(node_ptr);
+				this->stack_->push(node_ptr);
 				node_ptr = node_next_ptr;
 			}
-			node_ptr = stack.top();
-			stack.pop();
-			while (!stack.empty())
+			node_ptr = this->stack_->top();
+			this->stack_->pop();
+			while (!this->stack_->empty())
 			{
-				node_ptr = node_ptr->merge(stack.top());
-				stack.pop();
+				node_ptr = node_ptr->merge(this->stack_->top());
+				this->stack_->pop();
 			}
 		}
 		node_ptr->parent() = nullptr;
@@ -188,8 +219,14 @@ inline BinaryTreeItem<Priority, Data>* PairingHeapTwoPass<Priority, Data>::creat
 
 template<typename Priority, typename Data>
 inline PairingHeapMultiPass<Priority, Data>::PairingHeapMultiPass() :
-	PairingHeap<Priority, Data>()
+	PairingHeap<Priority, Data>(), queue_(new std::queue<BinaryTreeItem<Priority, Data>*>())
 {
+}
+
+template<typename Priority, typename Data>
+inline PairingHeapMultiPass<Priority, Data>::~PairingHeapMultiPass()
+{
+	delete this->queue_;
 }
 
 template<typename Priority, typename Data>
@@ -201,24 +238,23 @@ inline BinaryTreeItem<Priority, Data>* PairingHeapMultiPass<Priority, Data>::cre
 	{
 		if (node_ptr->right_son())
 		{
-			std::queue<BinaryTreeItem<Priority, Data>*> queue;
 			while (node_ptr)
 			{
 				node_next_ptr = node_ptr->right_son() ? node_ptr->right_son()->right_son() : nullptr;
 				node_ptr = node_ptr->merge(node_ptr->right_son());
 				node_ptr->right_son() = nullptr;
-				queue.push(node_ptr);
+				this->queue_->push(node_ptr);
 				node_ptr = node_next_ptr;
 			}
-			node_ptr = queue.front();
-			queue.pop();
-			while (!queue.empty())
+			node_ptr = this->queue_->front();
+			this->queue_->pop();
+			while (!this->queue_->empty())
 			{
-				node_ptr = node_ptr->merge(queue.front());
-				queue.pop();
-				queue.push(node_ptr);
-				node_ptr = queue.front();
-				queue.pop();
+				node_ptr = node_ptr->merge(this->queue_->front());
+				this->queue_->pop();
+				this->queue_->push(node_ptr);
+				node_ptr = this->queue_->front();
+				this->queue_->pop();
 			}
 		}
 		node_ptr->parent() = nullptr;

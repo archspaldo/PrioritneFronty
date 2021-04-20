@@ -42,8 +42,8 @@ inline void RankPairingHeap<Priority, Data>::restore_degree_rule(DegreeBinaryTre
 		int degree, left_son_degree, right_son_degree;
 		while (true)
 		{
-			left_son_degree = node_ptr->left_son() ? dynamic_cast<DegreeBinaryTreeItem<Priority, Data>*>(node_ptr->left_son())->degree() : -1;
-			right_son_degree = node_ptr->right_son() && node_ptr->right_son()->parent() ? dynamic_cast<DegreeBinaryTreeItem<Priority, Data>*>(node_ptr->right_son())->degree() : -1;
+			left_son_degree = node_ptr->left_son() ? ((DegreeBinaryTreeItem<Priority, Data>*)node_ptr->left_son())->degree() : -1;
+			right_son_degree = node_ptr->right_son() && node_ptr->right_son()->parent() ? ((DegreeBinaryTreeItem<Priority, Data>*)node_ptr->right_son())->degree() : -1;
 			if (node_ptr->parent())
 			{
 				if (abs(left_son_degree - right_son_degree) > 1)
@@ -62,7 +62,7 @@ inline void RankPairingHeap<Priority, Data>::restore_degree_rule(DegreeBinaryTre
 				{
 					node_ptr->degree() = degree;
 				}
-				node_ptr = dynamic_cast<DegreeBinaryTreeItem<Priority, Data>*>(node_ptr->parent());
+				node_ptr = (DegreeBinaryTreeItem<Priority, Data>*)node_ptr->parent();
 			}
 			else
 			{
@@ -82,8 +82,8 @@ inline void RankPairingHeap<Priority, Data>::consolidate_root(BinaryTreeItem<Pri
 template<typename Priority, typename Data>
 inline void RankPairingHeap<Priority, Data>::priority_was_increased(PriorityQueueItem<Priority, Data>* node)
 {
-	DegreeBinaryTreeItem<Priority, Data>* casted_node = dynamic_cast<DegreeBinaryTreeItem<Priority, Data>*>(node);
-	casted_node->degree() = casted_node->left_son() ? dynamic_cast<DegreeBinaryTreeItem<Priority, Data>*>(casted_node->left_son())->degree() + 1 : 0;
+	DegreeBinaryTreeItem<Priority, Data>* casted_node = (DegreeBinaryTreeItem<Priority, Data>*)node;
+	casted_node->degree() = casted_node->left_son() ? ((DegreeBinaryTreeItem<Priority, Data>*)casted_node->left_son())->degree() + 1 : 0;
 	if (casted_node->parent())
 	{
 		DegreeBinaryTreeItem<Priority, Data>* parent = (DegreeBinaryTreeItem<Priority, Data>*)casted_node->parent();
@@ -112,15 +112,15 @@ inline void RankPairingHeap<Priority, Data>::priority_was_decreased(PriorityQueu
 		}
 		this->root_ = new_root;
 	}
-	for (BinaryTreeItem<Priority, Data>* node_ptr = dynamic_cast<BinaryTreeItem<Priority, Data>*>(node)->left_son(), *node_next_ptr = node_ptr ? node_ptr->right_son() : nullptr; node_ptr;
+	for (BinaryTreeItem<Priority, Data>* node_ptr = ((BinaryTreeItem<Priority, Data>*)node)->left_son(), *node_next_ptr = node_ptr ? node_ptr->right_son() : nullptr; node_ptr;
 		node_ptr = node_next_ptr, node_next_ptr = node_ptr ? node_ptr->right_son() : nullptr)
 	{
 		if (*node_ptr < *node)
 		{
 			last_change = node_ptr->parent();
-			dynamic_cast<DegreeBinaryTreeItem<Priority, Data>*>(node_ptr->cut())->degree() = node_ptr->left_son() ? dynamic_cast<DegreeBinaryTreeItem<Priority, Data>*>(node_ptr->left_son())->degree() + 1 : 0;
+			((DegreeBinaryTreeItem<Priority, Data>*)node_ptr->cut())->degree() = node_ptr->left_son() ? ((DegreeBinaryTreeItem<Priority, Data>*)node_ptr->left_son())->degree() + 1 : 0;
 			this->add_root_item(node_ptr);
 		}
 	}
-	this->restore_degree_rule(dynamic_cast<DegreeBinaryTreeItem<Priority, Data>*>(last_change));
+	this->restore_degree_rule((DegreeBinaryTreeItem<Priority, Data>*)last_change);
 }

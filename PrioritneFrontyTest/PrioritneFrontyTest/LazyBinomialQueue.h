@@ -31,7 +31,7 @@ inline void LazyBinomialHeap<Priority, Data>::consolidate_root_using_multipass(B
 			node_ptr = node_next_ptr, node_next_ptr = node_ptr ? node_ptr->right_son() : nullptr)
 		{
 			node_ptr->cut();
-			node_degree = dynamic_cast<DegreeBinaryTreeItem<Priority, Data>*>(node_ptr)->degree();
+			node_degree = ((DegreeBinaryTreeItem<Priority, Data>*)node_ptr)->degree();
 
 			while (node_list[node_degree])
 			{
@@ -52,7 +52,7 @@ inline void LazyBinomialHeap<Priority, Data>::consolidate_root_using_multipass(B
 			node_ptr = node_next_ptr, node_next_ptr = node_ptr->right_son())
 		{
 			node_ptr->right_son() = nullptr;
-			node_degree = static_cast<DegreeBinaryTreeItem<Priority, Data>*>(node_ptr)->degree();
+			node_degree = ((DegreeBinaryTreeItem<Priority, Data>*)node_ptr)->degree();
 
 			while (node_list[node_degree])
 			{
@@ -65,7 +65,7 @@ inline void LazyBinomialHeap<Priority, Data>::consolidate_root_using_multipass(B
 		if (!this->root_->parent())
 		{
 			node_ptr = this->root_;
-			node_degree = static_cast<DegreeBinaryTreeItem<Priority, Data>*>(node_ptr)->degree();
+			node_degree = ((DegreeBinaryTreeItem<Priority, Data>*)node_ptr)->degree();
 
 			while (node_list[node_degree])
 			{
@@ -101,7 +101,7 @@ inline void LazyBinomialHeap<Priority, Data>::consolidate_root_using_singlepass(
 			node_ptr = node_next_ptr, node_next_ptr = node_ptr ? node_ptr->right_son() : nullptr)
 		{
 			node_ptr->cut();
-			node_degree = dynamic_cast<DegreeBinaryTreeItem<Priority, Data>*>(node_ptr)->degree();
+			node_degree = ((DegreeBinaryTreeItem<Priority, Data>*)node_ptr)->degree();
 
 			if (node_list[node_degree])
 			{
@@ -126,7 +126,7 @@ inline void LazyBinomialHeap<Priority, Data>::consolidate_root_using_singlepass(
 		{
 			node_ptr->right_son() = nullptr;
 
-			node_degree = dynamic_cast<DegreeBinaryTreeItem<Priority, Data>*>(node_ptr)->degree();
+			node_degree = ((DegreeBinaryTreeItem<Priority, Data>*)node_ptr)->degree();
 
 			if (node_list[node_degree])
 			{
@@ -143,7 +143,7 @@ inline void LazyBinomialHeap<Priority, Data>::consolidate_root_using_singlepass(
 		if (!root->parent())
 		{
 			node_ptr = root;
-			node_degree = dynamic_cast<DegreeBinaryTreeItem<Priority, Data>*>(node_ptr)->degree();
+			node_degree = ((DegreeBinaryTreeItem<Priority, Data>*)node_ptr)->degree();
 
 			if (node_list[node_degree])
 			{

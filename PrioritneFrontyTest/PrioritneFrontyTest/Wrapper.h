@@ -7,15 +7,8 @@
 #include <iostream>
 #include <chrono>
 #include <unordered_map>
-
-class Timer
-{
-private:
-	std::chrono::system_clock::time_point start_time_, end_time_;
-public:
-	void start_measuring();
-	double stop_measuring();
-};
+#include <time.h>
+#include <sys/timeb.h>
 
 template <typename Priority, typename Data>
 class PriorityQueueWrapper
@@ -23,14 +16,10 @@ class PriorityQueueWrapper
 private:
 	std::unordered_map<int, PriorityQueueItem<Priority, Data>*>* identifier_map_;
 	PriorityQueue<Priority, Data>* priority_queue_;
-	std::ofstream output_stream_;
-	std::string structure_name_;
-	Timer timer;
+	timespec* ts;
 public:
 	PriorityQueueWrapper(PriorityQueue<Priority, Data>* priority_queue);
 	~PriorityQueueWrapper();
-	void start_write(std::string& output_directory);
-	void end_write();
 	void reset();
 	void push(const int identifier, const Priority& priority, const Data& data);
 	int pop();
@@ -45,8 +34,6 @@ class PriorityQueueList
 public:
 	PriorityQueueList();
 	~PriorityQueueList();
-	void start_write(std::string& output_directory);
-	void end_write();
 	void clear_structures();
 	int get_random_identifier();
 	int size();
@@ -58,11 +45,9 @@ public:
 template<typename Priority, typename Data>
 inline PriorityQueueWrapper<Priority, Data>::PriorityQueueWrapper(PriorityQueue<Priority, Data>* priority_queue) :
 	identifier_map_(new std::unordered_map<int, PriorityQueueItem<Priority, Data>*>()),
-	priority_queue_(priority_queue),
-	structure_name_(typeid(*this->priority_queue_).name())
+	priority_queue_(priority_queue), 
+	ts()
 {
-	this->structure_name_.erase(this->structure_name_.end() - 9, this->structure_name_.end());
-	this->structure_name_.erase(this->structure_name_.begin(), this->structure_name_.begin() + 6);
 }
 
 template<typename Priority, typename Data>
@@ -72,19 +57,6 @@ inline PriorityQueueWrapper<Priority, Data>::~PriorityQueueWrapper()
 	delete this->identifier_map_;
 	this->priority_queue_ = nullptr;
 	this->identifier_map_ = nullptr;
-}
-
-template<typename Priority, typename Data>
-inline void PriorityQueueWrapper<Priority, Data>::start_write(std::string& output_directory)
-{
-	this->output_stream_.open(output_directory + this->structure_name_ + ".csv");
-	this->output_stream_ << "Operation;Time;Size\n";
-}
-
-template<typename Priority, typename Data>
-inline void PriorityQueueWrapper<Priority, Data>::end_write()
-{
-	this->output_stream_.close();
 }
 
 template<typename Priority, typename Data>
@@ -98,11 +70,7 @@ template<typename Priority, typename Data>
 inline void PriorityQueueWrapper<Priority, Data>::push(const int identifier, const Priority& priority, const Data& data)
 {
 	PriorityQueueItem<Priority, Data>* priority_queue_item;
-	double time;
-	timer.start_measuring();
 	this->priority_queue_->push(identifier, priority, data, priority_queue_item);
-	time = timer.stop_measuring();
-	this->output_stream_ << "push;" << time << ";" << this->priority_queue_->size() << "\n";
 	(*this->identifier_map_)[identifier] = priority_queue_item;
 }
 
@@ -110,11 +78,7 @@ template<typename Priority, typename Data>
 inline int PriorityQueueWrapper<Priority, Data>::pop()
 {
 	int identifier;
-	double time;
-	timer.start_measuring();
 	this->priority_queue_->pop(identifier);
-	time = timer.stop_measuring();
-	this->output_stream_ << "pop;" << time << ";" << this->priority_queue_->size() << "\n";
 	this->identifier_map_->erase(identifier);
 	return identifier;
 }
@@ -123,11 +87,7 @@ template<typename Priority, typename Data>
 inline void PriorityQueueWrapper<Priority, Data>::change_priority(const int identifier, const Priority& priority)
 {
 	PriorityQueueItem<Priority, Data>* priority_queue_item = (*this->identifier_map_)[identifier];
-	double time;
-	timer.start_measuring();
 	this->priority_queue_->change_priority(priority_queue_item, priority);
-	time = timer.stop_measuring();
-	this->output_stream_ << "change priority;" << time << ";" << this->priority_queue_->size() << "\n";
 }
 
 template<typename Priority, typename Data>
@@ -136,12 +96,21 @@ inline PriorityQueueList<Priority, Data>::PriorityQueueList() :
 	identifier_list_(new std::vector<int>())
 {
 	priority_queue_list_->push_back(new PriorityQueueWrapper<Priority, Data>(new BinaryHeap<Priority, Data>()));
+<<<<<<< Updated upstream
 	/*priority_queue_list_->push_back(new PriorityQueueWrapper<Priority, Data>(new PairingHeapTwoPass<Priority, Data>()));
 	priority_queue_list_->push_back(new PriorityQueueWrapper<Priority, Data>(new PairingHeapMultiPass<Priority, Data>()));
 	priority_queue_list_->push_back(new PriorityQueueWrapper<Priority, Data>(new RankPairingHeap<Priority, Data>()));
 	priority_queue_list_->push_back(new PriorityQueueWrapper<Priority, Data>(new FibonacciHeap<Priority, Data>()));
 	priority_queue_list_->push_back(new PriorityQueueWrapper<Priority, Data>(new BinomialHeapSinglePass<Priority, Data>()));
 	priority_queue_list_->push_back(new PriorityQueueWrapper<Priority, Data>(new BinomialHeapMultiPass<Priority, Data>()));*/
+=======
+	//priority_queue_list_->push_back(new PriorityQueueWrapper<Priority, Data>(new PairingHeapTwoPass<Priority, Data>()));
+	//priority_queue_list_->push_back(new PriorityQueueWrapper<Priority, Data>(new PairingHeapMultiPass<Priority, Data>()));
+	//priority_queue_list_->push_back(new PriorityQueueWrapper<Priority, Data>(new RankPairingHeap<Priority, Data>()));
+	//priority_queue_list_->push_back(new PriorityQueueWrapper<Priority, Data>(new FibonacciHeap<Priority, Data>()));
+	//priority_queue_list_->push_back(new PriorityQueueWrapper<Priority, Data>(new BinomialHeapSinglePass<Priority, Data>()));
+	//priority_queue_list_->push_back(new PriorityQueueWrapper<Priority, Data>(new BinomialHeapMultiPass<Priority, Data>()));
+>>>>>>> Stashed changes
 }
 
 template<typename Priority, typename Data>
@@ -155,24 +124,6 @@ inline PriorityQueueList<Priority, Data>::~PriorityQueueList()
 	delete this->identifier_list_;
 	this->priority_queue_list_ = nullptr;
 	this->identifier_list_ = nullptr;
-}
-
-template<typename Priority, typename Data>
-inline void PriorityQueueList<Priority, Data>::start_write(std::string& output_directory)
-{
-	for (PriorityQueueWrapper<Priority, Data>* item : *this->priority_queue_list_)
-	{
-		item->start_write(output_directory);
-	}
-}
-
-template<typename Priority, typename Data>
-inline void PriorityQueueList<Priority, Data>::end_write()
-{
-	for (PriorityQueueWrapper<Priority, Data>* item : *this->priority_queue_list_)
-	{
-		item->end_write();
-	}
 }
 
 template<typename Priority, typename Data>
