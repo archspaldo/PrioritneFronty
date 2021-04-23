@@ -14,7 +14,6 @@ private:
 	int greaterSon(const int index);
 	void heapifyUp(const int index);
 	void heapifyDown(const int index);
-
 	static void swap(ArrayItem<Priority, Data>*& item_1, ArrayItem<Priority, Data>*& item_2);
 protected:
 	void priority_was_increased(PriorityQueueItem<Priority, Data>* node) override;
@@ -28,6 +27,8 @@ public:
 	Data pop(int& identifier) override;
 	Data& find_min() override;
 	void merge(PriorityQueue<Priority, Data>* other_heap) override;
+
+	void change_priority(PriorityQueueItem<Priority, Data>* node, const Priority& priority) override { this->PriorityQueue<Priority, Data>::change_priority(node, priority); };
 };
 
 template<typename Priority, typename Data>

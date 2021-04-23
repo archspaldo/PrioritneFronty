@@ -1,5 +1,5 @@
 #pragma once
-#include "ExplicitPriorityQueue.h"
+#include "ExplicitHeap.h"
 
 template <typename Priority, typename Data>
 class LazyBinomialHeap : public ExplicitPriorityQueue<Priority, Data>

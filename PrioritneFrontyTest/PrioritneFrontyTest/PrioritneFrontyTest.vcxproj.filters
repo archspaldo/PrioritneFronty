@@ -69,7 +69,4 @@
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
-  <ItemGroup>
-    <None Include="ClassDiagram3.cd" />
-  </ItemGroup>
 </Project>

@@ -2,12 +2,7 @@
 
 void Tests::execute(PriorityQueueList<int, int>* pq_list, TestSuit1Scenario* scenario)
 {
-<<<<<<< Updated upstream
-	//pq_list->start_write(scenario->scenario_name());
-	for (int j = 0; j < 100; j++)
-=======
-	for (int j = 0; j < 1; j++)
->>>>>>> Stashed changes
+	for (int j = 0; j < 2; j++)
 	{
 		for (int i = 0; i < scenario->count(); i++)
 		{
@@ -29,11 +24,9 @@ void Tests::execute(PriorityQueueList<int, int>* pq_list, TestSuit1Scenario* sce
 				i--;
 			}
 		}
-<<<<<<< Updated upstream
-=======
-		system("pause");
 		pq_list->clear_structures();
 	}
+	system("pause");
 }
 
 void Tests::execute(PriorityQueueList<int, int>* pq_list, TestSuit2Scenario* scenario)
@@ -71,7 +64,6 @@ void Tests::execute(PriorityQueueList<int, int>* pq_list, TestSuit2Scenario* sce
 			}
 			system("pause");
 		}
->>>>>>> Stashed changes
 		pq_list->clear_structures();
 		counter = 0;
 	}

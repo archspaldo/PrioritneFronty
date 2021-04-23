@@ -14,6 +14,9 @@ public:
 	RankPairingHeap();
 	~RankPairingHeap();
 	void push(const int identifier, const Priority& priority, const Data& data, PriorityQueueItem<Priority, Data>*& data_item) override;
+
+	Data pop(int& identifier) override { return this->LazyBinomialHeap<Priority, Data>::pop(identifier); };
+	void change_priority(PriorityQueueItem<Priority, Data>* node, const Priority& priority) override { this->PriorityQueue<Priority, Data>::change_priority(node, priority); };
 };
 
 template<typename Priority, typename Data>
@@ -52,7 +55,7 @@ inline void RankPairingHeap<Priority, Data>::restore_degree_rule(DegreeBinaryTre
 				}
 				else
 				{
-					degree = std::max(left_son_degree, right_son_degree + 1);
+					degree = std::max(left_son_degree, right_son_degree) + 1;
 				}
 				if (node_ptr->degree() < degree)
 				{

@@ -16,7 +16,6 @@ class PriorityQueueWrapper
 private:
 	std::unordered_map<int, PriorityQueueItem<Priority, Data>*>* identifier_map_;
 	PriorityQueue<Priority, Data>* priority_queue_;
-	timespec* ts;
 public:
 	PriorityQueueWrapper(PriorityQueue<Priority, Data>* priority_queue);
 	~PriorityQueueWrapper();
@@ -45,8 +44,7 @@ public:
 template<typename Priority, typename Data>
 inline PriorityQueueWrapper<Priority, Data>::PriorityQueueWrapper(PriorityQueue<Priority, Data>* priority_queue) :
 	identifier_map_(new std::unordered_map<int, PriorityQueueItem<Priority, Data>*>()),
-	priority_queue_(priority_queue), 
-	ts()
+	priority_queue_(priority_queue)
 {
 }
 
@@ -95,22 +93,13 @@ inline PriorityQueueList<Priority, Data>::PriorityQueueList() :
 	priority_queue_list_(new std::list<PriorityQueueWrapper<Priority, Data>*>()),
 	identifier_list_(new std::vector<int>())
 {
-	priority_queue_list_->push_back(new PriorityQueueWrapper<Priority, Data>(new BinaryHeap<Priority, Data>()));
-<<<<<<< Updated upstream
-	/*priority_queue_list_->push_back(new PriorityQueueWrapper<Priority, Data>(new PairingHeapTwoPass<Priority, Data>()));
-	priority_queue_list_->push_back(new PriorityQueueWrapper<Priority, Data>(new PairingHeapMultiPass<Priority, Data>()));
-	priority_queue_list_->push_back(new PriorityQueueWrapper<Priority, Data>(new RankPairingHeap<Priority, Data>()));
-	priority_queue_list_->push_back(new PriorityQueueWrapper<Priority, Data>(new FibonacciHeap<Priority, Data>()));
-	priority_queue_list_->push_back(new PriorityQueueWrapper<Priority, Data>(new BinomialHeapSinglePass<Priority, Data>()));
-	priority_queue_list_->push_back(new PriorityQueueWrapper<Priority, Data>(new BinomialHeapMultiPass<Priority, Data>()));*/
-=======
+	//priority_queue_list_->push_back(new PriorityQueueWrapper<Priority, Data>(new BinaryHeap<Priority, Data>()));
 	//priority_queue_list_->push_back(new PriorityQueueWrapper<Priority, Data>(new PairingHeapTwoPass<Priority, Data>()));
 	//priority_queue_list_->push_back(new PriorityQueueWrapper<Priority, Data>(new PairingHeapMultiPass<Priority, Data>()));
 	//priority_queue_list_->push_back(new PriorityQueueWrapper<Priority, Data>(new RankPairingHeap<Priority, Data>()));
-	//priority_queue_list_->push_back(new PriorityQueueWrapper<Priority, Data>(new FibonacciHeap<Priority, Data>()));
+	priority_queue_list_->push_back(new PriorityQueueWrapper<Priority, Data>(new FibonacciHeap<Priority, Data>()));
 	//priority_queue_list_->push_back(new PriorityQueueWrapper<Priority, Data>(new BinomialHeapSinglePass<Priority, Data>()));
 	//priority_queue_list_->push_back(new PriorityQueueWrapper<Priority, Data>(new BinomialHeapMultiPass<Priority, Data>()));
->>>>>>> Stashed changes
 }
 
 template<typename Priority, typename Data>

@@ -1,5 +1,5 @@
 #pragma once
-#include "ExplicitPriorityQueue.h"
+#include "ExplicitHeap.h"
 #include <stack>
 #include <queue>
 
@@ -22,12 +22,7 @@ public:
 template <typename Priority, typename Data>
 class PairingHeapTwoPass : public PairingHeap<Priority, Data>
 {
-<<<<<<< Updated upstream
-public:
-	PairingHeapTwoPass();
-protected:
-	BinaryTreeItem<Priority, Data>* create_binary_tree(BinaryTreeItem<Priority, Data>* node) override;
-=======
+
 private:
 	std::stack<BinaryTreeItem<Priority, Data>*>* stack_;
 protected:
@@ -38,18 +33,11 @@ public:
 	void push(const int identifier, const Priority& priority, const Data& data, PriorityQueueItem<Priority, Data>*& data_item) override { this->PairingHeap<Priority, Data>::push(identifier, priority, data, data_item); };
 	Data pop(int& identifier) override { return this->PairingHeap<Priority, Data>::pop(identifier); };
 	void change_priority(PriorityQueueItem<Priority, Data>* node, const Priority& priority) override { this->PriorityQueue<Priority, Data>::change_priority(node, priority); };
->>>>>>> Stashed changes
 };
 
 template <typename Priority, typename Data>
 class PairingHeapMultiPass : public PairingHeap<Priority, Data>
 {
-<<<<<<< Updated upstream
-public:
-	PairingHeapMultiPass();
-protected:
-	BinaryTreeItem<Priority, Data>* create_binary_tree(BinaryTreeItem<Priority, Data>* node) override;
-=======
 private:
 	std::queue<BinaryTreeItem<Priority, Data>*>* queue_;
 protected:
@@ -60,7 +48,6 @@ public:
 	void push(const int identifier, const Priority& priority, const Data& data, PriorityQueueItem<Priority, Data>*& data_item) override { this->PairingHeap<Priority, Data>::push(identifier, priority, data, data_item); };
 	Data pop(int& identifier) override { return this->PairingHeap<Priority, Data>::pop(identifier); };
 	void change_priority(PriorityQueueItem<Priority, Data>* node, const Priority& priority) override { this->PriorityQueue<Priority, Data>::change_priority(node, priority); };
->>>>>>> Stashed changes
 };
 
 template<typename Priority, typename Data>
