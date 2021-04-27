@@ -11,9 +11,9 @@ private:
 	int leftSon(const int index);
 	int righSon(const int index);
 	int parent(const int index);
-	int greaterSon(const int index);
-	void heapifyUp(const int index);
-	void heapifyDown(const int index);
+	int greater_son(const int index);
+	void heapify_up(const int index);
+	void heapify_down(const int index);
 	static void swap(ArrayItem<Priority, Data>*& item_1, ArrayItem<Priority, Data>*& item_2);
 protected:
 	void priority_was_increased(PriorityQueueItem<Priority, Data>* node) override;
@@ -66,7 +66,7 @@ inline void BinaryHeap<Priority, Data>::push(const int identifier, const Priorit
 {
 	ArrayItem<Priority, Data>* new_node = new ArrayItem<Priority, Data>(identifier, priority, data, this->size());
 	this->list_->push_back(new_node);
-	this->heapifyUp(this->size() - 1);
+	this->heapify_up(this->size() - 1);
 	data_item = new_node;
 }
 
@@ -84,10 +84,9 @@ inline Data BinaryHeap<Priority, Data>::pop(int& identifier)
 
 	PriorityQueueItem<Priority, Data>* item = this->list_->back();
 	this->list_->pop_back(); 
-	this->heapifyDown(0);
+	this->heapify_down(0);
 	Data data = item->data();
 	identifier = item->identifier();
-	//std::cout << "BH\t" << item->priority() << "\t" << item->identifier() << "\n";
 	delete item;
 	return data;
 }
@@ -112,7 +111,7 @@ inline void BinaryHeap<Priority, Data>::merge(PriorityQueue<Priority, Data>* oth
 		int greater_son;
 		for (int i = (this->size() - 1) / 2; i <= 0; i--)
 		{
-			this->heapifyDown(i);
+			this->heapify_down(i);
 		}
 	}
 }
@@ -136,7 +135,7 @@ inline int BinaryHeap<Priority, Data>::parent(const int index)
 }
 
 template<typename Priority, typename Data>
-inline int BinaryHeap<Priority, Data>::greaterSon(const int index)
+inline int BinaryHeap<Priority, Data>::greater_son(const int index)
 {
 	PriorityQueueItem<Priority, Data>* lChild = this->leftSon(index) < this->size() ? (*this->list_)[this->leftSon(index)] : nullptr;
 	PriorityQueueItem<Priority, Data>* rChild = this->righSon(index) < this->size() ? (*this->list_)[this->righSon(index)] : nullptr;
@@ -148,7 +147,7 @@ inline int BinaryHeap<Priority, Data>::greaterSon(const int index)
 }
 
 template<typename Priority, typename Data>
-inline void BinaryHeap<Priority, Data>::heapifyUp(const int index)
+inline void BinaryHeap<Priority, Data>::heapify_up(const int index)
 {
 	for (int i = index, parent = this->parent(i); i > 0 && *(*this->list_)[i] < *(*this->list_)[parent]; i = parent, parent = this->parent(i))
 	{
@@ -157,9 +156,9 @@ inline void BinaryHeap<Priority, Data>::heapifyUp(const int index)
 }
 
 template<typename Priority, typename Data>
-inline void BinaryHeap<Priority, Data>::heapifyDown(const int index)
+inline void BinaryHeap<Priority, Data>::heapify_down(const int index)
 {
-	for (int i = index, child = this->greaterSon(i); child < this->size() && *(*this->list_)[child] < *(*this->list_)[i]; i = child, child = this->greaterSon(i))
+	for (int i = index, child = this->greater_son(i); child < this->size() && *(*this->list_)[child] < *(*this->list_)[i]; i = child, child = this->greater_son(i))
 	{
 		swap((*this->list_)[child], (*this->list_)[i]);
 	}
@@ -176,12 +175,12 @@ template<typename Priority, typename Data>
 inline void BinaryHeap<Priority, Data>::priority_was_increased(PriorityQueueItem<Priority, Data>* node)
 {
 	int index = ((ArrayItem<Priority, Data>*)node)->index();
-	this->heapifyUp(index);
+	this->heapify_up(index);
 }
 
 template<typename Priority, typename Data>
 inline void BinaryHeap<Priority, Data>::priority_was_decreased(PriorityQueueItem<Priority, Data>* node)
 {
 	int index = ((ArrayItem<Priority, Data>*)node)->index();
-	this->heapifyDown(index);
+	this->heapify_down(index);
 }

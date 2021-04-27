@@ -48,8 +48,7 @@ void Tests::execute(PriorityQueueList<int, int>* pq_list, TestSuit2Scenario* sce
 			system("pause");
 			for (int l = 0; l < 10000; l++)
 			{
-				pop = change = 100;
-				push = 400;
+				push = pop = change = 100;
 				while (push > 0 || pop > 0 || change > 0)
 				{
 					random = rand() % (pop + change + push);
