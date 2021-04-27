@@ -55,7 +55,3 @@ TS1ScenarioE::TS1ScenarioE() :
 	TestSuit1Scenario(50, 40, 10, 1000000)
 {
 }
-
-TestSuit2Scenario::TestSuit2Scenario()
-{
-}

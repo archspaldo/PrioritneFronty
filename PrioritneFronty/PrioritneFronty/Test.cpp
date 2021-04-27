@@ -31,40 +31,48 @@ void Tests::execute(PriorityQueueList<int, int>* pq_list, TestSuit1Scenario* sce
 
 void Tests::execute(PriorityQueueList<int, int>* pq_list, TestSuit2Scenario* scenario)
 {
-	int push, pop, change, counter = 0, random, k = 0;
+	int push, pop, change, counter = 0, random;
 	for (int i = 0; i < 1; i++)
 	{
-		for (int j = 1000; j < 2000000; j *= 1.5)
+		for (int j = 10000; j < 2000000; j *= 1.5)
 		{
-			for (; k < j; k++)
+			
+			for (; pq_list->size() < j;)
 			{
-				pq_list->push(counter++, rand() % UINT32_MAX, rand() % UINT32_MAX);
-			}
-			pq_list->pop();
-			system("pause");
-			push = pop = change = sqrt(j) * 10;
-			while (push > 0 || pop > 0 || change > 0)
-			{
-				random = rand() % (pop + change + push);
-				if (random < push)
+				for (int k = 0; k < 4; k++)
 				{
 					pq_list->push(counter++, rand() % UINT32_MAX, rand() % UINT32_MAX);
-					push--;
 				}
-				else if (random  < push + pop)
+				pq_list->pop();
+			}
+			system("pause");
+			for (int l = 0; l < 10000; l++)
+			{
+				pop = change = 100;
+				push = 400;
+				while (push > 0 || pop > 0 || change > 0)
 				{
-					pq_list->pop();
-					pop--;
-				}
-				else
-				{
-					pq_list->change_priority(pq_list->get_random_identifier(), rand() % UINT32_MAX);
-					change--;
+					random = rand() % (pop + change + push);
+					if (random < push || pq_list->size() == 0)
+					{
+						pq_list->push(counter++, rand() % UINT32_MAX, rand() % UINT32_MAX);
+						push--;
+					}
+					else if (random  < push + pop)
+					{
+						pq_list->pop();
+						pop--;
+					}
+					else
+					{
+						pq_list->change_priority(pq_list->get_random_identifier(), rand() % UINT32_MAX);
+						change--;
+					}
 				}
 			}
 			system("pause");
+			pq_list->clear_structures();
 		}
-		pq_list->clear_structures();
 		counter = 0;
 	}
 }

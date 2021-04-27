@@ -21,12 +21,8 @@ public:
 
 class TestSuit2Scenario : public Scenario
 {
-private:
-	int p_push_, p_pop_, p_change_;
-protected:
-	TestSuit2Scenario();
 public:
-	int p_push(), p_pop(), p_change();
+	TestSuit2Scenario() {};
 };
 
 class TS1ScenarioA : public TestSuit1Scenario
@@ -58,10 +54,3 @@ class TS1ScenarioE : public TestSuit1Scenario
 public:
 	TS1ScenarioE();
 };
-
-class TS2ScenarioA : public TestSuit2Scenario
-{
-public:
-	TS2ScenarioA();
-};
-

@@ -1,208 +1,175 @@
 #pragma once
-#include "PriorityQueue.h"
-#include <vector>
+#include "LazyBinomialQueue.h"
 
-template <typename K, typename T>
-class BinomialHeap : public PriorityQueue<K, T>
+template <typename Priority, typename Data>
+class BinomialHeap : public LazyBinomialHeap<Priority, Data>
 {
-public:
+protected:
+	void priority_was_increased(PriorityQueueItem<Priority, Data>* node) override;
+	void priority_was_decreased(PriorityQueueItem<Priority, Data>* node) override;
+	void repair_broken_root_list();
 	BinomialHeap();
-	BinomialHeap(PQDoubleLinkedItem<K, T>* head, size_t size = 0);
+public:
 	~BinomialHeap();
-	size_t size() const override;
-	PriorityQueueItem<K, T>* push(const K& key, const T& data) override;
-	T pop() override;
-	T& peek() override;
-	const T peek() const override;
-	K peekPriority() override;
-	void merge(PriorityQueue<K, T>* other_heap);
-	void change_priority(PriorityQueueItem<K, T>* node, const K& key);
-private:
-	void find_minimum();
-	PQDoubleLinkedItem<K, T>* head_;
-	PQDoubleLinkedItem<K, T>* root_;
-	size_t size_;
+	void push(const int identifier, const Priority& priority, const Data& data, PriorityQueueItem<Priority, Data>*& data_item) override;
+	void merge(PriorityQueue<Priority, Data>* other_heap) override;
 };
 
-template<typename K, typename T>
-inline BinomialHeap<K, T>::BinomialHeap() :
-	PriorityQueue<K, T>(), size_(0), head_(nullptr), root_(nullptr)
+template <typename Priority, typename Data>
+class BinomialHeapMultiPass : public BinomialHeap<Priority, Data>
+{
+protected:
+	void consolidate_root(BinaryTreeItem<Priority, Data>* node) override;
+public:
+	BinomialHeapMultiPass();
+	~BinomialHeapMultiPass();
+
+	void push(const int identifier, const Priority& priority, const Data& data, PriorityQueueItem<Priority, Data>*& data_item) override { this->BinomialHeap<Priority, Data>::push(identifier, priority, data, data_item); };
+	Data pop(int& identifier) override { return this->LazyBinomialHeap<Priority, Data>::pop(identifier); };
+	void change_priority(PriorityQueueItem<Priority, Data>* node, const Priority& priority) override { this->PriorityQueue<Priority, Data>::change_priority(node, priority); };
+};
+
+template <typename Priority, typename Data>
+class BinomialHeapSinglePass : public BinomialHeap<Priority, Data>
+{
+protected:
+	void consolidate_root(BinaryTreeItem<Priority, Data>* node) override;
+public:
+	BinomialHeapSinglePass();
+	~BinomialHeapSinglePass();
+
+	void push(const int identifier, const Priority& priority, const Data& data, PriorityQueueItem<Priority, Data>*& data_item) override { this->BinomialHeap<Priority, Data>::push(identifier, priority, data, data_item); };
+	Data pop(int& identifier) override { return this->LazyBinomialHeap<Priority, Data>::pop(identifier); };
+	void change_priority(PriorityQueueItem<Priority, Data>* node, const Priority& priority) override { this->PriorityQueue<Priority, Data>::change_priority(node, priority); };
+};
+
+template<typename Priority, typename Data>
+inline BinomialHeap<Priority, Data>::BinomialHeap() :
+	LazyBinomialHeap<Priority, Data>()
 {
 }
 
-template<typename K, typename T>
-inline BinomialHeap<K, T>::BinomialHeap(PQDoubleLinkedItem<K, T>* head, size_t size) :
-	PriorityQueue<K, T>(), head_(head), root_(head), size_(size)
+template<typename Priority, typename Data>
+inline BinomialHeap<Priority, Data>::~BinomialHeap()
 {
-	this->find_minimum();
 }
 
-template<typename K, typename T>
-inline BinomialHeap<K, T>::~BinomialHeap()
+template<typename Priority, typename Data>
+inline void BinomialHeap<Priority, Data>::push(const int identifier, const Priority& priority, const Data& data, PriorityQueueItem<Priority, Data>*& data_item)
 {
-	delete this->head_;
-	this->root_ = this->head_ = nullptr;
-	this->size_ = 0;
+	DegreeBinaryTreeItem<Priority, Data>* new_item = new DegreeBinaryTreeItem<Priority, Data>(identifier, priority, data);
+	this->size_++;
+	this->consolidate_root(new_item);
+	data_item = new_item;
 }
 
-template<typename K, typename T>
-inline size_t BinomialHeap<K, T>::size() const
+template<typename Priority, typename Data>
+inline void BinomialHeap<Priority, Data>::merge(PriorityQueue<Priority, Data>* other_heap)
 {
-	return this->size_;
+	BinomialHeap<Priority, Data>* heap = (BinomialHeap<Priority, Data>*)other_heap;
+	this->size_ += heap->size_;
+	this->consolidate_root(heap->root_);
+	heap->root_ = nullptr;
+	delete other_heap;
 }
 
-template<typename K, typename T>
-inline PriorityQueueItem<K, T>* BinomialHeap<K, T>::push(const K& key, const T& data)
+template<typename Priority, typename Data>
+inline void BinomialHeap<Priority, Data>::priority_was_increased(PriorityQueueItem<Priority, Data>* node)
 {
-	PQDoubleLinkedItem<K, T>* new_item = new PQDoubleLinkedItem<K, T>(key, data);
-	BinomialHeap<K, T>* new_heap = new BinomialHeap<K, T>(new_item, 1);
-	this->merge(new_heap);
-	return new_item;
-}
-
-template<typename K, typename T>
-inline T BinomialHeap<K, T>::pop()
-{
-	if (this->head_)
+	DegreeBinaryTreeItem<Priority, Data>* casted_node = (DegreeBinaryTreeItem<Priority, Data>*)node;
+	BinaryTreeItem<Priority, Data>* ordered_ancestor = casted_node->ancestor();
+	while (ordered_ancestor && *casted_node < *ordered_ancestor)
 	{
-		PQDoubleLinkedItem<K, T>* root = this->root_;
-
-		if (this->head_->is_isolated())
-		{
-			this->head_ = nullptr;
-		}
-		else
-		{
-			if (this->head_ == this->root_)
-			{
-				this->head_ = this->head_->right_sibling();
-			}
-			this->root_->isolate();
-		}
-
-		this->find_minimum();
-		this->size_--;
-		
-		BinomialHeap<K, T>* new_heap = new BinomialHeap<K, T>(root->first_son());
-
-		root->first_son(nullptr);
-
-		this->merge(new_heap);
-		T data = root->data();
-		delete root;
-		return data;
+		casted_node->swap_with_ancestor_node(ordered_ancestor);
+		ordered_ancestor = casted_node->ancestor();
 	}
-	throw new std::range_error("BinomialHeap<K, T>::pop(): PriorityQueue is empty!");
-}
-
-template<typename K, typename T>
-inline T& BinomialHeap<K, T>::peek()
-{
-	return this->root_->data();
-}
-
-template<typename K, typename T>
-inline const T BinomialHeap<K, T>::peek() const
-{
-	return this->root_->data();
-}
-
-template<typename K, typename T>
-inline K BinomialHeap<K, T>::peekPriority()
-{
-	return this->root_->priority();
-}
-
-template<typename K, typename T>
-inline void BinomialHeap<K, T>::merge(PriorityQueue<K, T>* other_heap)
-{
-	BinomialHeap<K, T>* heap = (BinomialHeap<K, T>*)other_heap;
-	if (heap)
+	if (!casted_node->parent() && casted_node != this->root_)
 	{
-		if (this->head_)
-		{
-			if (heap->head_)
-			{
-				if (heap->root_->priority() < this->root_->priority())
-				{
-					this->root_ = heap->root_;
-				}
-				int size = (int)(std::max(log2(this->size_) + 1, log2(heap->size_) + 1));
-				std::vector<PQDoubleLinkedItem<K, T>*> node_list(size + 1);
-				PQDoubleLinkedItem<K, T>* node_ptr = heap->head_, * node_next_ptr;
-				size_t degree;
-				while (node_ptr)
-				{
-					node_next_ptr = node_ptr->is_isolated() ? nullptr : node_ptr->right_sibling();
-					node_list[node_ptr->degree()] = node_ptr->isolate();
-					node_ptr = node_next_ptr;
-				}
-				node_ptr = this->head_;
-				this->head_ = nullptr;
-				while (node_ptr)
-				{
-					node_next_ptr = node_ptr->is_isolated() ? nullptr : node_ptr->right_sibling();
-					node_ptr->isolate();
-					degree = node_ptr->degree();
-					while (node_list[degree])
-					{
-						node_ptr = node_ptr->merge(node_list[degree]);
-						node_list[degree++] = nullptr;
-					}
-					node_list[degree] = node_ptr;
-					node_ptr = node_next_ptr;
-
-				} 
-
-				for (int i = 0; i < size + 1; i++)
-				{
-					if (node_list[i])
-					{
-						if (this->head_)
-						{
-							node_ptr->link_on_right(node_list[i]);
-							node_ptr = node_ptr->right_sibling();
-						}
-						else
-						{
-							this->head_ = node_ptr = node_list[i];
-						}
-					}
-				}
-
-			}
-		}
-		else
-		{
-			this->head_ = heap->head_;
-			this->root_ = heap->root_;
-		}
-		this->size_ += heap->size_;
-		heap->head_ = nullptr;
-		delete heap;
+		this->repair_broken_root_list();
 	}
 }
 
-template<typename K, typename T>
-inline void BinomialHeap<K, T>::change_priority(PriorityQueueItem<K, T>* node, const K& key)
+template<typename Priority, typename Data>
+inline void BinomialHeap<Priority, Data>::priority_was_decreased(PriorityQueueItem<Priority, Data>* node)
 {
-	node->priority() = key;
-	PQDoubleLinkedItem<K, T>* changed_node = (PQDoubleLinkedItem<K, T>*)node;
-	changed_node->heapify();
+	DegreeBinaryTreeItem<Priority, Data>* casted_node = (DegreeBinaryTreeItem<Priority, Data>*)node;
+	BinaryTreeItem<Priority, Data>* minimal_son = casted_node->highest_priority_son();
+	bool is_root_item = !casted_node->parent();
+	while (minimal_son && *minimal_son < *casted_node)
+	{
+		minimal_son->swap_with_ancestor_node(casted_node);
+		minimal_son = casted_node->highest_priority_son();
+	}
+	if (is_root_item)
+	{
+		this->repair_broken_root_list();
+	}
 }
 
-template<typename K, typename T>
-inline void BinomialHeap<K, T>::find_minimum()
+template<typename Priority, typename Data>
+inline void BinomialHeap<Priority, Data>::repair_broken_root_list()
 {
-	this->root_ = this->head_;
-	if (this->head_)
+	auto get_highest_node = [](BinaryTreeItem<Priority, Data>* node)
 	{
-		for (PQDoubleLinkedItem<K, T>* node = this->head_->right_sibling(); node != this->head_; node = node->right_sibling())
+		if (node->parent())
 		{
-			if (node->priority() < this->root_->priority())
+			BinaryTreeItem<Priority, Data>* node_ptr = node->parent();
+			while (node_ptr->parent())
 			{
-				this->root_ = node;
+				node_ptr = node_ptr->parent();
 			}
+			return node_ptr;
 		}
+		return node;
+	};
+	if (this->root_)
+	{
+		this->root_ = get_highest_node(this->root_);
+		this->root_->right_son() = get_highest_node(this->root_->right_son());
+		BinaryTreeItem<Priority, Data>* node_ptr = this->root_->right_son(), * root = this->root_;
+		while (node_ptr != this->root_)
+		{
+			if (*node_ptr < *root)
+			{
+				root = node_ptr;
+			}
+			node_ptr->right_son() = get_highest_node(node_ptr->right_son());
+			node_ptr = node_ptr->right_son();
+		}
+		this->root_ = root;
 	}
+}
+
+template<typename Priority, typename Data>
+inline void BinomialHeapMultiPass<Priority, Data>::consolidate_root(BinaryTreeItem<Priority, Data>* node)
+{
+	this->LazyBinomialHeap<Priority, Data>::consolidate_root_using_multipass(node, (int)(log2(this->size_)) + 2);
+}
+
+template<typename Priority, typename Data>
+inline BinomialHeapMultiPass<Priority, Data>::BinomialHeapMultiPass() :
+	BinomialHeap<Priority, Data>()
+{
+}
+
+template<typename Priority, typename Data>
+inline BinomialHeapMultiPass<Priority, Data>::~BinomialHeapMultiPass()
+{
+}
+
+template<typename Priority, typename Data>
+inline void BinomialHeapSinglePass<Priority, Data>::consolidate_root(BinaryTreeItem<Priority, Data>* node)
+{
+	this->LazyBinomialHeap<Priority, Data>::consolidate_root_using_singlepass(node, (int)(log2(this->size_)) + 2);
+}
+
+template<typename Priority, typename Data>
+inline BinomialHeapSinglePass<Priority, Data>::BinomialHeapSinglePass() :
+	BinomialHeap<Priority, Data>()
+{
+}
+
+template<typename Priority, typename Data>
+inline BinomialHeapSinglePass<Priority, Data>::~BinomialHeapSinglePass()
+{
 }

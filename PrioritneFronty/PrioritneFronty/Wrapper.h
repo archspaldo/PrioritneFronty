@@ -6,9 +6,11 @@
 #include "RankPairingHeap.h"
 #include <iostream>
 #include <chrono>
-#include <unordered_map>
+#include <unordered_set>
 #include <time.h>
 #include <sys/timeb.h>
+
+class RandomizedSet;
 
 template <typename Priority, typename Data>
 class PriorityQueueWrapper
@@ -29,7 +31,7 @@ template <typename Priority, typename Data>
 class PriorityQueueList
 {
 	std::list<PriorityQueueWrapper<Priority, Data>*>* priority_queue_list_;
-	std::vector<int>* identifier_list_;
+	RandomizedSet* identifier_set_;
 public:
 	PriorityQueueList();
 	~PriorityQueueList();
@@ -91,15 +93,15 @@ inline void PriorityQueueWrapper<Priority, Data>::change_priority(const int iden
 template<typename Priority, typename Data>
 inline PriorityQueueList<Priority, Data>::PriorityQueueList() :
 	priority_queue_list_(new std::list<PriorityQueueWrapper<Priority, Data>*>()),
-	identifier_list_(new std::vector<int>())
+	identifier_set_(new RandomizedSet())
 {
-	//priority_queue_list_->push_back(new PriorityQueueWrapper<Priority, Data>(new BinaryHeap<Priority, Data>()));
-	//priority_queue_list_->push_back(new PriorityQueueWrapper<Priority, Data>(new PairingHeapTwoPass<Priority, Data>()));
-	//priority_queue_list_->push_back(new PriorityQueueWrapper<Priority, Data>(new PairingHeapMultiPass<Priority, Data>()));
-	//priority_queue_list_->push_back(new PriorityQueueWrapper<Priority, Data>(new RankPairingHeap<Priority, Data>()));
+	priority_queue_list_->push_back(new PriorityQueueWrapper<Priority, Data>(new BinaryHeap<Priority, Data>()));
+	priority_queue_list_->push_back(new PriorityQueueWrapper<Priority, Data>(new PairingHeapTwoPass<Priority, Data>()));
+	priority_queue_list_->push_back(new PriorityQueueWrapper<Priority, Data>(new PairingHeapMultiPass<Priority, Data>()));
+	priority_queue_list_->push_back(new PriorityQueueWrapper<Priority, Data>(new RankPairingHeap<Priority, Data>()));
 	priority_queue_list_->push_back(new PriorityQueueWrapper<Priority, Data>(new FibonacciHeap<Priority, Data>()));
-	//priority_queue_list_->push_back(new PriorityQueueWrapper<Priority, Data>(new BinomialHeapSinglePass<Priority, Data>()));
-	//priority_queue_list_->push_back(new PriorityQueueWrapper<Priority, Data>(new BinomialHeapMultiPass<Priority, Data>()));
+	priority_queue_list_->push_back(new PriorityQueueWrapper<Priority, Data>(new BinomialHeapSinglePass<Priority, Data>()));
+	priority_queue_list_->push_back(new PriorityQueueWrapper<Priority, Data>(new BinomialHeapMultiPass<Priority, Data>()));
 }
 
 template<typename Priority, typename Data>
@@ -110,9 +112,9 @@ inline PriorityQueueList<Priority, Data>::~PriorityQueueList()
 		delete item;
 	}
 	delete this->priority_queue_list_;
-	delete this->identifier_list_;
+	delete this->identifier_set_;
 	this->priority_queue_list_ = nullptr;
-	this->identifier_list_ = nullptr;
+	this->identifier_set_ = nullptr;
 }
 
 template<typename Priority, typename Data>
@@ -122,19 +124,19 @@ inline void PriorityQueueList<Priority, Data>::clear_structures()
 	{
 		item->reset();
 	}
-	this->identifier_list_->clear();
+	this->identifier_set_->clear();
 }
 
 template<typename Priority, typename Data>
 inline int PriorityQueueList<Priority, Data>::get_random_identifier()
 {
-	return (*this->identifier_list_)[rand() % this->identifier_list_->size()];
+	return this->identifier_set_->get_random();
 }
 
 template<typename Priority, typename Data>
 inline int PriorityQueueList<Priority, Data>::size()
 {
-	return this->identifier_list_->size();
+	return this->identifier_set_->size();
 }
 
 template<typename Priority, typename Data>
@@ -144,7 +146,7 @@ inline void PriorityQueueList<Priority, Data>::push(const int identifier, const 
 	{
 		item->push(identifier, priority, data);
 	}
-	this->identifier_list_->push_back(identifier);
+	this->identifier_set_->insert(identifier);
 }
 
 template<typename Priority, typename Data>
@@ -155,11 +157,7 @@ inline void PriorityQueueList<Priority, Data>::pop()
 	{
 		identifier = item->pop();
 	}
-	std::vector<int>::iterator index_iterator = std::find(this->identifier_list_->begin(), this->identifier_list_->end(), identifier);
-	if (index_iterator != this->identifier_list_->end())
-	{
-		this->identifier_list_->erase(index_iterator);
-	}
+	this->identifier_set_->remove(identifier);
 }
 
 template<typename Priority, typename Data>
@@ -170,3 +168,46 @@ inline void PriorityQueueList<Priority, Data>::change_priority(const int identif
 		item->change_priority(identifier, priority);
 	}
 }
+
+// algoritmus je variacia https://www.geeksforgeeks.org/design-a-data-structure-that-supports-insert-delete-getrandom-in-o1-with-duplicates/
+class RandomizedSet {
+	std::unordered_map<int, int> map_;
+	std::vector<int> vector_;
+
+public:
+	RandomizedSet() {}
+
+	void insert(int val)
+	{
+		this->vector_.push_back(val);
+		int index = this->vector_.size() - 1;
+		this->map_[val] = index;
+	}
+
+	void remove(int val)
+	{
+		int index = this->map_[val];
+		int last_val = this->vector_.back();
+		this->vector_[index] = last_val;
+		this->vector_.pop_back();
+		this->map_[last_val] = index;
+		this->map_.erase(val);
+	}
+
+	int get_random()
+	{
+		int index = rand() % (this->vector_.size());
+		return this->vector_[index];
+	}
+
+	void clear()
+	{
+		this->map_.clear();
+		this->vector_.clear();
+	}
+
+	size_t size()
+	{
+		return this->vector_.size();
+	}
+};
