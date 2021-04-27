@@ -2,10 +2,10 @@
 # This .gitignore file was automatically created by Microsoft(R) Visual Studio.
 ################################################################################
 
-/PrioritneFronty/.vs/
-/PrioritneFronty/PrioritneFronty/Debug/
-/PrioritneFronty/PrioritneFronty/x64/
-/PrioritneFronty/x64/
+/PrioritneFronty/.vs/*
+/PrioritneFronty/PrioritneFronty/Debug/*
+/PrioritneFronty/PrioritneFronty/x64/*
+/PrioritneFronty/x64/*
 PrioritneFronty/Materials/~$kalarka.docx
 /Udajovky/
 *.csv
