@@ -1,16 +1,42 @@
 #pragma once
 #include "PriorityQueue.h"
 
+/// <summary>
+/// Abstraktný predok pre prioritné fronty implementované explicitným binárnym stromom
+/// </summary>
+/// <typeparam name="Priority">Dátový typ priority</typeparam>
+/// <typeparam name="Data">Dátový typ dát</typeparam>
 template <typename Priority, typename Data>
 class ExplicitPriorityQueue : public PriorityQueue<Priority, Data>
 {
 protected:
+	/// <summary>
+	/// Smerník na prvok s najvyššou prioritou
+	/// </summary>
 	BinaryTreeItem<Priority, Data>* root_;
+	/// <summary>
+	/// Poèet prvkov v prioritnom fronte
+	/// </summary>
 	size_t size_;
-	ExplicitPriorityQueue<Priority, Data>();
+	/// <summary>
+	/// Konštruktor
+	/// </summary>
+	ExplicitPriorityQueue();
 public:
-	virtual ~ExplicitPriorityQueue();
+	/// <summary>
+	/// Deštruktor
+	/// </summary>
+	/// <returns></returns>
+	~ExplicitPriorityQueue();
+	/// <summary>
+	/// Vráti poèet prvkov v prioritnom fronte
+	/// </summary>
+	/// <returns>Poèet prvkov v prioritnom fronte</returns>
 	size_t size() const override;
+	/// <summary>
+	/// Vráti dáta s najväèšou prioritou
+	/// </summary>
+	/// <returns>Hodnota dát</returns>
 	Data& find_min() override;
 };
 
@@ -34,5 +60,9 @@ inline size_t ExplicitPriorityQueue<Priority, Data>::size() const
 template<typename Priority, typename Data>
 inline Data& ExplicitPriorityQueue<Priority, Data>::find_min()
 {
+	if (this->size_ == 0)
+	{
+		throw new std::out_of_range("ExplicitPriorityQueue<Priority, Data>::find_min(): Zoznam je prazdny");
+	}
 	return this->root_->data();
 }

@@ -1,95 +1,288 @@
 #pragma once
 #include <algorithm>
 
+/// <summary>
+/// Abstraktnı predok pre prvky prioritného frontu
+/// </summary>
+/// <typeparam name="Priority">Dátovı typ priority</typeparam>
+/// <typeparam name="Data">Dátovı typ dát</typeparam>
 template <typename Priority, typename Data>
 class PriorityQueueItem
 {
 protected:
+	/// <summary>
+	/// Identifikátor prvku
+	/// </summary>
 	int identifier_;
+	/// <summary>
+	/// Priorita prvku
+	/// </summary>
 	Priority priority_;
+	/// <summary>
+	/// Dáta prvku
+	/// </summary>
 	Data data_;
-
+	/// <summary>
+	/// Konštruktor
+	/// </summary>
+	/// <param name="identifier">Identifikátor</param>
+	/// <param name="priority">Priorita</param>
+	/// <param name="data">Dáta</param>
 	PriorityQueueItem(const int identifier, const Priority& priority, const Data& data);
 public:
+	/// <summary>
+	/// Deštruktor
+	/// </summary>
 	virtual ~PriorityQueueItem();
-
+	/// <summary>
+	/// Vráti identifikátor prvku
+	/// </summary>
+	/// <returns>Identifikátor prvku</returns>
 	const int identifier() const;
+	/// <summary>
+	/// Vráti prioritu prvku
+	/// </summary>
+	/// <returns>Priorita prvku</returns>
 	Priority& priority();
+	/// <summary>
+	/// Vráti dáta prvku
+	/// </summary>
+	/// <returns>Dáta prvku</returns>
 	Data& data();
-
-	bool operator<(PriorityQueueItem<Priority, Data>& operand);
+	/// <summary>
+	/// Vráti, èi je priorita prvku väèšia ako priorita node
+	/// </summary>
+	/// <param name="node">Prvok, ktorého prioritu porovnávame</param>
+	/// <returns>True, ak je priorita prvku vyššia, alebo je rovná a jeho identifikátor je niší</returns>
+	bool operator<(PriorityQueueItem<Priority, Data>& node);
 };
 
+/// <summary>
+/// Prvok pouitı v binárnej halde
+/// </summary>
+/// <typeparam name="Priority">Dátovı typ priority</typeparam>
+/// <typeparam name="Data">Dátovı typ dát</typeparam>
 template <typename Priority, typename Data>
 class ArrayItem : public PriorityQueueItem<Priority, Data>
 {
 protected:
+	/// <summary>
+	/// Index prvku v implicitnom zozname
+	/// </summary>
 	int index_;
 public:
+	/// <summary>
+	/// Konštruktor
+	/// </summary>
+	/// <param name="identifier">Identifikátor</param>
+	/// <param name="priority">Priorita</param>
+	/// <param name="data">Dáta</param>
 	ArrayItem(const int identifier, const Priority& priority, const Data& data, const int index);
-
+	/// <summary>
+	/// Vráti index prvku
+	/// </summary>
+	/// <returns>Index prvku</returns>
 	int& index();
 };
 
+/// <summary>
+/// Prvok pouitı v explicitnom binárnom strome
+/// </summary>
+/// <typeparam name="Priority">Dátovı typ priority</typeparam>
+/// <typeparam name="Data">Dátovı typ dát</typeparam>
 template <typename Priority, typename Data>
 class BinaryTreeItem : public PriorityQueueItem<Priority, Data>
 {
 protected:
+	/// <summary>
+	/// Smerníky na súvisiace prvky
+	/// </summary>
 	BinaryTreeItem<Priority, Data>* left_son_, * right_son_, * parent_;
-
+	/// <summary>
+	/// Vymení prvok s jeho priamım predchodcom
+	/// </summary>
 	void swap_with_parent();
 public:
+	/// <summary>
+	/// Konštruktor
+	/// </summary>
+	/// <param name="identifier">Identifikátor</param>
+	/// <param name="priority">Priorita</param>
+	/// <param name="data">Dáta</param>
 	BinaryTreeItem(const int identifier, const Priority& priority, const Data& data);
+	/// <summary>
+	/// Deštruktor
+	/// </summary>
 	~BinaryTreeItem();
-
+	/// <summary>
+	/// Vystrihne prvok a nahradí ho jeho pravım potomkom
+	/// </summary>
+	/// <returns>Vystrihnutı prvok</returns>
 	virtual BinaryTreeItem* cut();
+	/// <summary>
+	/// Prepojí dva prvky na základe priority
+	/// </summary>
+	/// <param name="node">Pripájanı prvok</param>
+	/// <returns>Prvok s vyššou prioritou</returns>
 	virtual BinaryTreeItem* merge(BinaryTreeItem* node);
-	
+	/// <summary>
+	/// Prvok node sa pripojí ako ¾avı potomok prvku, pôvodnı potomok sa pripojí k nemu ako pravı potomok
+	/// </summary>
+	/// <param name="node">Pripájanı prvok</param>
+	/// <returns>Prvok</returns>
 	virtual BinaryTreeItem* add_left_son(BinaryTreeItem* node);
+	/// <summary>
+	/// Prvok node sa pripojí ako pravı potomok prvku, pôvodnı potomok sa pripojí k nemu ako pravı potomok
+	/// </summary>
+	/// <param name="node">Pripájanı prvok</param>
+	/// <returns>Prvok</returns>
 	virtual BinaryTreeItem* add_right_son(BinaryTreeItem* node);
+	/// <summary>
+	/// Vráti prvok s najvyššou prioritou z pravej chrbtice ¾avého potomka
+	/// </summary>
+	/// <returns>Potomok s najvyššou prioritou</returns>
 	BinaryTreeItem* highest_priority_son();
+	/// <summary>
+	/// Vráti prvok, ktorého pravá chrbtica ¾avého potomka obsahuje inštanciu
+	/// </summary>
+	/// <returns>Prvok</returns>
 	BinaryTreeItem* ancestor();
+	/// <summary>
+	/// Vymení prvok s prvkom node, prièom prvok node musí tvori predka prvku
+	/// V prípade, e prvok node netvorí predka prvku, správanie nie je definované
+	/// </summary>
+	/// <param name="node">Prvok, s ktorım sa má inštancia vymeni</param>
 	virtual void swap_with_ancestor_node(BinaryTreeItem* node);
-
+	/// <summary>
+	/// Vráti ¾avého potomka prvku
+	/// </summary>
+	/// <returns>¼avı potomok prvku</returns>
 	BinaryTreeItem*& left_son();
+	/// <summary>
+	/// Vráti pravého potomka prvku
+	/// </summary>
+	/// <returns>Pravı potomok prvku</returns>
 	BinaryTreeItem*& right_son();
+	/// <summary>
+	/// Vráti priamého predka prvku
+	/// </summary>
+	/// <returns>Priamy predok prvku</returns>
 	BinaryTreeItem*& parent();
-
+	/// <summary>
+	/// Prvok node sa nastaví ako ¾avı potomok
+	/// </summary>
+	/// <param name="node">Pripájanı prvok</param>
+	/// <returns>Prvok</returns>
 	virtual BinaryTreeItem* left_son(BinaryTreeItem* node);
+	/// <summary>
+	/// Prvok node sa nastaví ako pravı potomok
+	/// </summary>
+	/// <param name="node">Pripájanı prvok</param>
+	/// <returns>Prvok</returns>
 	virtual BinaryTreeItem* right_son(BinaryTreeItem* node);
-
 };
 
+/// <summary>
+/// Prvok pouitı v binomickom strome
+/// </summary>
+/// <typeparam name="Priority">Dátovı typ priority</typeparam>
+/// <typeparam name="Data">Dátovı typ dát</typeparam>
 template <typename Priority, typename Data>
 class DegreeBinaryTreeItem : public BinaryTreeItem<Priority, Data>
 {
 protected:
+	/// <summary>
+	/// Stupeò prvku
+	/// </summary>
 	int degree_;
 public:
+	/// <summary>
+	/// Konštruktor
+	/// </summary>
+	/// <param name="identifier">Identifikátor</param>
+	/// <param name="priority">Priorita</param>
+	/// <param name="data">Dáta</param>
 	DegreeBinaryTreeItem(const int identifier, const Priority& priority, const Data& data);
-
+	/// <summary>
+	/// Vymení prvok s prvkom node, prièom prvok node musí tvori predka prvku
+	/// V prípade, e prvok node netvorí predka prvku, správanie nie je definované
+	/// </summary>
+	/// <param name="node">Prvok, s ktorım sa má inštancia vymeni</param>
 	void swap_with_ancestor_node(BinaryTreeItem<Priority, Data>* node) override;
+	/// <summary>
+	/// Prvok node sa pripojí ako ¾avı potomok prvku, pôvodnı potomok sa pripojí k nemu ako pravı potomok
+	/// </summary>
+	/// <param name="node">Pripájanı prvok</param>
+	/// <returns>Prvok</returns>
 	DegreeBinaryTreeItem* add_left_son(BinaryTreeItem<Priority, Data>* node) override;
+	/// <summary>
+	/// Vráti stupeò prvku
+	/// </summary>
+	/// <returns>Stupeò prvku</returns>
 	int& degree();
 };
 
+/// <summary>
+/// Prvok pouitı vo Fibonacciho halde
+/// </summary>
+/// <typeparam name="Priority">Dátovı typ priority</typeparam>
+/// <typeparam name="Data">Dátovı typ dát</typeparam>
 template <typename Priority, typename Data>
 class FibonacciHeapItem : public DegreeBinaryTreeItem<Priority, Data>
 {
 protected:
+	/// <summary>
+	/// Oznaèenie, èi u prvok stratil potomka
+	/// </summary>
 	bool flag_;
+	/// <summary>
+	/// Prístup k usporiadanému predkovi
+	/// </summary>
 	FibonacciHeapItem<Priority, Data>* ordered_ancestor_;
 public:
+	/// <summary>
+	/// Konštruktor
+	/// </summary>
+	/// <param name="identifier">Identifikátor</param>
+	/// <param name="priority">Priorita</param>
+	/// <param name="data">Dáta</param>
 	FibonacciHeapItem(const int identifier, const Priority& priority, const Data& data);
+	/// <summary>
+	/// Deštruktor
+	/// </summary>
 	~FibonacciHeapItem();
-
+	/// <summary>
+	/// Vystrihne prvok a nahradí ho jeho pravım potomkom
+	/// </summary>
+	/// <returns>Vystrihnutı prvok</returns>
 	FibonacciHeapItem* cut() override;
+	/// <summary>
+	/// Prvok node sa pripojí ako ¾avı potomok prvku, pôvodnı potomok sa pripojí k nemu ako pravı potomok
+	/// </summary>
+	/// <param name="node">Pripájanı prvok</param>
+	/// <returns>Prvok</returns>
 	FibonacciHeapItem* add_left_son(BinaryTreeItem<Priority, Data>* node) override;
+	/// <summary>
+	/// Prvok node sa pripojí ako pravı potomok prvku, pôvodnı potomok sa pripojí k nemu ako pravı potomok
+	/// </summary>
+	/// <param name="node">Pripájanı prvok</param>
+	/// <returns>Prvok</returns>
 	FibonacciHeapItem* add_right_son(BinaryTreeItem<Priority, Data>* node) override;
-
+	/// <summary>
+	/// Vráti usporiadaného predka prvku
+	/// </summary>
+	/// <returns>Usporiadanı predok</returns>
 	FibonacciHeapItem*& ordered_ancestor();
+	/// <summary>
+	/// Vráti oznaèenie prvku
+	/// </summary>
+	/// <returns>Oznaèenie prvku</returns>
 	bool& flag();
-
+	/// <summary>
+	/// Prvok node sa nastaví ako ¾avı potomok
+	/// </summary>
+	/// <param name="node">Pripájanı prvok</param>
+	/// <returns>Prvok</returns>
 	FibonacciHeapItem* left_son(BinaryTreeItem<Priority, Data>* node) override;
 };
 

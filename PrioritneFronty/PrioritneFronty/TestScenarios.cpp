@@ -55,3 +55,33 @@ TS1ScenarioE::TS1ScenarioE() :
 	TestSuit1Scenario(50, 40, 10, 1000000)
 {
 }
+
+TestSuit2Scenario::TestSuit2Scenario(int operation_count, int iteration_count, double insert_ratio) :
+	Scenario(), operation_count_(operation_count), iteration_count_(iteration_count), insert_ratio_(insert_ratio)
+{
+}
+
+int TestSuit2Scenario::operation_count()
+{
+	return this->operation_count_;
+}
+
+int TestSuit2Scenario::iteration_count()
+{
+	return this->iteration_count_;
+}
+
+double TestSuit2Scenario::insert_ratio()
+{
+	return this->insert_ratio_;
+}
+
+TS2ScenarioA::TS2ScenarioA() :
+	TestSuit2Scenario(100, 1, 1.0)
+{
+}
+
+TS2ScenarioB::TS2ScenarioB() :
+	TestSuit2Scenario(100, 10000, 0.66)
+{
+}

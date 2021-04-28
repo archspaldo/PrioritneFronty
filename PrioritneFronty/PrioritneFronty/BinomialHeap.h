@@ -1,45 +1,141 @@
 #pragma once
 #include "LazyBinomialQueue.h"
 
+/// <summary>
+/// Abstraktná binomická trieda
+/// </summary>
+/// <typeparam name="Priority">Dátovı typ priority</typeparam>
+/// <typeparam name="Data">Dátovı typ dát</typeparam>
 template <typename Priority, typename Data>
 class BinomialHeap : public LazyBinomialHeap<Priority, Data>
 {
 protected:
+	/// <summary>
+	/// Vymieòa prvok node s jeho priamım predkom, dokia¾ nie je splnené haldové usporiadanie
+	/// </summary>
+	/// <param name="node">Vymieòanı prvok</param>
 	void priority_was_increased(PriorityQueueItem<Priority, Data>* node) override;
+	/// <summary>
+	/// Vymieòa prvok node s tım z priamıch potomkov, ktorı ma najväèšiu prioritu, dokia¾ nie je splnené haldové usporiadanie
+	/// </summary>
+	/// <param name="node">Vymieòanı prvok</param>
 	void priority_was_decreased(PriorityQueueItem<Priority, Data>* node) override;
+	/// <summary>
+	/// Upraví smerníky v pravej chrbtici atribútu root_, aby smerovali ku koreòom stromov
+	/// </summary>
 	void repair_broken_root_list();
+	/// <summary>
+	/// Abstraktnı konštruktor
+	/// </summary>
 	BinomialHeap();
 public:
+	/// <summary>
+	/// Deštruktor
+	/// </summary>
 	~BinomialHeap();
+	/// <summary>
+	/// Vloí dáta do prioritného frontu
+	/// </summary>
+	/// <param name="identifier">Identifikátor prvku</param>
+	/// <param name="priority">Priorita</param>
+	/// <param name="data">Data</param>
+	/// <param name="data_item">Vytvorenı prvok</param>
 	void push(const int identifier, const Priority& priority, const Data& data, PriorityQueueItem<Priority, Data>*& data_item) override;
+	/// <summary>
+	/// Pripojí k prioritnému frontu prvky z other_heap
+	/// </summary>
+	/// <param name="other_heap">Prioritnı front, ktorého prvky majú by pripojené</param>
 	void merge(PriorityQueue<Priority, Data>* other_heap) override;
 };
 
+
+/// <summary>
+/// Viacprechodová binomická halda
+/// </summary>
+/// <typeparam name="Priority">Dátovı typ priority</typeparam>
+/// <typeparam name="Data">Dátovı typ dát</typeparam>
 template <typename Priority, typename Data>
 class BinomialHeapMultiPass : public BinomialHeap<Priority, Data>
 {
 protected:
+	/// <summary>
+	/// Zlúèi prvky v pravej chrbtici atribútu root_ a parametra node viacprechodovou stratégiou
+	/// </summary>
+	/// <param name="node">Prvı prvok v postupnosti prvkov, ktoré sa majú zlúèi</param>
 	void consolidate_root(BinaryTreeItem<Priority, Data>* node) override;
 public:
+	/// <summary>
+	/// Konštruktor
+	/// </summary>
 	BinomialHeapMultiPass();
+	/// <summary>
+	/// Deštruktor
+	/// </summary>
 	~BinomialHeapMultiPass();
-
+	/// <summary>
+	/// Vloí dáta do prioritného frontu
+	/// </summary>
+	/// <param name="identifier">Identifikátor prvku</param>
+	/// <param name="priority">Priorita</param>
+	/// <param name="data">Data</param>
+	/// <param name="data_item">Vytvorenı prvok</param>
 	void push(const int identifier, const Priority& priority, const Data& data, PriorityQueueItem<Priority, Data>*& data_item) override { this->BinomialHeap<Priority, Data>::push(identifier, priority, data, data_item); };
+	/// <summary>
+	/// Vyberie z prioritného frontu dáta s najväèšou prioritou
+	/// </summary>
+	/// <param name="identifier">Identifikátor prvku s najväèšou prioritou</param>
+	/// <returns>Hodnota dát</returns>
 	Data pop(int& identifier) override { return this->LazyBinomialHeap<Priority, Data>::pop(identifier); };
+	/// <summary>
+	/// Zmení prioritu prvku
+	/// </summary>
+	/// <param name="node">Prvok, ktorému má by zmenená priorita</param>
+	/// <param name="priority">Nová priorita prvku</param>
 	void change_priority(PriorityQueueItem<Priority, Data>* node, const Priority& priority) override { this->PriorityQueue<Priority, Data>::change_priority(node, priority); };
 };
 
+/// <summary>
+/// Jednoprechodová binomická halda
+/// </summary>
+/// <typeparam name="Priority">Dátovı typ priority</typeparam>
+/// <typeparam name="Data">Dátovı typ dát</typeparam>
 template <typename Priority, typename Data>
-class BinomialHeapSinglePass : public BinomialHeap<Priority, Data>
+class BinomialHeapOnePass : public BinomialHeap<Priority, Data>
 {
 protected:
+	/// <summary>
+	/// Zlúèi prvky v pravej chrbtici atribútu root_ a parametra node jednoprechodovou stratégiou
+	/// </summary>
+	/// <param name="node">Prvı prvok v postupnosti prvkov, ktoré sa majú zlúèi</param>
 	void consolidate_root(BinaryTreeItem<Priority, Data>* node) override;
 public:
-	BinomialHeapSinglePass();
-	~BinomialHeapSinglePass();
-
+	/// <summary>
+	/// Konštruktor
+	/// </summary>
+	BinomialHeapOnePass();
+	/// <summary>
+	/// Deštruktor
+	/// </summary>
+	~BinomialHeapOnePass();
+	/// <summary>
+	/// Vloí dáta do prioritného frontu
+	/// </summary>
+	/// <param name="identifier">Identifikátor prvku</param>
+	/// <param name="priority">Priorita</param>
+	/// <param name="data">Data</param>
+	/// <param name="data_item">Vytvorenı prvok</param>
 	void push(const int identifier, const Priority& priority, const Data& data, PriorityQueueItem<Priority, Data>*& data_item) override { this->BinomialHeap<Priority, Data>::push(identifier, priority, data, data_item); };
+	/// <summary>
+	/// Vyberie z prioritného frontu dáta s najväèšou prioritou
+	/// </summary>
+	/// <param name="identifier">Identifikátor prvku s najväèšou prioritou</param>
+	/// <returns>Hodnota dát</returns>
 	Data pop(int& identifier) override { return this->LazyBinomialHeap<Priority, Data>::pop(identifier); };
+	/// <summary>
+	/// Zmení prioritu prvku
+	/// </summary>
+	/// <param name="node">Prvok, ktorému má by zmenená priorita</param>
+	/// <param name="priority">Nová priorita prvku</param>
 	void change_priority(PriorityQueueItem<Priority, Data>* node, const Priority& priority) override { this->PriorityQueue<Priority, Data>::change_priority(node, priority); };
 };
 
@@ -158,18 +254,18 @@ inline BinomialHeapMultiPass<Priority, Data>::~BinomialHeapMultiPass()
 }
 
 template<typename Priority, typename Data>
-inline void BinomialHeapSinglePass<Priority, Data>::consolidate_root(BinaryTreeItem<Priority, Data>* node)
+inline void BinomialHeapOnePass<Priority, Data>::consolidate_root(BinaryTreeItem<Priority, Data>* node)
 {
-	this->LazyBinomialHeap<Priority, Data>::consolidate_root_using_singlepass(node, (int)(log2(this->size_)) + 2);
+	this->LazyBinomialHeap<Priority, Data>::consolidate_root_using_onepass(node, (int)(log2(this->size_)) + 2);
 }
 
 template<typename Priority, typename Data>
-inline BinomialHeapSinglePass<Priority, Data>::BinomialHeapSinglePass() :
+inline BinomialHeapOnePass<Priority, Data>::BinomialHeapOnePass() :
 	BinomialHeap<Priority, Data>()
 {
 }
 
 template<typename Priority, typename Data>
-inline BinomialHeapSinglePass<Priority, Data>::~BinomialHeapSinglePass()
+inline BinomialHeapOnePass<Priority, Data>::~BinomialHeapOnePass()
 {
 }

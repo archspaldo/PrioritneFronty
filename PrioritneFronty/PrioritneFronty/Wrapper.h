@@ -5,41 +5,123 @@
 #include "PairingHeap.h"
 #include "RankPairingHeap.h"
 #include <iostream>
+#include <fstream>
 #include <chrono>
 #include <unordered_map>
 #include <time.h>
 #include <sys/timeb.h>
 
+/// <summary>
+/// Struktúra uchovavajúca identifikátory s O(1) výberom náhodného prvku
+/// </summary>
 class RandomizedSet;
 
+/// <summary>
+/// Oba¾ujúca trieda pre prioritný front, ktorá obsahuje mapovanie identifikátorov k prvkom
+/// </summary>
+/// <typeparam name="Priority">Dátový typ priority</typeparam>
+/// <typeparam name="Data">Dátový typ dát</typeparam>
 template <typename Priority, typename Data>
 class PriorityQueueWrapper
 {
 private:
+	/// <summary>
+	/// Tabu¾ka mapujúca identifikátory k prvkom
+	/// </summary>
 	std::unordered_map<int, PriorityQueueItem<Priority, Data>*>* identifier_map_;
+	/// <summary>
+	/// Prioritný front
+	/// </summary>
 	PriorityQueue<Priority, Data>* priority_queue_;
 public:
+	/// <summary>
+	/// Konštruktor
+	/// </summary>
+	/// <param name="priority_queue">Prioritný front</param>
 	PriorityQueueWrapper(PriorityQueue<Priority, Data>* priority_queue);
+	/// <summary>
+	/// Deštruktor
+	/// </summary>
 	~PriorityQueueWrapper();
+	/// <summary>
+	/// Vymaže prvky z prioritného frontu
+	/// </summary>
 	void reset();
+	/// <summary>
+	/// Operácia oba¾ujúca operáciu vlož
+	/// </summary>
+	/// <param name="identifier">Identifikátor</param>
+	/// <param name="priority">Priorita</param>
+	/// <param name="data">Dáta</param>
 	void push(const int identifier, const Priority& priority, const Data& data);
+	/// <summary>
+	/// Operácia oba¾ujúca operáciu vyber minimum
+	/// </summary>
+	/// <returns>Idenifikátor odstraneného prvku</returns>
 	int pop();
+	/// <summary>
+	/// Operácia oba¾ujúca operáciu zmeò prioritu
+	/// </summary>
+	/// <param name="identifier">Identifikátor prvku</param>
+	/// <param name="priority">Nová priorita prvku</param>
 	void change_priority(const int identifier, const Priority& priority);
 };
 
+/// <summary>
+/// Zoznam prioritných frontov
+/// </summary>
+/// <typeparam name="Priority">Dátový typ priority</typeparam>
+/// <typeparam name="Data">Dátový typ dát</typeparam>
 template <typename Priority, typename Data>
 class PriorityQueueList
 {
+	/// <summary>
+	/// Zoznam obalených prioritných frontov
+	/// </summary>
 	std::list<PriorityQueueWrapper<Priority, Data>*>* priority_queue_list_;
+	/// <summary>
+	/// Tabu¾ka identifikátorov
+	/// </summary>
 	RandomizedSet* identifier_set_;
 public:
+	/// <summary>
+	/// Konštruktor
+	/// </summary>
 	PriorityQueueList();
+	/// <summary>
+	/// Deštruktor
+	/// </summary>
 	~PriorityQueueList();
+	/// <summary>
+	/// Vymáže prvky zo všetkých prioritných frontov
+	/// </summary>
 	void clear_structures();
+	/// <summary>
+	/// Vráti náhodný identifikátor prvku
+	/// </summary>
+	/// <returns></returns>
 	int get_random_identifier();
+	/// <summary>
+	/// Vráti poèet prvkov v jednotlivých prioritných frontoch
+	/// </summary>
+	/// <returns></returns>
 	int size();
+	/// <summary>
+	/// Vloží prvok s parametrami do všetkých prioritných frontov
+	/// </summary>
+	/// <param name="identifier">Identifikátor</param>
+	/// <param name="priority">Priorita</param>
+	/// <param name="data">Dáta</param>
 	void push(const int identifier, const Priority& priority, const Data& data);
+	/// <summary>
+	/// Vyberie minimálny prvok zo všetkých prioritných frontov
+	/// </summary>
 	void pop();
+	/// <summary>
+	/// Zmení prioritu prvku s identifikátorom identifier na priority 
+	/// </summary>
+	/// <param name="identifier">Identifikátor prvku</param>
+	/// <param name="priority">Nová priorita</param>
 	void change_priority(const int identifier, const Priority& priority);
 };
 
@@ -100,7 +182,7 @@ inline PriorityQueueList<Priority, Data>::PriorityQueueList() :
 	priority_queue_list_->push_back(new PriorityQueueWrapper<Priority, Data>(new PairingHeapMultiPass<Priority, Data>()));
 	priority_queue_list_->push_back(new PriorityQueueWrapper<Priority, Data>(new RankPairingHeap<Priority, Data>()));
 	priority_queue_list_->push_back(new PriorityQueueWrapper<Priority, Data>(new FibonacciHeap<Priority, Data>()));
-	priority_queue_list_->push_back(new PriorityQueueWrapper<Priority, Data>(new BinomialHeapSinglePass<Priority, Data>()));
+	priority_queue_list_->push_back(new PriorityQueueWrapper<Priority, Data>(new BinomialHeapOnePass<Priority, Data>()));
 	priority_queue_list_->push_back(new PriorityQueueWrapper<Priority, Data>(new BinomialHeapMultiPass<Priority, Data>()));
 }
 
@@ -169,43 +251,66 @@ inline void PriorityQueueList<Priority, Data>::change_priority(const int identif
 	}
 }
 
-// algoritmus je variacia https://www.geeksforgeeks.org/design-a-data-structure-that-supports-insert-delete-getrandom-in-o1-with-duplicates/
+/// <summary>
+/// Tabu¾ka s O(1) prístupom k náhodnému prvku
+/// Variacia https://www.geeksforgeeks.org/design-a-data-structure-that-supports-insert-delete-getrandom-in-o1-with-duplicates/
+/// </summary>
 class RandomizedSet {
+	/// <summary>
+	/// Tabu¾ka mapujúca identifikátory k indexom v implicitnom zozname
+	/// </summary>
 	std::unordered_map<int, int> map_;
+	/// <summary>
+	/// Implicitný zoznam identifikátorov
+	/// </summary>
 	std::vector<int> vector_;
-
 public:
+	/// <summary>
+	/// Konštruktor
+	/// </summary>
 	RandomizedSet() {}
-
-	void insert(int val)
+	/// <summary>
+	/// Vloží identifikátor do tabu¾ky
+	/// </summary>
+	/// <param name="identifier">Identifikátor</param>
+	void insert(int identifier)
 	{
-		this->vector_.push_back(val);
-		int index = this->vector_.size() - 1;
-		this->map_[val] = index;
+		this->vector_.push_back(identifier);
+		this->map_[identifier] = this->vector_.size() - 1;
 	}
-
-	void remove(int val)
+	/// <summary>
+	/// Odstáni identifikátor z tabu¾ky
+	/// </summary>
+	/// <param name="identifier">Identifikátor</param>
+	void remove(int identifier)
 	{
-		int index = this->map_[val];
-		int last_val = this->vector_.back();
-		this->vector_[index] = last_val;
+		int index = this->map_[identifier];
+		int last_identifier = this->vector_.back();
+		this->vector_[index] = last_identifier;
 		this->vector_.pop_back();
-		this->map_[last_val] = index;
-		this->map_.erase(val);
+		this->map_[last_identifier] = index;
+		this->map_.erase(identifier);
 	}
-
+	/// <summary>
+	/// Vráti náhodný identifikátor z tabu¾ky
+	/// </summary>
+	/// <returns>Náhodný identifikátor</returns>
 	int get_random()
 	{
-		int index = rand() % (this->vector_.size());
-		return this->vector_[index];
+		return this->vector_[rand() % (this->vector_.size())];
 	}
-
+	/// <summary>
+	/// Odstráni všetky identifikátory z tabu¾ky
+	/// </summary>
 	void clear()
 	{
 		this->map_.clear();
 		this->vector_.clear();
 	}
-
+	/// <summary>
+	/// Vráti poèet identifikátorov v tabu¾ke
+	/// </summary>
+	/// <returns>Poèet identifikátorov</returns>
 	size_t size()
 	{
 		return this->vector_.size();

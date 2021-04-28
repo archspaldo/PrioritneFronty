@@ -1,16 +1,38 @@
 #pragma once
 #include "LazyBinomialQueue.h"
 
+/// <summary>
+/// Úrovòová párovacia halda
+/// </summary>
+/// <typeparam name="Priority">Dátovı typ priority</typeparam>
+/// <typeparam name="Data">Dátovı typ dát</typeparam>
 template <typename Priority, typename Data>
 class RankPairingHeap : public LazyBinomialHeap<Priority, Data>
 {
 private:
+	/// <summary>
+	/// Nastolí stupòové pravidlo od prvku smerom ku koreòu
+	/// </summary>
+	/// <param name="node"></param>
 	void restore_degree_rule(DegreeBinaryTreeItem<Priority, Data>* node);
 protected:
+	/// <summary>
+	/// Zlúèi prvky v pravej chrbtici atribútu root_ a parametra node viacprechodovou stratégiou
+	/// </summary>
+	/// <param name="node">Prvı prvok v postupnosti prvkov, ktoré sa majú zlúèi</param>
 	void consolidate_root(BinaryTreeItem<Priority, Data>* node) override;
+	/// <summary>
+	/// Vystrihne prvok a nasataví stupòové pravidlo od priameho predka
+	/// </summary>
+	/// <param name="node">Prvok so zvıšenou prioritou</param>
 	void priority_was_increased(PriorityQueueItem<Priority, Data>* node) override;
+	/// <summary>
+	/// Vystrihne potomkov prvku s vyššou prioritou a nastaví stupòové pravidlo od priameho predka posledného vystrihnutého prvku
+	/// </summary>
+	/// <param name="node">Prvok so zníenou prioritou</param>
 	void priority_was_decreased(PriorityQueueItem<Priority, Data>* node) override;
 public:
+
 	RankPairingHeap();
 	~RankPairingHeap();
 	void push(const int identifier, const Priority& priority, const Data& data, PriorityQueueItem<Priority, Data>*& data_item) override;

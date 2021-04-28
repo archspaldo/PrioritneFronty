@@ -1,22 +1,69 @@
 #pragma once
 #include "LazyBinomialQueue.h"
 
+/// <summary>
+/// Fibonacciho halda
+/// </summary>
+/// <typeparam name="Priority">Dátovı typ priority</typeparam>
+/// <typeparam name="Data">Dátovı typ dát</typeparam>
 template <typename Priority, typename Data>
 class FibonacciHeap : public LazyBinomialHeap<Priority, Data>
 {
 private:
+	/// <summary>
+	/// Vystrihne prvok node a pripojí ho k root_
+	/// </summary>
+	/// <param name="node">Vystrihovanı prvok</param>
 	void cut(FibonacciHeapItem<Priority, Data>* node);
+	/// <summary>
+	/// Ak je prvok oznaèenı, vystrihne ho, inak ho oznaèí
+	/// </summary>
+	/// <param name="node">Vystrihovanı prvok</param>
 	void cascading_cut(FibonacciHeapItem<Priority, Data>* node);
 protected:
+	/// <summary>
+	/// Zlúèi prvky v pravej chrbtici atribútu root_ a parametra node viacprechodovou stratégiou
+	/// </summary>
+	/// <param name="node">Prvı prvok v postupnosti prvkov, ktoré sa majú zlúèi</param>
 	void consolidate_root(BinaryTreeItem<Priority, Data>* node) override;
+	/// <summary>
+	/// Vystrihne prvok a vykoná sériovı rez nad priamım predkom
+	/// </summary>
+	/// <param name="node">Prvok so zvıšenou prioritou</param>
 	void priority_was_increased(PriorityQueueItem<Priority, Data>* node) override;
+	/// <summary>
+	/// Vystrihne potomkov prvku s vyššou prioritou
+	/// </summary>
+	/// <param name="node">Prvok so zníenou prioritou</param>
 	void priority_was_decreased(PriorityQueueItem<Priority, Data>* node) override;
 public:
+	/// <summary>
+	/// Konštruktor
+	/// </summary>
 	FibonacciHeap();
+	/// <summary>
+	/// Deštruktor
+	/// </summary>
 	~FibonacciHeap();
+	/// <summary>
+	/// Vloí dáta do prioritného frontu
+	/// </summary>
+	/// <param name="identifier">Identifikátor prvku</param>
+	/// <param name="priority">Priorita</param>
+	/// <param name="data">Data</param>
+	/// <param name="data_item">Vytvorenı prvok</param>
 	void push(const int identifier, const Priority& priority, const Data& data, PriorityQueueItem<Priority, Data>*& = nullptr) override;
-
+	/// <summary>
+	/// Vyberie z prioritného frontu dáta s najväèšou prioritou
+	/// </summary>
+	/// <param name="identifier">Identifikátor prvku s najväèšou prioritou</param>
+	/// <returns>Hodnota dát</returns>
 	Data pop(int& identifier) override { return this->LazyBinomialHeap<Priority, Data>::pop(identifier); };
+	/// <summary>
+	/// Zmení prioritu prvku
+	/// </summary>
+	/// <param name="node">Prvok, ktorému má by zmenená priorita</param>
+	/// <param name="priority">Nová priorita prvku</param>
 	void change_priority(PriorityQueueItem<Priority, Data>* node, const Priority& priority) override { this->PriorityQueue<Priority, Data>::change_priority(node, priority); };
 };
 

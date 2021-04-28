@@ -3,50 +3,165 @@
 #include <stack>
 #include <queue>
 
+/// <summary>
+/// Abstraktná párovacia halda
+/// </summary>
+/// <typeparam name="Priority">Dátovı typ priority</typeparam>
+/// <typeparam name="Data">Dátovı typ dát</typeparam>
 template <typename Priority, typename Data>
 class PairingHeap : public ExplicitPriorityQueue<Priority, Data>
 {
 protected:
+	/// <summary>
+	/// Konštruktor
+	/// </summary>
 	PairingHeap();
+	/// <summary>
+	/// Vytvorí binárny strom z prvku node a jeho potomkov
+	/// </summary>
+	/// <param name="node">Prvı prvok v postupnosti prvkov, ktoré sa majú vytvori binárny strom</param>
+	/// <returns>Prvok tvoriací koreò binárneho stromu</returns>
 	virtual BinaryTreeItem<Priority, Data>* create_binary_tree(BinaryTreeItem<Priority, Data>* node) = 0;
+	/// <summary>
+	/// Vystrihne prvok a prepojí ho s root_
+	/// </summary>
+	/// <param name="node">Prvok so zvıšenou prioritou</param>
 	void priority_was_increased(PriorityQueueItem<Priority, Data>* node) override;
+	/// <summary>
+	/// Z prvku node a prvkov tvoriacích pravú chrbticu ¾avého potomka tohto prvku vytvorí binárny strom a pridá ho do binárneho stromu
+	/// </summary>
+	/// <param name="node">Prvok so zníenou prioritou</param>
 	void priority_was_decreased(PriorityQueueItem<Priority, Data>* node) override;
 public:
+	/// <summary>
+	/// Deštruktor
+	/// </summary>
 	~PairingHeap();
+	/// <summary>
+	/// Vymáe všetky prvky z prioritného frontu
+	/// </summary>
 	void clear() override;
+	/// <summary>
+	/// Vloí dáta do prioritného frontu
+	/// </summary>
+	/// <param name="identifier">Identifikátor prvku</param>
+	/// <param name="priority">Priorita</param>
+	/// <param name="data">Data</param>
+	/// <param name="data_item">Vytvorenı prvok</param>
 	void push(const int identifier, const Priority& key, const Data& data, PriorityQueueItem<Priority, Data>*& data_item) override;
+	/// <summary>
+	/// Vyberie z prioritného frontu dáta s najväèšou prioritou
+	/// </summary>
+	/// <param name="identifier">Identifikátor prvku s najväèšou prioritou</param>
+	/// <returns>Hodnota dát</returns>
 	Data pop(int& identifier) override;
+	/// <summary>
+	/// Zmení prioritu prvku
+	/// </summary>
+	/// <param name="node">Prvok, ktorému má by zmenená priorita</param>
+	/// <param name="priority">Nová priorita prvku</param>
 	void merge(PriorityQueue<Priority, Data>* other_heap) override;
 };
 
+/// <summary>
+/// Dvojprechodová párovacia halda
+/// </summary>
+/// <typeparam name="Priority">Dátovı typ priority</typeparam>
+/// <typeparam name="Data">Dátovı typ dát</typeparam>
 template <typename Priority, typename Data>
 class PairingHeapTwoPass : public PairingHeap<Priority, Data>
 {
-
 private:
+	/// <summary>
+	/// Zásobník pouitı pri zluèovaní prvkov
+	/// </summary>
 	std::stack<BinaryTreeItem<Priority, Data>*>* stack_;
 protected:
+	/// <summary>
+	/// Vytvorí binárny strom z prvku node a jeho potomkov
+	/// </summary>
+	/// <param name="node">Prvı prvok v postupnosti prvkov, ktoré sa majú vytvori binárny strom</param>
+	/// <returns>Prvok tvoriací koreò binárneho stromu</returns>
 	BinaryTreeItem<Priority, Data>* create_binary_tree(BinaryTreeItem<Priority, Data>* node) override;
 public:
+	/// <summary>
+	/// Konštruktor
+	/// </summary>
 	PairingHeapTwoPass();
+	/// <summary>
+	/// Deštruktor
+	/// </summary>
 	~PairingHeapTwoPass();
+	/// <summary>
+	/// Vloí dáta do prioritného frontu
+	/// </summary>
+	/// <param name="identifier">Identifikátor prvku</param>
+	/// <param name="priority">Priorita</param>
+	/// <param name="data">Data</param>
+	/// <param name="data_item">Vytvorenı prvok</param>
 	void push(const int identifier, const Priority& priority, const Data& data, PriorityQueueItem<Priority, Data>*& data_item) override { this->PairingHeap<Priority, Data>::push(identifier, priority, data, data_item); };
+	/// <summary>
+	/// Vyberie z prioritného frontu dáta s najväèšou prioritou
+	/// </summary>
+	/// <param name="identifier">Identifikátor prvku s najväèšou prioritou</param>
+	/// <returns>Hodnota dát</returns>
 	Data pop(int& identifier) override { return this->PairingHeap<Priority, Data>::pop(identifier); };
+	/// <summary>
+	/// Zmení prioritu prvku
+	/// </summary>
+	/// <param name="node">Prvok, ktorému má by zmenená priorita</param>
+	/// <param name="priority">Nová priorita prvku</param>
 	void change_priority(PriorityQueueItem<Priority, Data>* node, const Priority& priority) override { this->PriorityQueue<Priority, Data>::change_priority(node, priority); };
 };
 
+/// <summary>
+/// Viacprechodová párovacia halda
+/// </summary>
+/// <typeparam name="Priority">Dátovı typ priority</typeparam>
+/// <typeparam name="Data">Dátovı typ dát</typeparam>
 template <typename Priority, typename Data>
 class PairingHeapMultiPass : public PairingHeap<Priority, Data>
 {
 private:
+	/// <summary>
+	/// Front pouitı pri zluèovaní prvkov
+	/// </summary>
 	std::queue<BinaryTreeItem<Priority, Data>*>* queue_;
 protected:
+	/// <summary>
+	/// Vytvorí binárny strom z prvku node a jeho potomkov
+	/// </summary>
+	/// <param name="node">Prvı prvok v postupnosti prvkov, ktoré sa majú vytvori binárny strom</param>
+	/// <returns>Prvok tvoriací koreò binárneho stromu</returns>
 	BinaryTreeItem<Priority, Data>* create_binary_tree(BinaryTreeItem<Priority, Data>* node) override;
 public:
+	/// <summary>
+	/// Konštruktor
+	/// </summary>
 	PairingHeapMultiPass();
+	/// <summary>
+	/// Deštruktor
+	/// </summary>
 	~PairingHeapMultiPass();
+	/// <summary>
+	/// Vloí dáta do prioritného frontu
+	/// </summary>
+	/// <param name="identifier">Identifikátor prvku</param>
+	/// <param name="priority">Priorita</param>
+	/// <param name="data">Data</param>
+	/// <param name="data_item">Vytvorenı prvok</param>
 	void push(const int identifier, const Priority& priority, const Data& data, PriorityQueueItem<Priority, Data>*& data_item) override { this->PairingHeap<Priority, Data>::push(identifier, priority, data, data_item); };
+	/// <summary>
+	/// Vyberie z prioritného frontu dáta s najväèšou prioritou
+	/// </summary>
+	/// <param name="identifier">Identifikátor prvku s najväèšou prioritou</param>
+	/// <returns>Hodnota dát</returns>
 	Data pop(int& identifier) override { return this->PairingHeap<Priority, Data>::pop(identifier); };
+	/// <summary>
+	/// Zmení prioritu prvku
+	/// </summary>
+	/// <param name="node">Prvok, ktorému má by zmenená priorita</param>
+	/// <param name="priority">Nová priorita prvku</param>
 	void change_priority(PriorityQueueItem<Priority, Data>* node, const Priority& priority) override { this->PriorityQueue<Priority, Data>::change_priority(node, priority); };
 };
 
@@ -129,7 +244,6 @@ inline Data PairingHeap<Priority, Data>::pop(int& identifier)
 		this->size_--;
 		Data data = root->data();
 		identifier = root->identifier();
-		//std::cout << "LH\t" << root->priority() << "\t" << root->identifier() << "\n";
 		delete root;
 		return data;
 	}

@@ -2,32 +2,117 @@
 #include "PriorityQueue.h"
 #include <vector>
 
+/// <summary>
+/// Binárna halda implementovaná implicitnım zoznamom
+/// </summary>
+/// <typeparam name="Priority">Dátovı typ priority</typeparam>
+/// <typeparam name="Data">Dátovı typ dát</typeparam>
 template <typename Priority, typename Data>
 class BinaryHeap : public PriorityQueue<Priority, Data>
 {
 private:
+	/// <summary>
+	/// Implicitnı zoznam prvkov
+	/// </summary>
 	std::vector<ArrayItem<Priority, Data>*>* list_;
-
-	int leftSon(const int index);
-	int righSon(const int index);
+	/// <summary>
+	/// Vráti index ¾avého potomka prvku na indexe index
+	/// </summary>
+	/// <param name="index">Index prvku</param>
+	/// <returns>Index ¾avého potomka</returns>
+	int left_son(const int index);
+	/// <summary>
+	/// Vráti index pravého potomka prvku na indexe index
+	/// </summary>
+	/// <param name="index">Index prvku</param>
+	/// <returns>Index pravého potomka</returns>
+	int righ_son(const int index);
+	/// <summary>
+	/// Vráti index piameho predka prvku na indexe index
+	/// </summary>
+	/// <param name="index">Index prvku</param>
+	/// <returns>Index priamého predka</returns>
 	int parent(const int index);
+	/// <summary>
+	/// Vráti index piameho predka prvku na indexe index
+	/// </summary>
+	/// <param name="index"></param>
+	/// <returns></returns>
 	int greater_son(const int index);
+	/// <summary>
+	/// Vymieòa prvok na indexe index s priamym predkom, dokia¾ nie je splnené haldové usporiadanie
+	/// </summary>
+	/// <param name="index">Index prvku, ktorı sa vymieòa</param>
 	void heapify_up(const int index);
+	/// <summary>
+	/// Vymieòa prvok na indexe index s tım z priamıch potomkov, ktorı ma najväèšiu prioritu, dokia¾ nie je splnené haldové usporiadanie
+	/// </summary>
+	/// <param name="index">Index prvku, ktorı sa vymieòa</param>
 	void heapify_down(const int index);
+	/// <summary>
+	/// Vymení prvky uloené v item_1 a item_2
+	/// </summary>
+	/// <param name="item_1"></param>
+	/// <param name="item_2"></param>
 	static void swap(ArrayItem<Priority, Data>*& item_1, ArrayItem<Priority, Data>*& item_2);
 protected:
+	/// <summary>
+	/// Vymieòa prvok node s jeho priamım predkom, dokia¾ nie je splnené haldové usporiadanie
+	/// </summary>
+	/// <param name="node">Vymieòanı prvok</param>
 	void priority_was_increased(PriorityQueueItem<Priority, Data>* node) override;
+	/// <summary>
+	/// Vymieòa prvok node s tım z priamıch potomkov, ktorı ma najväèšiu prioritu, dokia¾ nie je splnené haldové usporiadanie
+	/// </summary>
+	/// <param name="node">Vymieòanı prvok</param>
 	void priority_was_decreased(PriorityQueueItem<Priority, Data>* node) override;
 public:
+	/// <summary>
+	/// Konštruktor
+	/// </summary>
 	BinaryHeap();
+	/// <summary>
+	/// Deštruktor
+	/// </summary>
 	~BinaryHeap();
+	/// <summary>
+	/// Vymáe všetky prvky z prioritného frontu
+	/// </summary>
 	void clear() override;
+	/// <summary>
+	/// Vráti poèet prvkov v prioritnom fronte
+	/// </summary>
+	/// <returns>Poèet prvkov v prioritnom fronte</returns>
 	size_t size() const override;
+	/// <summary>
+	/// Vloí dáta do prioritného frontu
+	/// </summary>
+	/// <param name="identifier">Identifikátor prvku</param>
+	/// <param name="priority">Priorita</param>
+	/// <param name="data">Data</param>
+	/// <param name="data_item">Vytvorenı prvok</param>
 	void push(const int identifier, const Priority& priority, const Data& data, PriorityQueueItem<Priority, Data>*& data_item) override;
+	/// <summary>
+	/// Vyberie z prioritného frontu dáta s najväèšou prioritou
+	/// </summary>
+	/// <param name="identifier">Identifikátor prvku s najväèšou prioritou</param>
+	/// <returns>Hodnota dát</returns>
 	Data pop(int& identifier) override;
+	/// <summary>
+	/// Vráti dáta s najväèšou prioritou
+	/// </summary>
+	/// <returns>Hodnota dát</returns>
 	Data& find_min() override;
+	/// <summary>
+	/// Pripojí k prioritnému frontu prvky z other_heap
+	/// </summary>
+	/// <param name="other_heap">Prioritnı front, ktorého prvky majú by pripojené</param>
 	void merge(PriorityQueue<Priority, Data>* other_heap) override;
-
+	/// <summary>
+	/// Zmení prioritu prvku
+	/// </summary>
+	/// <param name="node">Prvok, ktorému má by zmenená priorita</param>
+	/// <param name="priority">Nová priorita prvku</param>
 	void change_priority(PriorityQueueItem<Priority, Data>* node, const Priority& priority) override { this->PriorityQueue<Priority, Data>::change_priority(node, priority); };
 };
 
@@ -96,7 +181,7 @@ inline Data& BinaryHeap<Priority, Data>::find_min()
 {
 	if (this->list_->empty())
 	{
-		throw new std::out_of_range("BinaryHeap<Priority, Data>::peek(): Zoznam je prazdny");
+		throw new std::out_of_range("BinaryHeap<Priority, Data>::find_min(): Zoznam je prazdny");
 	}
 	return (*this->list_)[0]->data();
 }
@@ -117,13 +202,13 @@ inline void BinaryHeap<Priority, Data>::merge(PriorityQueue<Priority, Data>* oth
 }
 
 template<typename Priority, typename Data>
-inline int BinaryHeap<Priority, Data>::leftSon(const int index)
+inline int BinaryHeap<Priority, Data>::left_son(const int index)
 {
 	return 2 * index + 1;
 }
 
 template<typename Priority, typename Data>
-inline int BinaryHeap<Priority, Data>::righSon(const int index)
+inline int BinaryHeap<Priority, Data>::righ_son(const int index)
 {
 	return 2 * index + 2;
 }
@@ -137,13 +222,13 @@ inline int BinaryHeap<Priority, Data>::parent(const int index)
 template<typename Priority, typename Data>
 inline int BinaryHeap<Priority, Data>::greater_son(const int index)
 {
-	PriorityQueueItem<Priority, Data>* lChild = this->leftSon(index) < this->size() ? (*this->list_)[this->leftSon(index)] : nullptr;
-	PriorityQueueItem<Priority, Data>* rChild = this->righSon(index) < this->size() ? (*this->list_)[this->righSon(index)] : nullptr;
+	PriorityQueueItem<Priority, Data>* lChild = this->left_son(index) < this->size() ? (*this->list_)[this->left_son(index)] : nullptr;
+	PriorityQueueItem<Priority, Data>* rChild = this->righ_son(index) < this->size() ? (*this->list_)[this->righ_son(index)] : nullptr;
 	if (lChild && rChild)
 	{
-		return *lChild < *rChild ? this->leftSon(index) : this->righSon(index);
+		return *lChild < *rChild ? this->left_son(index) : this->righ_son(index);
 	}
-	return this->leftSon(index);
+	return this->left_son(index);
 }
 
 template<typename Priority, typename Data>

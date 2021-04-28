@@ -1,22 +1,74 @@
 #pragma once
 #include "ExplicitHeap.h"
 
+/// <summary>
+/// Abstraktnı predok pre prioritné fronty implementované lesom binárnych stromov
+/// </summary>
+/// <typeparam name="Priority">Dátovı typ priority</typeparam>
+/// <typeparam name="Data">Dátovı typ dát</typeparam>
 template <typename Priority, typename Data>
 class LazyBinomialHeap : public ExplicitPriorityQueue<Priority, Data>
 {
 protected:
+	/// <summary>
+	/// Pripojí prvok k atribútu root_ a zvısi poèet prvkov
+	/// </summary>
+	/// <param name="node">Vkladanı prvok</param>
 	PriorityQueueItem<Priority, Data>* push(BinaryTreeItem<Priority, Data>* node);
+	/// <summary>
+	/// Pripojí prvok k atribútu root_
+	/// </summary>
+	/// <param name="node">Vkladanı prvok</param>
 	void add_root_item(BinaryTreeItem<Priority, Data>* node);
+	/// <summary>
+	/// Zlúèi prvky v pravej chrbtici atribútu root_ a parametra node
+	/// </summary>
+	/// <param name="node">Prvı prvok v postupnosti prvkov, ktoré sa majú zlúèi</param>
 	virtual void consolidate_root(BinaryTreeItem<Priority, Data>* node) = 0;
+	/// <summary>
+	/// Zlúèi prvky v pravej chrbtici atribútu root_ a parametra node viacprechodovou stratégiou
+	/// </summary>
+	/// <param name="node">Prvı prvok v postupnosti prvkov, ktoré sa majú zlúèi</param>
+	/// <param name="array_size">Ve¾kos po¾a v ktorom sa bude zluèova</param>
 	void consolidate_root_using_multipass(BinaryTreeItem<Priority, Data>* node, size_t array_size);
-	void consolidate_root_using_singlepass(BinaryTreeItem<Priority, Data>* node, size_t array_size);
+	/// <summary>
+	/// Zlúèi prvky v pravej chrbtici atribútu root_ a parametra node jednoprechodovou stratégiou
+	/// </summary>
+	/// <param name="node">Prvı prvok v postupnosti prvkov, ktoré sa majú zlúèi</param>
+	/// <param name="array_size">Ve¾kos po¾a v ktorom sa bude zluèova</param>
+	void consolidate_root_using_onepass(BinaryTreeItem<Priority, Data>* node, size_t array_size);
+	/// <summary>
+	/// Konštruktor
+	/// </summary>
 	LazyBinomialHeap();
 public:
-	virtual ~LazyBinomialHeap();
-	virtual void clear() override;
-	virtual void push(const int identifier, const Priority& priority, const Data& data, PriorityQueueItem<Priority, Data>*&) = 0;
-	virtual Data pop(int& identifier) override;
-	virtual void merge(PriorityQueue<Priority, Data>* other_heap) override;
+	/// <summary>
+	/// Deštruktor
+	/// </summary>
+	~LazyBinomialHeap();
+	/// <summary>
+	/// Vymáe všetky prvky z prioritného frontu
+	/// </summary>
+	void clear() override;
+	/// <summary>
+	/// Vloí dáta do prioritného frontu
+	/// </summary>
+	/// <param name="identifier">Identifikátor prvku</param>
+	/// <param name="priority">Priorita</param>
+	/// <param name="data">Data</param>
+	/// <param name="data_item">Vytvorenı prvok</param>
+	void push(const int identifier, const Priority& priority, const Data& data, PriorityQueueItem<Priority, Data>*&) = 0;
+	/// <summary>
+	/// Vyberie z prioritného frontu dáta s najväèšou prioritou
+	/// </summary>
+	/// <param name="identifier">Identifikátor prvku s najväèšou prioritou</param>
+	/// <returns>Hodnota dát</returns>virtual Data pop(int& identifier) = 0;
+	Data pop(int& identifier) override;
+	/// <summary>
+	/// Pripojí k prioritnému frontu prvky z other_heap
+	/// </summary>
+	/// <param name="other_heap">Prioritnı front, ktorého prvky majú by pripojené</param>
+	void merge(PriorityQueue<Priority, Data>* other_heap) override;
 };
 
 template<typename Priority, typename Data>
@@ -88,7 +140,7 @@ inline void LazyBinomialHeap<Priority, Data>::consolidate_root_using_multipass(B
 }
 
 template<typename Priority, typename Data>
-inline void LazyBinomialHeap<Priority, Data>::consolidate_root_using_singlepass(BinaryTreeItem<Priority, Data>* node, size_t array_size)
+inline void LazyBinomialHeap<Priority, Data>::consolidate_root_using_onepass(BinaryTreeItem<Priority, Data>* node, size_t array_size)
 {
 	std::vector<BinaryTreeItem<Priority, Data>*> node_list(array_size);
 	BinaryTreeItem<Priority, Data>* root = this->root_;
@@ -239,11 +291,10 @@ inline Data LazyBinomialHeap<Priority, Data>::pop(int& identifier)
 		this->size_--;
 		Data data = root->data();
 		identifier = root->identifier();
-		//std::cout << "LH\t" << root->priority() << "\t" << root->identifier() << "\n";
 		delete root;
 		return data;
 	}
-	throw new std::range_error("LazyBinomialHeap<Priority, Data>::pop(): Priority queue is empty!");
+	throw new std::out_of_range("LazyBinomialHeap<Priority, Data>::pop(): Priority queue is empty!");
 }
 
 template<typename Priority, typename Data>

@@ -21,8 +21,13 @@ public:
 
 class TestSuit2Scenario : public Scenario
 {
+private:
+	int operation_count_, iteration_count_;
+	double insert_ratio_;
 public:
-	TestSuit2Scenario() {};
+	TestSuit2Scenario(int operation_count, int iteration_count, double insert_ratio);
+	int operation_count(), iteration_count();
+	double insert_ratio();
 };
 
 class TS1ScenarioA : public TestSuit1Scenario
@@ -53,4 +58,16 @@ class TS1ScenarioE : public TestSuit1Scenario
 {
 public:
 	TS1ScenarioE();
+};
+
+class TS2ScenarioA : public TestSuit2Scenario
+{
+public:
+	TS2ScenarioA();
+};
+
+class TS2ScenarioB : public TestSuit2Scenario
+{
+public:
+	TS2ScenarioB();
 };
