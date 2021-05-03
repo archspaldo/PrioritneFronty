@@ -307,15 +307,18 @@ inline BinaryTreeItem<Priority, Data>::BinaryTreeItem(const int identifier, cons
 template<typename Priority, typename Data>
 inline BinaryTreeItem<Priority, Data>::~BinaryTreeItem()
 {
+	BinaryTreeItem<Priority, Data>* left_son, * right_son;
 	if (this->left_son_)
 	{
 		delete this->left_son_;
 		this->left_son_ = nullptr;
 	}
-	if (this->right_son_)
+	while (this->right_son_)
 	{
-		delete this->right_son_;
-		this->right_son_ = nullptr;
+		right_son = this->right_son_;
+		this->right_son_ = this->right_son_->right_son_;
+		right_son->right_son_ = nullptr;
+		delete right_son;
 	}
 	this->parent_ = nullptr;
 }

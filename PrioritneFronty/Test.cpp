@@ -38,7 +38,7 @@ void Tests::execute(PriorityQueueList<int, int>& pq_list, TestSuit1Scenario&& sc
 void Tests::execute(PriorityQueueList<int, int>& pq_list, TestSuit2Scenario& scenario)
 {
 	int push, pop, change, counter = 0, random;
-	for (int item_count = 10000; item_count < 2000000; item_count *= 1.5)
+	for (double item_count = 10000; item_count < 2000000; item_count *= 1.5)
 	{
 		while (pq_list.size() < item_count)
 		{

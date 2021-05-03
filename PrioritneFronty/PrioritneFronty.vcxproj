@@ -135,6 +135,7 @@
       <Optimization>Disabled</Optimization>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <RemoveUnreferencedCodeData>true</RemoveUnreferencedCodeData>
+      <AdditionalOptions> /GH /Gh %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -142,12 +143,13 @@
       <OptimizeReferences>false</OptimizeReferences>
       <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+      <AdditionalDependencies>$(MICROPROFILERDIR)/micro-profiler_$(PlatformName).lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="BinaryHeap.h" />
     <ClInclude Include="BinomialHeap.h" />
-    <ClInclude Include="ExplicitHeap.h" />
+    <ClInclude Include="ExplicitPriorityQueue.h" />
     <ClInclude Include="FibonacciHeap.h" />
     <ClInclude Include="heap_monitor.h" />
     <ClInclude Include="LazyBinomialQueue.h" />

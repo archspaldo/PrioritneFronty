@@ -1,5 +1,5 @@
 #pragma once
-#include "ExplicitHeap.h"
+#include "ExplicitPriorityQueue.h"
 
 /// <summary>
 /// Abstraktný predok pre prioritné fronty implementované lesom binárnych stromov

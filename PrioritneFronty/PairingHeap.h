@@ -1,5 +1,5 @@
 #pragma once
-#include "ExplicitHeap.h"
+#include "ExplicitPriorityQueue.h"
 #include <stack>
 #include <queue>
 
@@ -253,9 +253,12 @@ inline Data PairingHeap<Priority, Data>::pop(int& identifier)
 template<typename Priority, typename Data>
 inline void PairingHeap<Priority, Data>::clear()
 {
-	delete this->root_;
-	this->root_ = nullptr;
-	this->size_ = 0;
+	if (this->root_)
+	{
+		delete this->root_;
+		this->root_ = nullptr;
+		this->size_ = 0;
+	}
 }
 
 template<typename Priority, typename Data>
@@ -270,7 +273,8 @@ inline void PairingHeap<Priority, Data>::merge(PriorityQueue<Priority, Data>* ot
 	}
 	else
 	{
-		std::swap(this->root_, heap->root_);
+		this->root_ = heap->root_;
+		heap->root_ = nullptr;
 	}
 	this->size_ += heap->size_;
 	delete heap;

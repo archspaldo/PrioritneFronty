@@ -39,7 +39,7 @@
     <ClInclude Include="BinomialHeap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ExplicitHeap.h">
+    <ClInclude Include="ExplicitPriorityQueue.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="FibonacciHeap.h">
