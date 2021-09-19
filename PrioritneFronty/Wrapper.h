@@ -234,7 +234,7 @@ inline void PriorityQueueList<Priority, Data>::push(const int identifier, const 
 template<typename Priority, typename Data>
 inline void PriorityQueueList<Priority, Data>::pop()
 {
-	int identifier;
+	int identifier = 0;
 	for (PriorityQueueWrapper<Priority, Data>* item : *this->priority_queue_list_)
 	{
 		identifier = item->pop();

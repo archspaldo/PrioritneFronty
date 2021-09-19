@@ -135,7 +135,6 @@
       <Optimization>Disabled</Optimization>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <RemoveUnreferencedCodeData>true</RemoveUnreferencedCodeData>
-      <AdditionalOptions> /GH /Gh %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -143,7 +142,6 @@
       <OptimizeReferences>false</OptimizeReferences>
       <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
-      <AdditionalDependencies>$(MICROPROFILERDIR)/micro-profiler_$(PlatformName).lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
